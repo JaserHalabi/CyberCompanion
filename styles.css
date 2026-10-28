@@ -3,66 +3,6 @@
    UI Overhaul: Module grid · Category sidebar · Breadcrumb · Compact lab panel
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-:root {
-  /* ─── Base Backgrounds — graphite, flat ─── */
-  --bg-deep:       #0d1117;
-  --bg-base:       #11161d;
-  --bg-surface:    #161c24;
-  --bg-elevated:   #1c232c;
-  --bg-hover:      #232b35;
-
-  /* ─── Accent — one muted steel blue (legacy names kept) ─── */
-  --cyan:          #5b8def;
-  --cyan-dim:      rgba(91, 141, 239, 0.12);
-  --cyan-glow:     transparent;
-  --violet:        #8b93a7;
-  --violet-dim:    rgba(139, 147, 167, 0.12);
-  --violet-glow:   transparent;
-
-  /* ─── Status Colors (desaturated) ─── */
-  --success:       #3fb950;
-  --success-dim:   rgba(63, 185, 80, 0.12);
-  --danger:        #f05c56;
-  --danger-dim:    rgba(240, 92, 86, 0.12);
-  --warning:       #d6a238;
-  --warning-dim:   rgba(214, 162, 56, 0.12);
-  --blue:          #5b8def;
-  --blue-dim:      rgba(91, 141, 239, 0.12);
-
-  /* ─── Module Accents (muted, used only as thin markers) ─── */
-  --mod-cyan:      #5b8def;
-  --mod-red:       #e0615f;
-  --mod-orange:    #cc8033;
-  --mod-blue:      #5b8def;
-  --mod-purple:    #9683c9;
-  --mod-pink:      #c06a93;
-  --mod-green:     #3fb950;
-  --mod-teal:      #3a9c96;
-
-  /* ─── Text ─── */
-  --text-primary:  #e6edf3;
-  --text-secondary:#9aa7b5;
-  --text-muted:    #6b7685;
-
-  /* ─── Borders ─── */
-  --border:        rgba(255, 255, 255, 0.07);
-  --border-accent: rgba(255, 255, 255, 0.13);
-
-  /* ─── Layout ─── */
-  --sidebar-w:     264px;
-  --radius:        8px;
-  --radius-sm:     6px;
-  --radius-xs:     4px;
-
-  /* ─── Typography ─── */
-  --font-sans:     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono:     'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
-
-  /* ─── Animation ─── */
-  --ease:          cubic-bezier(0.4, 0, 0.2, 1);
-  --transition:    0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 html, body {
@@ -785,12 +725,6 @@ body.theme-light {
 /* ═══════════════════════════════════════════════════════════════════════════════
    UI/UX OVERHAUL v3.0 — Splash · Logo · Polish
    ═══════════════════════════════════════════════════════════════════════════════ */
-
-/* ── Spring easing token ── */
-:root {
-  --spring: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
-}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SPLASH SCREEN

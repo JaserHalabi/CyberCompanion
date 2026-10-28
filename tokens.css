@@ -1,0 +1,114 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CyberCompanion — Design tokens (terminal native)
+   Single source of truth for custom properties. Loaded first, before motion.css,
+   styles.css and overlay.css. body.theme-* rules in styles.css override these.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Bundled fonts (offline; SIL OFL, see fonts/LICENSE-*.txt) ─── */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('fonts/inter-latin-wght-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  /* ─── Surfaces — near-black, faint green cast ─── */
+  --bg-deep:        #07090a;
+  --bg-base:        #0a0d0c;
+  --bg-surface:     #0e1311;
+  --bg-elevated:    #141b18;
+  --bg-hover:       #1b2420;
+
+  /* ─── Text — off-white, never green ─── */
+  --text-primary:   #e6e9e4;
+  --text-secondary: #a6b0a9;
+  --text-muted:     #87928b;
+
+  /* ─── Accent — phosphor green (primary: links, focus, primary actions) ─── */
+  --accent:         #5fd68c;
+  --accent-hover:   #80e3a5;
+  --accent-dim:     rgba(95, 214, 140, 0.12);
+  --accent-line:    rgba(95, 214, 140, 0.35);
+
+  /* ─── Amber — active / selected / success emphasis ─── */
+  --amber:          #ffb000;
+  --amber-dim:      rgba(255, 176, 0, 0.14);
+
+  /* ─── Status ─── */
+  --success:        #56cf82;
+  --success-dim:    rgba(86, 207, 130, 0.12);
+  --danger:         #f26b61;
+  --danger-dim:     rgba(242, 107, 97, 0.12);
+  --warning:        #e8a33d;
+  --warning-dim:    rgba(232, 163, 61, 0.12);
+
+  /* ─── Borders ─── */
+  --border:         rgba(230, 233, 228, 0.08);
+  --border-accent:  rgba(95, 214, 140, 0.28);
+
+  /* ─── Typography ─── */
+  --font-sans:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:      'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+
+  /* ─── Motion ─── */
+  --dur-fast:       140ms;
+  --dur-base:       200ms;
+  --dur-reveal:     380ms;
+  --ease-out:       cubic-bezier(.2, .8, .2, 1);
+
+  /* ─── Layout ─── */
+  --sidebar-w:      264px;
+  --radius:         8px;
+  --radius-sm:      6px;
+  --radius-xs:      4px;
+
+  /* ─── Legacy names (mapped onto the new palette during migration) ─── */
+  --cyan:           var(--accent);
+  --cyan-dim:       var(--accent-dim);
+  --cyan-glow:      transparent;
+  --violet:         #9aa59e;
+  --violet-dim:     rgba(154, 165, 158, 0.12);
+  --violet-glow:    transparent;
+  --blue:           #6aa8ff;
+  --blue-dim:       rgba(106, 168, 255, 0.12);
+
+  --mod-cyan:       var(--accent);
+  --mod-red:        #e8655d;
+  --mod-orange:     #e0913f;
+  --mod-blue:       #6aa8ff;
+  --mod-purple:     #a48fdb;
+  --mod-pink:       #d47aa4;
+  --mod-green:      var(--success);
+  --mod-teal:       #4fb8a8;
+
+  --ease:           cubic-bezier(0.4, 0, 0.2, 1);
+  --spring:         cubic-bezier(0.16, 1, 0.3, 1);
+  --transition:     var(--dur-fast) var(--ease-out);
+}
