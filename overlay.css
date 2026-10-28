@@ -415,19 +415,24 @@
   animation: cc-drop-out var(--dur-base) var(--ease-out) both;
 }
 
+/* Same 18px line box as the title, so the icon centres on it. */
 .context-hint-icon {
-  font-size: 18px;
-  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  height: 18px;
+  color: var(--accent);
   flex-shrink: 0;
 }
+.context-hint-icon svg { width: 16px; height: 16px; }
 
 .context-hint-content { flex: 1; min-width: 0; }
 
 .context-hint-title {
   font-family: var(--font-mono);
   font-size: 13px;
-  font-weight: 600;
-  color: var(--accent);
+  font-weight: 700;
+  line-height: 18px;
+  color: var(--text-primary);
   margin-bottom: 6px;
 }
 
@@ -509,10 +514,10 @@
   animation: cc-slide-out-right var(--dur-base) var(--ease-out) both;
 }
 
+/* The 18px icon shares the title's 18px line box, so their centres line up. */
 .toast-icon {
   display: flex;
   align-items: flex-start;
-  padding-top: 1px;
   color: var(--amber);
   flex-shrink: 0;
 }
@@ -524,9 +529,10 @@
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
+  line-height: 18px;
   text-transform: lowercase;
   color: var(--text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .toast-challenge {
