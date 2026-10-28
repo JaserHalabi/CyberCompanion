@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..');
-const files = ['styles.css', 'overlay.css'];
+const files = ['styles.css'];
 
 // Replace comment characters with spaces, keeping newlines so line numbers stay accurate.
 function stripComments(src) {

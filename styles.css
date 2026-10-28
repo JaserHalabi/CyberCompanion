@@ -135,20 +135,6 @@ body { display: flex; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* ─── Lab Mode Toggle ─── */
-.sidebar-lab-toggle { padding: 8px; }
-.btn.btn-lab-mode {
-  display: flex; align-items: center; gap: 10px; width: 100%;
-  padding: 9px 12px;
-  border: 1px solid var(--border-accent); border-radius: var(--radius-xs);
-  background: transparent; color: var(--accent);
-  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
-  cursor: pointer;
-}
-.btn.btn-lab-mode:hover { background: var(--accent-dim); border-color: var(--accent); }
-.btn.btn-lab-mode.active { background: color-mix(in srgb, var(--amber) 7%, transparent); border-color: var(--amber); color: var(--amber); }
-.btn-lab-mode .btn-icon { width: 15px; height: 15px; flex-shrink: 0; }
-
 /* ─── Footer ─── */
 .sidebar-footer { padding: 4px 16px 14px; }
 .sidebar-footer .sidebar-divider { margin: 0 0 10px; }
@@ -175,7 +161,6 @@ body { display: flex; }
 .sidebar.collapsed .nav-section-label,
 .sidebar.collapsed .nav-label,
 .sidebar.collapsed .sidebar-category,
-.sidebar.collapsed .btn-lab-mode span,
 .sidebar.collapsed .footer-text,
 .sidebar.collapsed .version-badge,
 .sidebar.collapsed .settings-text,
@@ -191,7 +176,7 @@ body { display: flex; }
 .sidebar.collapsed .nav-track-label { display: block; padding: 8px 0 4px; margin: 4px 10px 0; border-top: 1px solid var(--border); text-align: center; }.sidebar.collapsed .nav-track-label::before { content: 'B'; color: var(--text-muted); opacity: 1; }
 .sidebar.collapsed .nav-track-label:first-child { display: none; }
 .sidebar.collapsed .nav-icon-emoji { font-size: 16px; }
-.sidebar.collapsed .btn.btn-lab-mode { padding: 9px; justify-content: center; }
+
 .sidebar.collapsed .sidebar-footer { padding: 4px 8px 14px; }
 .sidebar.collapsed .footer-info { justify-content: center; }
 .sidebar.collapsed .btn-settings { margin-right: 0; }
@@ -202,41 +187,7 @@ body { display: flex; }
 
 .main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: var(--bg-deep); }
 
-/* ─── Lab Control Panel ─── */
-.lab-panel {
-  background: var(--bg-base); border-bottom: 1px solid var(--border);
-  padding: 8px 24px; flex-shrink: 0;
-}
-.lab-panel.compact { padding: 8px 24px; }
-.lab-panel.compact .lab-panel-desc,
-.lab-panel.compact .lab-panel-icon,
-.lab-panel.compact .lab-status-row,
-.lab-panel.compact #dockerWizardMount { display: none; }
-.lab-panel.compact .lab-panel-inner { gap: 10px; }
-.lab-panel.compact .lab-panel-actions { gap: 6px; }
-.lab-panel.compact .btn { padding: 5px 10px; }
-.lab-panel-expand-row { display: flex; justify-content: flex-end; padding-top: 6px; }
-.lab-panel.compact .lab-panel-expand-row { padding-top: 0; }
-.btn-lab-expand {
-  background: none; border: 1px solid var(--border); color: var(--text-muted);
-  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
-  padding: 3px 10px; border-radius: var(--radius-xs);
-  cursor: pointer; white-space: nowrap;
-}
-.btn-lab-expand:hover { border-color: var(--border-accent); color: var(--accent); }
-
-.lab-panel-inner { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
-.lab-panel-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.lab-panel-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--accent); }
-.lab-panel-icon svg { width: 16px; height: 16px; }
-.lab-panel-title {
-  font-family: var(--font-mono);
-  font-size: 12px; font-weight: 700; letter-spacing: 0; color: var(--text-primary);
-}
-.lab-panel-desc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
-.lab-panel-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 /* Quieter control strip: smaller buttons than the content-area actions. */
-.lab-panel-actions .btn { padding: 5px 11px; }
 
 /* ─── Buttons ─── */
 .btn {
@@ -255,31 +206,12 @@ body { display: flex; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 700; }
 .btn-boot:hover,
 .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-.btn-boot.loading { background: var(--bg-elevated); border-color: var(--border-accent); color: var(--text-secondary); pointer-events: none; }
 
-.btn-stop,
 .btn-danger { background: transparent; color: var(--danger); border-color: color-mix(in srgb, var(--danger) 35%, transparent); }
-.btn-stop:hover,
 .btn-danger:hover { background: var(--danger-dim); border-color: var(--danger); }
 
 .btn-secondary { background: var(--bg-surface); color: var(--text-secondary); border-color: var(--border); }
 .btn-secondary:hover { background: var(--bg-hover); color: var(--text-primary); border-color: color-mix(in srgb, var(--text-primary) 16%, transparent); }
-.btn-sm { padding: 5px 10px; font-size: 12px; }
-
-/* ─── Lab Status ─── */
-.lab-status-row { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
-.status-chip {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 4px 10px; border-radius: var(--radius-xs);
-  background: var(--bg-surface); border: 1px solid var(--border);
-  font-family: var(--font-mono); font-size: 11px; font-weight: 400; color: var(--text-secondary);
-}
-.status-chip:has(.status-dot.online) { color: var(--text-primary); border-color: color-mix(in srgb, var(--success) 30%, transparent); }
-.status-chip:has(.status-dot.error) { color: var(--text-primary); border-color: color-mix(in srgb, var(--danger) 35%, transparent); }
-.status-dot { width: 6px; height: 6px; border-radius: 1px; flex-shrink: 0; }
-.status-dot.offline { background: var(--text-muted); opacity: 0.6; }
-.status-dot.online { background: var(--success); }
-.status-dot.error { background: var(--danger); }
 
 /* ─── Breadcrumb Bar ─── */
 .breadcrumb-bar {
@@ -298,52 +230,6 @@ body { display: flex; }
   width: 6px; height: 6px; border-radius: 1px;
   background: var(--amber); display: inline-block; flex-shrink: 0;
 }
-
-/* ─── Docker Wizard ─── */
-.docker-wizard {
-  margin-top: 12px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  animation: cc-reveal var(--dur-reveal) var(--ease-out);
-}
-.docker-wizard-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-/* Bare glyph beside the title; warning colour because setup is still required. */
-.docker-wizard-icon {
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; color: var(--warning); background: none;
-}
-.docker-wizard-icon svg { width: 17px; height: 17px; }
-.docker-wizard-title { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--text-primary); }
-.docker-wizard-desc { font-size: 13.5px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 12px; max-width: 78ch; }
-.docker-wizard-desc strong, .docker-wizard-steps strong { color: var(--text-primary); font-weight: 600; }
-.docker-wizard-steps { list-style: none; margin-bottom: 14px; border-top: 1px solid var(--border); }
-.docker-wizard-steps li {
-  display: flex; align-items: baseline; gap: 12px; padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 13.5px; color: var(--text-secondary); line-height: 1.55;
-}
-.docker-wizard-steps .dw-num {
-  width: 2ch; flex-shrink: 0;
-  font-family: var(--font-mono); font-size: 12px; font-weight: 700;
-  font-variant-numeric: tabular-nums; color: var(--accent);
-}
-.docker-wizard-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.btn-docker-dl { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 700; }
-.btn-docker-dl:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-.btn-docker-recheck { background: var(--bg-surface); color: var(--text-secondary); border: 1px solid var(--border); }
-.btn-docker-recheck:hover { background: var(--bg-hover); color: var(--text-primary); }
-/* Short-lived confirmation line (removed after 4s), not a big green box. */
-.docker-success {
-  margin-top: 12px; background: transparent;
-  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
-  border-radius: var(--radius-xs); padding: 5px 10px;
-  display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--font-mono); font-size: 12px; font-weight: 400; color: var(--text-primary);
-  animation: cc-reveal var(--dur-base) var(--ease-out);
-}
-.docker-success svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--success); }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    CONTENT AREA
@@ -546,8 +432,7 @@ body { display: flex; }
 .section-body p { font-size: 14px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 10px; max-width: 78ch; }
 .section-body p:last-child { margin-bottom: 0; }
 .section-body strong { color: var(--text-primary); font-weight: 600; }
-.section-body code,
-.docker-wizard code {
+.section-body code {
   font-family: var(--font-mono); font-size: 12px;
   background: var(--bg-base); color: var(--accent); padding: 1px 5px;
   border-radius: var(--radius-xs); border: 1px solid var(--border);
@@ -679,41 +564,10 @@ body { display: flex; }
 .cell-copy-btn svg { width: 12px; height: 12px; }
 
 /* ─── Error Banner ─── */
-.error-banner {
-  background: var(--danger-dim); border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
-  border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 10px;
-  display: flex; align-items: flex-start; gap: 10px;
-}
-.error-banner-icon { color: var(--danger); flex-shrink: 0; margin-top: 1px; }
-.error-banner-icon svg { width: 16px; height: 16px; }
-.error-banner-text {
-  font-family: var(--font-mono); font-size: 12px; font-weight: 400; line-height: 1.6;
-  color: var(--text-primary); white-space: pre-wrap;
-}
 
 /* ─── Loading Dots ─── */
-.loading-dots::after { content: ''; animation: cc-dots 1.5s steps(4,end) infinite; }
 
 /* ─── Fade-in: .fade-in / .fade-in-delay-* live in motion.css ─── */
-
-/* ═══════════════════════════════════════════════════════════════════════════════
-   LAB MODE
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-.lab-mode { flex: 1; display: flex; position: relative; overflow: hidden; background: var(--bg-deep); }
-/* White stays: it is the backdrop the target web apps (Juice Shop) expect. */
-.webview-container { flex: 1; position: relative; display: flex; flex-direction: column; background: #fff; }
-webview { flex: 1; border: none; display: flex; }
-.lab-frame { flex: 1; border: none; width: 100%; height: 100%; background: var(--bg-surface); }
-.webview-loading {
-  position: absolute; inset: 0; background: var(--bg-base); z-index: 10;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.webview-loading-spinner {
-  width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent);
-  border-radius: 50%; animation: cc-spin 0.9s linear infinite; margin-bottom: 14px;
-}
-.webview-loading-text { font-family: var(--font-mono); font-size: 12px; font-weight: 400; color: var(--text-secondary); }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    SOC MODE
@@ -809,40 +663,6 @@ webview { flex: 1; border: none; display: flex; }
 .terminal-line .timestamp { color: var(--text-muted); margin-right: 8px; }
 .terminal-line .ip { color: var(--accent); margin-right: 8px; }
 .terminal-line .method { color: var(--text-primary); font-weight: 700; margin-right: 6px; }
-
-/* ─── Mini Burp Proxy ─── */
-.mini-burp {
-  position: absolute; top: 20%; left: 20%; width: 580px;
-  background: var(--bg-surface); border: 1px solid var(--border-accent); border-radius: var(--radius);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.55);
-  z-index: 999995; display: flex; flex-direction: column; overflow: hidden;
-}
-.mini-burp-header { background: var(--bg-elevated); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; cursor: move; }
-.mini-burp-title { font-family: var(--font-mono); font-weight: 700; color: var(--text-primary); font-size: 12.5px; display: flex; align-items: center; gap: 7px; }
-.mini-burp-controls { display: flex; gap: 8px; }
-.mini-burp-controls .btn { flex: 1; justify-content: center; }
-.mini-burp-body { padding: 14px; flex: 1; background: var(--bg-deep); }
-.proxy-editor-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 12px 0 8px; }
-.proxy-editor-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
-.btn.btn-xs { padding: 4px 10px; font-size: 11px; }
-.burp-editor {
-  flex: 1; width: 100%; min-height: 200px;
-  background: var(--bg-deep); color: var(--text-primary);
-  border: 1px solid var(--border); border-radius: var(--radius-xs);
-  padding: 12px;
-  font-family: var(--font-mono); font-size: 12px; line-height: 1.5;
-  white-space: pre; overflow: auto; resize: none; outline: none;
-}
-.burp-editor:focus { border-color: var(--border-accent); }
-
-/* ─── Overlay Tab Buttons ─── */
-.tab-btn {
-  flex: 1; background: none; border: none; border-bottom: 2px solid transparent;
-  color: var(--text-muted); padding: 8px; cursor: pointer;
-  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
-}
-.tab-btn:hover { color: var(--text-primary); }
-.tab-btn.active, .tab-btn.tab-btn-active { color: var(--text-primary); border-bottom-color: var(--amber); }
 
 /* ─── Scenario Select ─── */
 .scenario-select {
@@ -1174,6 +994,6 @@ textarea.sim-field { resize: vertical; line-height: 1.5; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
-  .loading-dots::after { animation: none !important; content: "..."; }
+  
   #splash.splash-exit { opacity: 0; }
 }

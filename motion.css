@@ -25,21 +25,6 @@
   to   { opacity: 0; }
 }
 
-/* Loading indicators: the only loops allowed, and only while something loads. */
-@keyframes cc-spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Discrete "..." for .loading-dots: 4 content steps per cycle, only while a download runs.
-   The one deliberate exception to transform/opacity-only, kept for equivalent behavior. */
-@keyframes cc-dots {
-  0%   { content: ''; }
-  25%  { content: '.'; }
-  50%  { content: '..'; }
-  75%  { content: '...'; }
-  100% { content: ''; }
-}
-
 /* Splash: amber progress line fills, then the splash fades away. */
 @keyframes cc-progress {
   from { transform: scaleX(0); }
@@ -55,36 +40,6 @@
 @keyframes cc-fade-out {
   from { opacity: 1; }
   to   { opacity: 0; }
-}
-
-/* ─── Overlay (overlay.css) ─── */
-/* Page hint drops in from the top edge of the lab view, and lifts back out. */
-@keyframes cc-drop-in {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes cc-drop-out {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(-8px); }
-}
-
-/* Achievement toast arrives from the right edge (where the panel is) and leaves there. */
-@keyframes cc-slide-in-right {
-  from { opacity: 0; transform: translateX(16px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes cc-slide-out-right {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(16px); }
-}
-
-/* Level-up confetti: one short fall, invisible during its delay and after. */
-@keyframes cc-confetti {
-  0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
-  15%  { opacity: 1; }
-  100% { opacity: 0; transform: translateY(56px) rotate(180deg); }
 }
 
 /* ─── Staged reveal (existing class names, new behavior) ─── */
@@ -178,18 +133,4 @@
     animation: none !important;
     opacity: 0 !important;
   }
-  /* Overlay: toasts and hints appear and leave instantly; no level-up wash or confetti. */
-  .context-hint,
-  .achievement-toast {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  .level-up-glow.active {
-    animation: none !important;
-    opacity: 0 !important;
-  }
-  .confetti-container { display: none !important; }
-  .xp-bar-fill,
-  .floating-overlay-toggle { transition: none !important; }
 }

@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
    CyberCompanion — Design tokens (terminal native)
-   Single source of truth for custom properties. Loaded first, before motion.css,
-   styles.css and overlay.css. There is one theme.
+   Single source of truth for custom properties. Loaded first, before motion.css and
+   styles.css. There is one theme.
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 /* ─── Bundled fonts (offline; SIL OFL, see fonts/LICENSE-*.txt) ─── */
