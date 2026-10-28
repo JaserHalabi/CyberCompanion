@@ -1,6 +1,5 @@
 {
   "proxy-intercept": {
-    "challengeKey": "proxyInterceptChallenge",
     "name": "Proxy Intercept: SQLi Bypass",
     "module": "burp-proxy",
     "description": "Learn how to use the Mini Proxy Interceptor to pause a request and modify it in transit.",
@@ -46,7 +45,6 @@
     ]
   },
   "proxy-drop": {
-    "challengeKey": "proxyDropChallenge",
     "name": "Proxy Intercept: Drop Request",
     "module": "burp-proxy",
     "description": "Learn how to block malicious or unwanted requests from reaching the server.",
@@ -72,7 +70,6 @@
     ]
   },
   "proxy-tamper": {
-    "challengeKey": "proxyTamperChallenge",
     "name": "Proxy Intercept: Parameter Tampering",
     "module": "burp-proxy",
     "description": "Learn how to intercept and modify API parameters to manipulate server logic (e.g., getting items for free).",
@@ -105,7 +102,6 @@
     ]
   },
   "proxy-headers": {
-    "challengeKey": "proxyHeadersChallenge",
     "name": "Proxy Intercept: Header Manipulation",
     "module": "burp-proxy",
     "description": "Learn how to bypass access controls by manipulating HTTP headers like X-Forwarded-For.",
@@ -138,7 +134,6 @@
     ]
   },
   "xss-search": {
-    "challengeKey": "xssTierOneChallenge",
     "name": "Reflected XSS: Basic Injection",
     "module": "xss",
     "description": "Execute a basic Cross-Site Scripting attack using the XSS Sandbox Simulator.",
@@ -171,7 +166,6 @@
     ]
   },
   "xss-dom": {
-    "challengeKey": "domXssChallenge",
     "name": "XSS: Image Error Vector",
     "module": "xss",
     "description": "Trigger XSS using an image tag with an onerror event handler to bypass basic script filters.",
@@ -204,7 +198,6 @@
     ]
   },
   "nmap-basic": {
-    "challengeKey": "nmapBasicChallenge",
     "name": "Basic Scan & Ping Sweep",
     "module": "nmap",
     "description": "Learn how to use ping sweeps and basic scans to discover hosts.",
@@ -238,7 +231,6 @@
     ]
   },
   "nmap-sv": {
-    "challengeKey": "nmapSvChallenge",
     "name": "Service Version Detection",
     "module": "nmap",
     "description": "Learn how to use the -sV flag to detect service versions.",
@@ -259,7 +251,6 @@
     ]
   },
   "nmap-aggressive": {
-    "challengeKey": "nmapAChallenge",
     "name": "Aggressive Scan (-A)",
     "module": "nmap",
     "description": "Combine OS detection, version detection, script scanning, and traceroute.",
@@ -280,7 +271,6 @@
     ]
   },
   "hydra-ssh": {
-    "challengeKey": "hydraSshChallenge",
     "name": "SSH Brute Force Attack",
     "module": "hydra",
     "description": "Learn how to use Hydra to brute force an SSH login with a password list.",
@@ -327,20 +317,19 @@
     ]
   },
   "hydra-http": {
-    "challengeKey": "hydraHttpChallenge",
     "name": "HTTP Form Brute Force",
     "module": "hydra",
     "description": "Learn how to brute force a web application login form using Hydra's http-post-form module.",
     "steps": [
       {
-        "text": "Web application login forms are common brute force targets. Hydra uses the http-post-form module for this. Type the command: hydra -l admin@juice-sh.op -P rockyou.txt localhost http-post-form \"/rest/user/login:{\\\"email\\\":\\\"^USER^\\\",\\\"password\\\":\\\"^PASS^\\\"}:Invalid\"",
+        "text": "Web application login forms are common brute force targets. Hydra uses the http-post-form module for this. Type the command: hydra -l admin -P rockyou.txt shop.local http-post-form \"/login:username=^USER^&password=^PASS^:Invalid\"",
         "selector": "#hydraSimInput",
         "action": "input",
-        "waitForValue": "hydra -l admin@juice-sh.op -P rockyou.txt localhost http-post-form",
+        "waitForValue": "hydra -l admin -P rockyou.txt shop.local http-post-form",
         "position": "bottom"
       },
       {
-        "text": "Press Enter to attack the Juice Shop login endpoint!",
+        "text": "Press Enter to attack the practice shop login endpoint!",
         "selector": "#hydraSimInput",
         "action": "enter",
         "position": "bottom"
@@ -348,7 +337,6 @@
     ]
   },
   "hydra-ftp": {
-    "challengeKey": "hydraFtpChallenge",
     "name": "FTP Brute Force Attack",
     "module": "hydra",
     "description": "Learn how to brute force an FTP server login using Hydra.",
@@ -369,7 +357,6 @@
     ]
   },
   "sqlmap-basic": {
-    "challengeKey": "sqlmapBasicChallenge",
     "name": "SQLmap: Detect & Enumerate Databases",
     "module": "sqlmap",
     "description": "Use the SQLmap simulator to detect SQL injection and list all databases on the target.",
@@ -416,7 +403,6 @@
     ]
   },
   "sqlmap-tables": {
-    "challengeKey": "sqlmapTablesChallenge",
     "name": "SQLmap: Extract Tables from a Database",
     "module": "sqlmap",
     "description": "Once you know the database name, use SQLmap to enumerate all tables inside it.",
@@ -450,7 +436,6 @@
     ]
   },
   "sqlmap-fingerprint": {
-    "challengeKey": "sqlmapFingerprintChallenge",
     "name": "SQLmap: Database Fingerprinting",
     "module": "sqlmap",
     "description": "Gather intelligence about the target DBMS — version, current user, and current database.",
@@ -484,7 +469,6 @@
     ]
   },
   "net-ftp": {
-    "challengeKey": "netFtpChallenge",
     "name": "CTF: Hunt Cleartext Passwords",
     "module": "net-analyst",
     "description": "Learn how to filter a massive packet capture to find plaintext FTP credentials.",
@@ -517,7 +501,6 @@
     ]
   },
   "net-sqli": {
-    "challengeKey": "netSqliChallenge",
     "name": "CTF: Detect SQL Injection",
     "module": "net-analyst",
     "description": "Learn how to spot a SQL injection attack attempting to steal database records over HTTP.",
@@ -550,7 +533,6 @@
     ]
   },
   "net-beacon": {
-    "challengeKey": "netBeaconChallenge",
     "name": "CTF: Isolate C2 Beacons",
     "module": "net-analyst",
     "description": "Learn how to use TCP port filters to isolate Command and Control (C2) malware beacons.",
@@ -583,7 +565,6 @@
     ]
   },
   "net-dns": {
-    "challengeKey": "netDnsChallenge",
     "name": "CTF: Spot DNS Exfiltration",
     "module": "net-analyst",
     "description": "Detect data being smuggled out of the network via massive encoded DNS requests.",
@@ -615,53 +596,6 @@
       }
     ]
   },
-  "cybermart-intercept": {
-    "challengeKey": "cyberMartInterceptChallenge",
-    "name": "CyberMart: Intercept a Login Request",
-    "module": "burp-proxy",
-    "description": "Launch CyberMart, navigate to the login page, and intercept the HTTP POST request in real-time.",
-    "requiresCyberMart": true,
-    "steps": [
-      {
-        "text": "Welcome to CyberMart! The full store is loaded and the Burp proxy panel is open on the right. First, click the Account button in the navbar.",
-        "selector": "iframe:#navbarAccount",
-        "action": "click",
-        "position": "bottom"
-      },
-      {
-        "text": "A dropdown appeared. Click Login.",
-        "selector": "iframe:#navbarLoginButton",
-        "action": "click",
-        "position": "bottom"
-      },
-      {
-        "text": "You are now on the Login page. Type any email address into the field.",
-        "selector": "iframe:#email",
-        "action": "input",
-        "waitForValue": "test@test.com",
-        "position": "right"
-      },
-      {
-        "text": "Now type any password.",
-        "selector": "iframe:#password",
-        "action": "input",
-        "waitForValue": "password",
-        "position": "right"
-      },
-      {
-        "text": "Click Log in — the request will be intercepted by Burp on the right!",
-        "selector": "iframe:#loginButton",
-        "action": "click",
-        "position": "bottom"
-      },
-      {
-        "text": "The request is paused! Look at the raw HTTP POST request in the Burp panel. You can see exactly what the browser was about to send. Click Forward to let it through.",
-        "selector": "#btnBurpForward",
-        "action": "click",
-        "position": "left"
-      }
-    ]
-  },
   "price-tampering": {
     "name": "Logic Flaws: Price Tampering",
     "module": "burp-proxy",
@@ -685,5 +619,11 @@
     "module": "sqli",
     "description": "Master Authentication Bypass and UNION-based data extraction via hands-on SQLi labs with a live SQL debug panel.",
     "requiresSQLiLab": true
+  },
+  "burp-lab-intercept": {
+    "name": "Burp Suite Lab: Intercept a Login Request",
+    "module": "burp-proxy",
+    "description": "Open the standalone offline Burp Suite lab, log in to the practice shop, and intercept the HTTP POST request in real time.",
+    "requiresBurpLab": true
   }
 }

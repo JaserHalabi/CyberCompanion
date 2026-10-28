@@ -737,7 +737,7 @@ function renderModule(mod) {
         <h3 class="section-title">Interactive Challenges</h3>
       </div>
       <div class="section-body">
-        <p>Put your skills to the test inside the live lab environment. You can follow an interactive step-by-step tutorial, or try to solve it on your own!</p>
+        <p>Put your skills to the test in the built-in offline labs and simulators. Follow an interactive step-by-step tutorial, or try to solve it on your own!</p>
         <div id="challengesList" class="challenges-list">
           <!-- Populated dynamically if tutorials exist for this module -->
         </div>
@@ -761,7 +761,7 @@ function renderModule(mod) {
       </div>
     `;
   } else if (window.TUTORIALS) {
-    const modsTuts = Object.entries(window.TUTORIALS).filter(([key, tut]) => tut.module === mod.id && !tut.requiresWebview);
+    const modsTuts = Object.entries(window.TUTORIALS).filter(([key, tut]) => tut.module === mod.id);
 
     if (modsTuts.length > 0) {
       document.getElementById('interactiveChallengesSection').style.display = 'block';
@@ -773,7 +773,7 @@ function renderModule(mod) {
         { flag: 'requiresHeaderManipulation',  fn: 'openHeaderManipulationLab', label: 'Launch Header Manipulation Lab' },
         { flag: 'requiresCookieManipulation',  fn: 'openCookieManipulationLab', label: 'Launch Cookie Manipulation Lab' },
         { flag: 'requiresPriceTampering',      fn: 'openPriceTamperingLab',     label: 'Launch Price Tampering Lab' },
-        { flag: 'requiresCyberMart',           fn: 'openBurpLab',               label: 'Launch Burp Suite Lab' },
+        { flag: 'requiresBurpLab',             fn: 'openBurpLab',               label: 'Launch Burp Suite Lab' },
       ];
 
       function resolveLabButton(key, tut) {
@@ -936,7 +936,7 @@ Ready. Type 'hydra' for usage help.</div>
           <h3 class="section-title">XSS Injection Sandbox</h3>
         </div>
         <div class="section-body">
-          <p>A <strong>safe, isolated</strong> practice environment. Type an XSS payload below and click <strong>Inject</strong> to see it execute inside the simulated page. No Docker or lab required.</p>
+          <p>A <strong>safe, isolated</strong> practice environment. Type an XSS payload below and click <strong>Inject</strong> to see it execute inside the simulated page. Fully offline.</p>
           <div class="sim-stack sim-block">
             <div class="sim-out">
               <div class="sim-label">quick payloads</div>
@@ -1120,7 +1120,7 @@ Ready. Type 'hydra' for usage help.</div>
       <div class="section-card fade-in fade-in-delay-6" id="sqliLabSection">
         <div class="section-header">
           <div class="section-icon concept">${LI.target}</div>
-          <h3 class="section-title">SQLi Practice Lab — No Docker Required</h3>
+          <h3 class="section-title">SQLi Practice Lab</h3>
         </div>
         <div class="section-body">
           <p>Test SQL injection payloads against a simulated login form. This lab works <strong>instantly</strong> — no lab setup needed. Observe how different payloads bypass or fail authentication.</p>
@@ -1379,7 +1379,7 @@ function startTutorial(tutorialKey) {
   const tut = window.TUTORIALS[tutorialKey];
   
   // ── Standalone Lab Launchers ──────────────────────────────────────────────
-  if (tut.requiresCyberMart) {
+  if (tut.requiresBurpLab) {
     if (window.labAPI && window.labAPI.openBurpLab) window.labAPI.openBurpLab();
     return;
   }
@@ -1403,10 +1403,6 @@ function startTutorial(tutorialKey) {
   if (!tut.steps || !Array.isArray(tut.steps) || tut.steps.length === 0) {
     return;
   }
-
-  // The embedded Juice Shop webview no longer exists; tutorials that need it
-  // cannot run. (Task 3 removes them from tutorials.json.)
-  if (tut.requiresWebview) return;
 
   // Auto-scroll to integrated simulator section if available
   setTimeout(() => {
@@ -1536,15 +1532,6 @@ function startTutorial(tutorialKey) {
       for (var i = 0; i < els.length; i++) {
         els[i].classList.remove('cyber-tut-highlight');
       }
-      try {
-        var frame = document.getElementById('cyberMartView');
-        if (frame && frame.contentWindow && frame.contentWindow.document) {
-          var fEls = frame.contentWindow.document.querySelectorAll('.cyber-tut-highlight');
-          for (var j = 0; j < fEls.length; j++) {
-            fEls[j].classList.remove('cyber-tut-highlight');
-          }
-        }
-      } catch(e) { }
       backdrop.style.clipPath = 'none';
     },
 
@@ -1565,30 +1552,8 @@ function startTutorial(tutorialKey) {
       this.clearHighlight();
 
       var target = null;
-      var inIframe = false;
-      var frameOffset = { top: 0, left: 0 };
-
       if (step.selector === 'body') {
         target = document.body;
-      } else if (step.selector.startsWith('iframe:')) {
-        inIframe = true;
-        var frame = document.getElementById('cyberMartView');
-        try {
-          if (frame && frame.contentWindow && frame.contentWindow.document) {
-            target = frame.contentWindow.document.querySelector(step.selector.substring(7));
-            var rect = frame.getBoundingClientRect();
-            frameOffset = { top: rect.top, left: rect.left };
-            
-            if (target && !frame.contentWindow.document.getElementById('cyber-tut-styles-iframe')) {
-              var s = frame.contentWindow.document.createElement('style');
-              s.id = 'cyber-tut-styles-iframe';
-              s.textContent = '.cyber-tut-highlight { position: relative !important; z-index: 999995 !important; box-shadow: 0 0 0 2px #ffb000 !important; border-radius: 4px; }';
-              frame.contentWindow.document.head.appendChild(s);
-            }
-          }
-        } catch(e) {
-          target = null;
-        }
       } else {
         target = document.querySelector(step.selector);
       }
@@ -1608,19 +1573,15 @@ function startTutorial(tutorialKey) {
 
       if (target !== document.body) {
         target.classList.add('cyber-tut-highlight');
-        if (!inIframe) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
         setTimeout(function() {
           var rect = target.getBoundingClientRect();
           var pad = 6;
-          var top = rect.top + frameOffset.top - pad;
-          var left = rect.left + frameOffset.left - pad;
-          var right = rect.right + frameOffset.left + pad;
-          var bottom = rect.bottom + frameOffset.top + pad;
+          var top = rect.top - pad;
+          var left = rect.left - pad;
+          var right = rect.right + pad;
+          var bottom = rect.bottom + pad;
           
           backdrop.style.clipPath = 'polygon(' +
             '0% 0%, 0% 100%, ' +
@@ -1655,10 +1616,10 @@ function startTutorial(tutorialKey) {
         var tRect = target.getBoundingClientRect();
         var bRect = bubble.getBoundingClientRect();
 
-        var tTop = tRect.top + frameOffset.top;
-        var tBottom = tRect.bottom + frameOffset.top;
-        var tLeft = tRect.left + frameOffset.left;
-        var tRight = tRect.right + frameOffset.left;
+        var tTop = tRect.top;
+        var tBottom = tRect.bottom;
+        var tLeft = tRect.left;
+        var tRight = tRect.right;
 
         var bTop, bLeft;
         var pos = step.position || 'bottom';
@@ -1793,8 +1754,8 @@ function startSocSimulator() {
     return Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255);
   }
   const paths = [
-    '/images/logo.png', '/css/main.css', '/api/products', '/#/', '/rest/user/whoami',
-    '/js/app.js', '/favicon.ico', '/api/challenges', '/assets/public/images/apple.png',
+    '/images/logo.png', '/css/main.css', '/api/products', '/#/', '/api/session',
+    '/js/app.js', '/favicon.ico', '/api/orders', '/assets/images/banner.png',
     '/rest/products/search', '/socket.io/?EIO=3&transport=websocket'
   ];
   const statuses = ['200', '200', '200', '304', '404', '401', '302', '201'];
@@ -1836,7 +1797,7 @@ function startSocSimulator() {
         actualStatus = '200';
       } else if (activeScenario === 'brute') {
         actualMethod = 'POST';
-        actualPath = '/rest/user/login';
+        actualPath = '/api/login';
         actualStatus = '200';
       } else if (activeScenario === 'path') {
         actualMethod = 'GET';
@@ -1859,7 +1820,7 @@ function startSocSimulator() {
       // Background noise for brute force
       actualIp = '13.37.13.37';
       actualMethod = 'POST';
-      actualPath = '/rest/user/login';
+      actualPath = '/api/login';
       actualStatus = '401';
     }
     
@@ -2147,10 +2108,9 @@ Nmap scan report for localhost (127.0.0.1)
 Host is up (0.00013s latency).
 Not shown: 998 closed tcp ports (conn-refused)
 PORT     STATE SERVICE VERSION
-3000/tcp open  http    Node.js Express framework
-|_http-title: OWASP Juice Shop
-8080/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
-|_http-title: Damn Vulnerable Web App
+22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.1 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.52 ((Ubuntu))
+|_http-title: Practice Shop - Offline Lab
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 12.45 seconds`;
@@ -2160,8 +2120,8 @@ Nmap scan report for localhost (127.0.0.1)
 Host is up (0.00015s latency).
 Not shown: 998 closed tcp ports (conn-refused)
 PORT     STATE SERVICE VERSION
-3000/tcp open  http    Node.js Express framework
-8080/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
+22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.1 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.52 ((Ubuntu))
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 6.12 seconds`;
@@ -2180,8 +2140,8 @@ Nmap scan report for localhost (127.0.0.1)
 Host is up (0.00014s latency).
 Not shown: 998 closed tcp ports (conn-refused)
 PORT     STATE SERVICE
-3000/tcp open  ppp
-8080/tcp open  http-proxy
+22/tcp open  ssh
+80/tcp open  http
 
 Nmap done: 1 IP address (1 host up) scanned in 0.13 seconds`;
     }
@@ -2226,7 +2186,7 @@ Supported services:
 
 Example:
   hydra -l admin -P passwords.txt ssh://192.168.1.1
-  hydra -l user -P pass.txt -s 8080 localhost http-post-form "/login:user=^USER^&pass=^PASS^:Failed"
+  hydra -l user -P pass.txt -s 8000 shop.local http-post-form "/login:user=^USER^&pass=^PASS^:Failed"
 `;
     terminalEl.scrollTop = terminalEl.scrollHeight;
     return;
@@ -2286,8 +2246,8 @@ Hydra finished at ${timestamp}`;
 1 of 1 target successfully completed, 1 valid password found
 Hydra finished at ${timestamp}`;
     } else if (cmd.includes('http-post-form') || cmd.includes('http-get-form')) {
-      const user = escapeHtml(cmd.match(/-l\s+(\S+)/)?.[1] || 'admin@juice-sh.op');
-      const target = escapeHtml(cmd.match(/(?:localhost|(\d+\.\d+\.\d+\.\d+))/)?.[0] || 'localhost');
+      const user = escapeHtml(cmd.match(/-l\s+(\S+)/)?.[1] || 'admin');
+      const target = escapeHtml(cmd.match(/(\S+)\s+http-(?:post|get)-form/)?.[1] || 'shop.local');
       if (isVerbose) {
         result = `[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344392 login tests
 [DATA] attacking http-post-form://${target}/
@@ -2445,7 +2405,7 @@ function initPacketLab() {
     { proto:'HTTP',  src:'192.168.1.105',  dst:'93.184.216.34', len:198, info:'GET /images/logo.png HTTP/1.1', malicious:false },
     { proto:'TCP',   src:'192.168.1.10',   dst:'10.0.0.1',      len:60,  info:'[SYN] Seq=0 Win=65535', malicious:false },
     { proto:'DNS',   src:'192.168.1.15',   dst:'8.8.8.8',       len:74,  info:'Standard query A api.company.com', malicious:false },
-    { proto:'HTTP',  src:'192.168.1.22',   dst:'203.0.113.10',  len:420, info:'POST /rest/user/login HTTP/1.1', malicious:false },
+    { proto:'HTTP',  src:'192.168.1.22',   dst:'203.0.113.10',  len:420, info:'POST /api/login HTTP/1.1', malicious:false },
     { proto:'ARP',   src:'192.168.1.1',    dst:'ff:ff:ff:ff',   len:42,  info:'Who has 192.168.1.50? Tell 192.168.1.1', malicious:false },
     { proto:'ICMP',  src:'192.168.1.10',   dst:'192.168.1.1',   len:74,  info:'Echo (ping) request id=0x01', malicious:false },
     { proto:'TLS',   src:'192.168.1.33',   dst:'151.101.1.140', len:1452,info:'Application Data', malicious:false },
@@ -2589,7 +2549,7 @@ const TRANSLATIONS = {
     btn_settings: 'Settings',
     // Welcome hero
     hero_title: 'Welcome to CyberCompanion',
-    hero_desc: 'Select a module from the sidebar to begin your Web Application Penetration Testing journey. Open a built-in lab to practice on real vulnerable applications.',
+    hero_desc: 'Select a module from the sidebar to begin your Web Application Penetration Testing journey. Open a built-in lab to practise against offline simulated labs.',
     hero_step1: 'Choose a module',
     hero_step2: 'Open a built-in lab',
     hero_step3: 'Follow step-by-step',
@@ -2601,7 +2561,7 @@ const TRANSLATIONS = {
     section_defense: 'Defense & Remediation',
     section_reference: 'Interactive Reference Table',
     section_challenges: 'Interactive Challenges',
-    challenge_intro: 'Put your skills to the test inside the live lab environment. You can follow an interactive step-by-step tutorial, or try to solve it on your own!',
+    challenge_intro: 'Put your skills to the test in the built-in offline labs and simulators. Follow an interactive step-by-step tutorial, or try to solve it on your own!',
     // Settings modal
     settings_title: 'Global Settings',
     settings_reset_title: 'Factory Reset',
