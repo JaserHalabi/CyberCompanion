@@ -1406,7 +1406,9 @@ function startTutorial(tutorialKey) {
 
   // Auto-scroll to integrated simulator section if available
   setTimeout(() => {
-    const simSec = document.getElementById(tut.module + 'LabSection') || 
+    const SECTION_IDS = { 'burp-proxy': 'burpLabSection', 'net-analyst': 'packetLabSection' };
+    const simSec = document.getElementById(SECTION_IDS[tut.module] || '') ||
+                   document.getElementById(tut.module + 'LabSection') || 
                    document.getElementById(tut.module + 'TerminalSection') ||
                    document.getElementById(tut.module + 'Section');
     if (simSec) {
@@ -1502,7 +1504,7 @@ function startTutorial(tutorialKey) {
     steps: [],
     current: 0,
     retryCount: 0,
-    maxRetries: 20,
+    maxRetries: 40,
     active: false,
 
     cleanupListeners: function() {
@@ -2247,7 +2249,7 @@ Hydra finished at ${timestamp}`;
 Hydra finished at ${timestamp}`;
     } else if (cmd.includes('http-post-form') || cmd.includes('http-get-form')) {
       const user = escapeHtml(cmd.match(/-l\s+(\S+)/)?.[1] || 'admin');
-      const target = escapeHtml(cmd.match(/(\S+)\s+http-(?:post|get)-form/)?.[1] || 'shop.local');
+      const target = escapeHtml(cmd.match(/(\S+)(?:\s+-s\s+\d+)?\s+http-(?:post|get)-form/)?.[1] || 'shop.local');
       if (isVerbose) {
         result = `[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344392 login tests
 [DATA] attacking http-post-form://${target}/

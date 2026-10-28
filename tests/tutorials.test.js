@@ -47,6 +47,21 @@ test('tutorials.json: every tutorial is structurally valid and names a real modu
   }
 });
 
+function hasId(hay, name) {
+  return new RegExp(String.raw`id=\\?["']${name}\\?["']|\.id\s*=\s*['"]${name}['"]`).test(hay);
+}
+function hasClass(hay, name) {
+  return new RegExp(String.raw`class=\\?["'][^"']*\b${name}\b`).test(hay);
+}
+
+test('selector helpers find real ids/classes and reject missing ones', () => {
+  const hay = rendererSrc + indexSrc;
+  assert.ok(hasId(hay, 'hydraSimInput'));
+  assert.ok(!hasId(hay, 'noSuchIdZzz'));
+  assert.ok(hasClass(hay, 'challenge-row'));
+  assert.ok(!hasClass(hay, 'no-such-class-zzz'));
+});
+
 test('tutorials.json: every step selector id/class exists in index.html or renderer templates', () => {
   const hay = rendererSrc + indexSrc;
   for (const [key, tut] of Object.entries(tutorials)) {
@@ -56,9 +71,7 @@ test('tutorials.json: every step selector id/class exists in index.html or rende
       assert.ok(tokens.length, key + ' step ' + i + ' selector has a token: ' + st.selector);
       for (const tok of tokens) {
         const name = tok.slice(1);
-        const found = tok[0] === '#'
-          ? new RegExp('id=\\?["\']' + name + '\\?["\']|\.id\s*=\s*[\'"]' + name).test(hay)
-          : new RegExp('class=\\?["\'][^"\']*\b' + name + '\b').test(hay);
+        const found = tok[0] === '#' ? hasId(hay, name) : hasClass(hay, name);
         assert.ok(found, key + ' step ' + i + ' selector ' + tok + ' not found');
       }
     });
@@ -90,4 +103,56 @@ test('preload.js bridge channels equal main.js ipcMain handle channels', () => {
   const labKeys = [...labBlock.matchAll(/'(lab:[^']+)'\s*:/g)].map((m) => m[1]);
   assert.ok(labKeys.length >= 5, 'LAB_WINDOWS keys found');
   assert.deepEqual([...handled, ...labKeys].sort(), bridge);
+});
+
+// ── Simulator dispatch ──────────────────────────────────────────────────────
+function extractFn(name) {
+  const start = rendererSrc.indexOf('function ' + name + '(');
+  assert.ok(start >= 0, name + ' found');
+  const ends = [rendererSrc.indexOf('\nfunction ', start + 1), rendererSrc.indexOf('\n/* ', start + 1)]
+    .filter((x) => x > 0);
+  return rendererSrc.slice(start, Math.min(...ends));
+}
+function runSim(name, cmd) {
+  const out = { innerHTML: '', scrollTop: 0, scrollHeight: 0, remove() {} };
+  const ctx = {
+    document: { getElementById: () => out },
+    setTimeout: (fn) => fn(),
+    escapeHtml: (x) => String(x),
+    Date,
+  };
+  vm.runInNewContext(extractFn(name) + '\n' + name + '(' + JSON.stringify(cmd) + ');', ctx);
+  return out.innerHTML;
+}
+
+test('hydra http host parsing handles -s before and after the target', () => {
+  const form = '"/login:u=^USER^&p=^PASS^:Invalid"';
+  const a = runSim('handleHydraCommand', 'hydra -l admin -P rockyou.txt shop.local http-post-form ' + form);
+  assert.match(a, /host: shop\.local/);
+  const b = runSim('handleHydraCommand', 'hydra -l admin -P rockyou.txt localhost -s 8000 http-post-form ' + form);
+  assert.match(b, /host: localhost/);
+  assert.doesNotMatch(b, /host: 8000/);
+});
+
+test('hydra/sqlmap/nmap tutorial waitForValues are accepted by their simulators', () => {
+  let checked = 0;
+  for (const [key, tut] of Object.entries(tutorials)) {
+    for (const st of tut.steps || []) {
+      if (st.action !== 'input' || !st.waitForValue) continue;
+      const cmd = st.waitForValue;
+      if (tut.module === 'hydra') {
+        assert.match(cmd, /^hydra/, key);
+        assert.doesNotMatch(runSim('handleHydraCommand', cmd), /Command not found|No valid target service/, key + ': ' + cmd);
+        checked++;
+      } else if (tut.module === 'sqlmap') {
+        assert.match(cmd, /^sqlmap/, key);
+        assert.doesNotMatch(runSim('handleSqlmapCommand', cmd), /Command not found|No target URL/, key + ': ' + cmd);
+        checked++;
+      } else if (tut.module === 'nmap') {
+        assert.match(cmd, /^(nmap|ping)/, key);
+        checked++;
+      }
+    }
+  }
+  assert.ok(checked >= 10, 'checked ' + checked);
 });
