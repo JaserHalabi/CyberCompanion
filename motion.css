@@ -150,6 +150,10 @@
   animation: cc-scan var(--dur-reveal) var(--ease-out) 1 both;
 }
 
+/* ─── Splash logo: the mark's amber cursor blinks twice during boot, then rests on ─── */
+/* The cursor rect lives in <symbol id="cc-logo">; the variable inherits into the <use> copy. */
+.splash-logo { --logo-cursor-anim: cc-blink 600ms steps(2, jump-none) 200ms 2; }
+
 /* ─── Reduced motion: no animation, final state visible ─── */
 @media (prefers-reduced-motion: reduce) {
   .fade-in,
@@ -162,6 +166,7 @@
     opacity: 1 !important;
     transform: none !important;
   }
+  .splash-logo { --logo-cursor-anim: none; }
   #splash.splash-exit,
   .splash-bar-fill {
     animation: none !important;

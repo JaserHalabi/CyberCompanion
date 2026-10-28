@@ -18,40 +18,13 @@
   <!-- ═══ SVG Logo Defs — defined once, reused everywhere via <use> ═══ -->
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
     <defs>
-      <linearGradient id="logo-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#5fd68c"/>
-        <stop offset="100%" stop-color="#ffb000"/>
-      </linearGradient>
-      <linearGradient id="logo-grad-h" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%"   stop-color="#5fd68c"/>
-        <stop offset="100%" stop-color="#ffb000"/>
-      </linearGradient>
+      <!-- Terminal mark: rounded frame, ">" prompt chevron, amber "_" cursor block.
+           Flat; colours come from CSS variables with token fallbacks. Coordinates sit on a
+           4-unit grid so the cursor lands on whole pixels at 16px. -->
       <symbol id="cc-logo" viewBox="0 0 64 64" fill="none">
-        <!-- Swirls behind/around -->
-        <path d="M 14 30 C 8 30, 6 24, 12 22 C 18 20, 20 26, 14 28 C 11 29, 9 28, 9 26" stroke="rgba(95,214,140,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <path d="M 50 26 C 56 26, 58 20, 52 18 C 46 16, 44 22, 50 24 C 53 25, 55 24, 55 22" stroke="rgba(255,176,0,0.45)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <path d="M 28 62 C 22 62, 20 56, 26 54 C 32 52, 34 58, 28 60 C 25 61, 23 60, 23 58" stroke="rgba(95,214,140,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-
-        <!-- Ghost Body -->
-        <path d="M 32 6 C 20 6, 16 18, 16 28 
-                 C 16 34, 15 36, 12 40 C 9 44, 13 46, 16 44 
-                 C 19 42, 20 40, 22 42 C 26 46, 20 54, 26 58
-                 C 32 62, 36 56, 40 58 C 44 60, 48 54, 46 50
-                 C 44 46, 45 42, 48 44 C 51 46, 55 44, 52 40
-                 C 49 36, 48 34, 48 28
-                 C 48 18, 44 6, 32 6 Z"
-              fill="#e6e9e4" opacity="0.95"/>
-              
-        <!-- Eyes -->
-        <ellipse cx="28" cy="25" rx="3" ry="4.5" fill="#111827" transform="rotate(-5 28 25)" />
-        <ellipse cx="40" cy="25" rx="3" ry="4.5" fill="#111827" transform="rotate(-5 40 25)" />
-        
-        <!-- Stars / Sparkles -->
-        <path d="M 12 18 Q 12 14, 8 14 Q 12 14, 12 10 Q 12 14, 16 14 Q 12 14, 12 18 Z" fill="#ffb000" opacity="0.9"/>
-        <path d="M 48 10 Q 48 8, 46 8 Q 48 8, 48 6 Q 48 8, 50 8 Q 48 8, 48 10 Z" fill="#ffb000" opacity="0.9"/>
-        <path d="M 54 38 Q 54 36, 52 36 Q 54 36, 54 34 Q 54 36, 56 36 Q 54 36, 54 38 Z" fill="#e2e8f0" opacity="0.9"/>
-        <circle cx="20" cy="10" r="1" fill="#e2e8f0" opacity="0.8"/>
-        <circle cx="56" cy="18" r="1" fill="#ffb000" opacity="0.8"/>
+        <rect class="logo-frame" x="6.5" y="6.5" width="51" height="51" rx="10" stroke-width="3" style="stroke: var(--logo-frame, var(--text-muted, #87928b))"/>
+        <polyline class="logo-chevron" points="18,21 29,32 18,43" stroke-width="5.5" stroke-linecap="square" stroke-linejoin="miter" style="stroke: var(--logo-fg, var(--accent, #5fd68c))"/>
+        <rect class="logo-cursor" x="32" y="40" width="16" height="6" style="fill: var(--logo-cursor, var(--amber, #ffb000)); animation: var(--logo-cursor-anim, none)"/>
       </symbol>
     </defs>
   </svg>
