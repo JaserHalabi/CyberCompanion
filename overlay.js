@@ -139,37 +139,42 @@ class TutorialStateManager {
 
   handlePageChange(data) {
     if (!this.challengesData || !this.challengesData.pageHints) return null;
-    
-    // Exact match or partial match on hash
-    let hash = data.hash || '/';
-    let hint = this.challengesData.pageHints[hash];
-    
+
+    // pageHints keys look like "/#/login"; the webview reports hash as "#/login".
+    // Normalise both to a single leading slash so either form matches.
+    const norm = (h) => '/' + String(h || '').replace(/^\/+/, '');
+    const hints = this.challengesData.pageHints;
+    const hash = norm(data.hash);
+
+    let hint = hints[data.hash] || hints[hash] || null;
+
     if (!hint) {
-      // Try partial matching
-      for (const [key, val] of Object.entries(this.challengesData.pageHints)) {
-        if (hash.startsWith(key)) {
-          hint = val;
-          break;
-        }
+      // Longest-prefix match so nested routes still resolve.
+      let bestLen = -1;
+      for (const [key, val] of Object.entries(hints)) {
+        const nk = norm(key);
+        if (hash.startsWith(nk) && nk.length > bestLen) { hint = val; bestLen = nk.length; }
       }
     }
-    
+
     this.activePageHint = hint || null;
     return this.activePageHint;
   }
 
   getProgress() {
-    let nextLevelXp = 8000;
-    if (this.level < this.LEVELS.length) {
-      nextLevelXp = this.LEVELS[this.level].max;
-    }
-    
-    const levelName = this.LEVELS[Math.min(this.level - 1, this.LEVELS.length - 1)].name;
+    const atMax = this.level >= this.LEVELS.length;
+    // Thresholds for the current and next level, so the bar fills across the
+    // current band rather than from zero every time.
+    const currentFloor = this.LEVELS[Math.min(this.level - 1, this.LEVELS.length - 1)].max;
+    const nextLevelXp = atMax ? this.LEVELS[this.LEVELS.length - 1].max : this.LEVELS[this.level].max;
 
-    // Calculate category progress (simulated for now, would be better with full category mapping)
+    const span = Math.max(1, nextLevelXp - currentFloor);
+    const intoLevel = Math.max(0, this.totalXP - currentFloor);
+    const xpPercent = atMax ? 100 : Math.max(0, Math.min(100, Math.floor((intoLevel / span) * 100)));
+
+    const levelName = this.LEVELS[Math.min(this.level - 1, this.LEVELS.length - 1)].name;
     const solvedCount = this.solvedChallenges.size;
-    
-    // Sort recent challenges
+
     const recent = Array.from(this.solvedChallenges.entries())
       .map(([k, v]) => ({ key: k, ...v }))
       .sort((a, b) => b.solvedAt - a.solvedAt)
@@ -178,11 +183,11 @@ class TutorialStateManager {
     return {
       totalXP: this.totalXP,
       level: this.level,
-      levelName: levelName,
-      nextLevelXp: nextLevelXp,
-      xpPercent: Math.min(100, Math.floor((this.totalXP / nextLevelXp) * 100)),
-      solvedCount: solvedCount,
-      recent: recent
+      levelName,
+      nextLevelXp,
+      xpPercent,
+      solvedCount,
+      recent
     };
   }
 }
@@ -221,14 +226,14 @@ class OverlayRenderer {
 
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-icon">🏆</div>
+          <div class="stat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg></div>
           <div class="stat-info">
             <span class="stat-value">${progress.solvedCount}</span>
             <span class="stat-label">Solved</span>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">🔥</div>
+          <div class="stat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s4 4 4 8a4 4 0 0 1-8 0c0-1 .5-2 1-2.5C8 10 7 12 7 14a5 5 0 0 0 10 0c0-5-5-8-5-12z"/></svg></div>
           <div class="stat-info">
             <span class="stat-value">${progress.recent.length ? 'Active' : 'Idle'}</span>
             <span class="stat-label">Streak</span>
@@ -292,16 +297,22 @@ class OverlayRenderer {
     }
     toast.appendChild(confetti);
 
-    const moduleLink = result.info.module 
-      ? `<div class="toast-link" onclick="window.__overlay.goToModule('${result.info.module}')">Review Module</div>`
+    const challengeInfo = result.info || {};
+    const challengeName = typeof result.challenge === 'string' 
+      ? result.challenge 
+      : (result.challenge && result.challenge.name) || 'Challenge';
+    const xpAmount = result.xpGained || result.xp || 0;
+
+    const moduleLink = challengeInfo.module 
+      ? `<div class="toast-link" onclick="window.__overlay.goToModule('${challengeInfo.module}')">Review Module</div>`
       : '';
 
     toast.innerHTML += `
-      <div class="toast-icon">🏆</div>
+      <div class="toast-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg></div>
       <div class="toast-content">
         <div class="toast-title">Challenge Solved</div>
-        <div class="toast-challenge">${this.escapeHtml(result.challenge.name)}</div>
-        <div class="toast-xp">+${result.xpGained} XP</div>
+        <div class="toast-challenge">${this.escapeHtml(challengeName)}</div>
+        <div class="toast-xp">+${xpAmount} XP</div>
         ${moduleLink}
       </div>
       <button class="toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 400)">✕</button>
@@ -407,7 +418,16 @@ window.__overlay = {
         }
       }
       else if (event.channel === 'juiceshop:ready') {
-        console.log('Juice Shop loaded inside Webview');
+        console.log('Juice Shop / CyberMart loaded inside Webview');
+      }
+      else if (event.channel === 'cybermart:proxy-request') {
+        const { id, email, password } = event.args[0];
+        // Store the pending proxy ID so Forward/Drop can reply
+        if (window.__app) {
+          window.__app.triggerBurpSimIntercept(id,
+            `POST /rest/user/login HTTP/1.1\nHost: cyber-mart.local\nContent-Type: application/json\n\n{"email":"${email}","password":"${password}"}`
+          );
+        }
       }
     });
 
@@ -418,30 +438,28 @@ window.__overlay = {
       });
     }
 
-    // Periodic bulk sync to ensure XP tracks even if socket intercept fails
-    setInterval(() => {
-      if (webviewEl && webviewEl.executeJavaScript) {
-        webviewEl.executeJavaScript("fetch('/api/Challenges').catch(e=>{})").catch(e => {});
+    // Periodic bulk sync so XP still tracks if the realtime hook misses an event.
+    // Only polls while the webview is actually showing (saves work in Study/SOC mode).
+    if (this._syncTimer) clearInterval(this._syncTimer);
+    this._syncTimer = setInterval(() => {
+      const labVisible = typeof window.__app?.isLabMode === 'function' ? window.__app.isLabMode() : true;
+      if (labVisible && webviewEl && webviewEl.executeJavaScript && webviewEl.isConnected) {
+        webviewEl.executeJavaScript("fetch('/api/Challenges').catch(function(){})").catch(() => {});
       }
     }, 5000);
   },
 
   goToModule(moduleId) {
-    // If the user clicks a module link in a toast, exit lab mode and go to module
-    if (window.__app && window.__app.toggleLabMode) {
-      window.__app.toggleLabMode(); // exit lab mode
+    // Exit lab mode so the module content is visible.
+    if (window.__app && window.__app.isLabMode && window.__app.isLabMode() && window.__app.toggleLabMode) {
+      window.__app.toggleLabMode();
     }
-    
-    // Find module index
-    const items = document.querySelectorAll('.nav-item');
-    for (let i = 0; i < items.length; i++) {
-      // In renderer.js, modules are selected by index, we'd need to map id -> index
-      // Hack for now: click the nav item containing the title
-      // The DOM stores dataset.index
-      if (MODULES && MODULES[i] && MODULES[i].id === moduleId) {
-        items[i].click();
-        break;
-      }
+    // Prefer the app's own selector; fall back to matching nav items by data-module.
+    if (window.__app && typeof window.__app.selectModuleById === 'function') {
+      window.__app.selectModuleById(moduleId);
+      return;
     }
+    const item = document.querySelector(`.nav-item[data-module="${moduleId}"]`);
+    if (item) item.click();
   }
 };

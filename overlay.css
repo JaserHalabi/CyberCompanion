@@ -620,3 +620,45 @@
   0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
   100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PROFESSIONAL REDESIGN OVERRIDES — flat, tool-like (loaded last)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.overlay-panel { background: var(--bg-base) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; border-left: 1px solid var(--border) !important; }
+.overlay-header { background: var(--bg-base) !important; }
+.overlay-header-title { background: none !important; -webkit-text-fill-color: currentColor !important; color: var(--text-primary) !important; font-weight: 650; }
+
+.xp-section, .stat-card, .progress-category, .recent-item { background: var(--bg-surface) !important; }
+.level-value { text-shadow: none !important; }
+.level-title { color: var(--accent, var(--cyan)) !important; }
+
+/* XP bar: solid fill, no moving shimmer */
+.xp-bar-fill { background: var(--accent, var(--cyan)) !important; }
+.xp-bar-fill::after { display: none !important; animation: none !important; }
+.level-up-glow { display: none !important; }
+
+/* Toasts: flat card with a thin accent left border, no gradient ring, no bounce */
+.achievement-toast { background: var(--bg-surface) !important; border: 1px solid var(--border-accent) !important; border-left: 3px solid var(--accent, var(--cyan)) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important; }
+.achievement-toast::before { display: none !important; }
+.toast-icon { animation: none !important; font-size: 20px; }
+.toast-title { color: var(--text-secondary) !important; }
+.toast-xp { background: var(--accent-dim, var(--cyan-dim)) !important; color: var(--accent, var(--cyan)) !important; }
+.confetti-container { display: none !important; }
+
+/* Context hint: flat, no colored shadow */
+.context-hint { background: var(--bg-surface) !important; border: 1px solid var(--border-accent) !important; box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important; backdrop-filter: none !important; }
+.context-hint-title { color: var(--accent, var(--cyan)) !important; }
+.hint-module-badge { background: var(--bg-elevated) !important; color: var(--text-secondary) !important; border: 1px solid var(--border) !important; }
+
+/* Floating toggle: flat */
+.floating-overlay-toggle { background: var(--bg-elevated) !important; border: 1px solid var(--border) !important; color: var(--text-secondary) !important; box-shadow: none !important; }
+.floating-overlay-toggle:hover { background: var(--bg-hover) !important; color: var(--text-primary) !important; box-shadow: none !important; }
+
+/* Icon colors for stat / overlay-header / toast line icons */
+.stat-icon { color: var(--text-secondary); }
+.stat-icon svg { width: 18px; height: 18px; }
+.overlay-header-icon { display: inline-flex; color: var(--accent, var(--cyan)); }
+.overlay-header-icon svg { width: 16px; height: 16px; }
+.toast-icon { color: var(--accent, var(--cyan)); }
+.toast-icon svg { width: 18px; height: 18px; }

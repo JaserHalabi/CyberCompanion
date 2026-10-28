@@ -1,3 +1,10 @@
 node_modules/
 dist/
+build/
+temp_asar/
+restored_from_exe/
+*.log
+*-preview.png
 .DS_Store
+Thumbs.db
+.superpowers/

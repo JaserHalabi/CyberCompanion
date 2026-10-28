@@ -1,68 +1,104 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
-const { exec } = require('child_process');
+'use strict';
+
+const { app, BrowserWindow, ipcMain, shell, session } = require('electron');
+const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
 // ─── Container Configuration ───────────────────────────────────────────────────
+// Ports are bound to 127.0.0.1 so the intentionally vulnerable apps are never
+// reachable from other machines on the network.
 const CONTAINERS = {
-  juiceshop: {
-    name: 'cyber-juiceshop',
-    image: 'bkimminich/juice-shop',
-    port: '3000:3000',
-    label: 'Juice Shop'
-  },
-  dvwa: {
-    name: 'cyber-dvwa',
-    image: 'vulnerables/web-dvwa',
-    port: '8080:80',
-    label: 'DVWA'
-  }
+  juiceshop: { name: 'cyber-juiceshop', image: 'bkimminich/juice-shop', port: '127.0.0.1:3000:3000', label: 'Juice Shop' },
+  dvwa:      { name: 'cyber-dvwa',      image: 'vulnerables/web-dvwa',  port: '127.0.0.1:8080:80',   label: 'DVWA' }
 };
+
+const LAB_ORIGINS = new Set([
+  'http://localhost:3000', 'http://127.0.0.1:3000',
+  'http://localhost:8080', 'http://127.0.0.1:8080'
+]);
 
 // ─── Docker Download URLs ───────────────────────────────────────────────────────
 const DOCKER_URLS = {
   win32:  'https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe',
-  darwin: 'https://desktop.docker.com/mac/main/amd64/Docker.dmg',
+  darwin: process.arch === 'arm64'
+    ? 'https://desktop.docker.com/mac/main/arm64/Docker.dmg'
+    : 'https://desktop.docker.com/mac/main/amd64/Docker.dmg',
   linux:  'https://docs.docker.com/engine/install/'
 };
 
+const APP_ICON = path.join(__dirname, 'build', 'icon.png');
+const WEBVIEW_PRELOAD = path.join(__dirname, 'webview-preload.js');
+
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
-function runCommand(cmd) {
-  return new Promise((resolve) => {
-    exec(cmd, { timeout: 300000 }, (error, stdout, stderr) => {
-      if (error) {
-        const msg = (stderr || error.message || '').toLowerCase();
+function isLabUrl(raw) {
+  try { return LAB_ORIGINS.has(new URL(raw).origin); } catch { return false; }
+}
 
-        if (msg.includes('permission denied') || msg.includes('got permission denied')) {
-          resolve({
-            ok: false,
-            error: 'Permission denied. On Linux, add your user to the docker group:\nsudo usermod -aG docker $USER\nThen log out and back in.'
-          });
-        } else if (msg.includes('cannot connect') || msg.includes('is the docker daemon running')) {
-          resolve({
-            ok: false,
-            error: 'Cannot connect to Docker. Please ensure the Docker daemon is running and your user has permissions.'
-          });
-        } else if (msg.includes('not found') || msg.includes('not recognized')) {
-          resolve({ ok: false, error: 'DOCKER_NOT_FOUND' });
-        } else {
-          resolve({ ok: false, error: stderr || error.message });
-        }
-        return;
-      }
-      resolve({ ok: true, data: stdout.trim() });
+/** Opens only https URLs or the local lab targets in the system browser. */
+function safeOpenExternal(raw) {
+  try {
+    const u = new URL(raw);
+    if (u.protocol === 'https:' || isLabUrl(u.href)) {
+      shell.openExternal(u.href);
+      return true;
+    }
+  } catch { /* invalid URL */ }
+  return false;
+}
+
+function classifyDockerError(err, stderr) {
+  if (err && err.code === 'ENOENT') return 'DOCKER_NOT_FOUND';
+  const text = String(stderr || (err && err.message) || '').trim();
+  const msg = text.toLowerCase();
+  if (msg.includes('permission denied')) {
+    return 'Permission denied. On Linux, add your user to the docker group:\nsudo usermod -aG docker $USER\nThen log out and back in.';
+  }
+  if (msg.includes('cannot connect') || msg.includes('is the docker daemon running') ||
+      msg.includes('error during connect') || msg.includes('docker_engine') ||
+      msg.includes('dockerdesktoplinuxengine')) {
+    return 'Docker is installed but not running. Start Docker Desktop, wait until it says "running", then try again.';
+  }
+  if (msg.includes('port is already allocated') || msg.includes('address already in use')) {
+    return 'Port 3000 or 8080 is already used by another program. Close it and try again.';
+  }
+  if (err && err.killed) return 'The Docker command timed out. Check your internet connection and try again.';
+  return text || 'Unknown Docker error';
+}
+
+/** Runs docker with an argument array — no shell, so no quoting or injection issues. */
+function docker(args, timeout = 60_000) {
+  return new Promise((resolve) => {
+    execFile('docker', args, { timeout, windowsHide: true, maxBuffer: 8 * 1024 * 1024 }, (err, stdout, stderr) => {
+      if (err) resolve({ ok: false, error: classifyDockerError(err, stderr), raw: String(stderr || '') });
+      else resolve({ ok: true, data: String(stdout).trim() });
     });
   });
 }
 
+const isNoSuchContainer = (r) => !r.ok && /no such container/i.test(r.raw || r.error || '');
+
+async function bootContainer(c) {
+  await docker(['rm', '-f', c.name]); // "no such container" is fine here
+  const inspect = await docker(['image', 'inspect', c.image], 30_000);
+  if (!inspect.ok) {
+    if (inspect.error === 'DOCKER_NOT_FOUND') return inspect;
+    const pull = await docker(['pull', c.image], 30 * 60_000); // first download can be slow
+    if (!pull.ok) return pull;
+  }
+  return docker(['run', '-d', '--name', c.name, '-p', c.port, c.image], 120_000);
+}
+
 // ─── IPC Handlers ───────────────────────────────────────────────────────────────
+
+let labBusy = false;
 
 function registerIpcHandlers() {
 
-  ipcMain.handle('lab:getTutorials', () => {
+  ipcMain.handle('lab:getTutorials', async () => {
     try {
-      return require('./tutorials.json');
+      return JSON.parse(await fs.promises.readFile(path.join(__dirname, 'tutorials.json'), 'utf8'));
     } catch (e) {
       console.error('Failed to read tutorials.json', e);
       return {};
@@ -71,25 +107,17 @@ function registerIpcHandlers() {
 
   // ── Check Docker Installation ───────────────────────────────────────────────
   ipcMain.handle('lab:checkDocker', async () => {
-    const result = await runCommand('docker --version');
-    return {
-      installed: result.ok,
-      version: result.ok ? result.data : null,
-      error: result.ok ? null : result.error,
-      platform: process.platform
-    };
+    const r = await docker(['--version'], 15_000);
+    return { installed: r.ok, version: r.ok ? r.data : null, error: r.ok ? null : r.error, platform: process.platform };
   });
 
-  // ── Open External URL (for Docker download and Lab opening) ────────────────
-  ipcMain.handle('lab:openUrl', async (_event, url) => {
-    if (typeof url === 'string' && (url.startsWith('https://') || url.startsWith('http://localhost:'))) {
-      await shell.openExternal(url);
-      return { ok: true };
-    }
-    return { ok: false, error: 'Invalid or insecure URL.' };
-  });
+  // ── Open External URL ───────────────────────────────────────────────────────
+  ipcMain.handle('lab:openUrl', (_event, url) =>
+    (typeof url === 'string' && safeOpenExternal(url))
+      ? { ok: true }
+      : { ok: false, error: 'Invalid or insecure URL.' });
 
-  // ── Download Docker (opens installer download in browser) ──────────────────
+  // ── Download Docker ─────────────────────────────────────────────────────────
   ipcMain.handle('lab:downloadDocker', async () => {
     const url = DOCKER_URLS[process.platform] || DOCKER_URLS.linux;
     await shell.openExternal(url);
@@ -98,47 +126,95 @@ function registerIpcHandlers() {
 
   // ── Boot Lab ────────────────────────────────────────────────────────────────
   ipcMain.handle('lab:boot', async () => {
-    const results = {};
-    for (const [key, container] of Object.entries(CONTAINERS)) {
-      await runCommand(`docker rm -f ${container.name}`);
-      const cmd = `docker run -d --name ${container.name} -p ${container.port} ${container.image}`;
-      const result = await runCommand(cmd);
-      results[key] = { label: container.label, ...result };
+    if (labBusy) return { busy: { label: 'Lab', ok: false, error: 'A lab operation is already running. Please wait.' } };
+    labBusy = true;
+    try {
+      const daemon = await docker(['info', '--format', '{{.ServerVersion}}'], 30_000);
+      if (!daemon.ok) {
+        return Object.fromEntries(Object.entries(CONTAINERS).map(([k, c]) => [k, { label: c.label, ok: false, error: daemon.error }]));
+      }
+      const entries = await Promise.all(Object.entries(CONTAINERS).map(async ([k, c]) => {
+        const r = await bootContainer(c);
+        return [k, { label: c.label, ok: r.ok, data: r.data, error: r.ok ? null : r.error }];
+      }));
+      return Object.fromEntries(entries);
+    } finally {
+      labBusy = false;
     }
-    return results;
   });
 
   // ── Stop Lab ────────────────────────────────────────────────────────────────
   ipcMain.handle('lab:stop', async () => {
-    const results = {};
-    for (const [key, container] of Object.entries(CONTAINERS)) {
-      const stopResult = await runCommand(`docker stop ${container.name}`);
-      const rmResult   = await runCommand(`docker rm ${container.name}`);
-      results[key] = {
-        label: container.label,
-        ok: stopResult.ok && rmResult.ok,
-        error: stopResult.error || rmResult.error || null
-      };
-    }
-    return results;
+    const entries = await Promise.all(Object.entries(CONTAINERS).map(async ([k, c]) => {
+      const r = await docker(['rm', '-f', c.name]);
+      const ok = r.ok || isNoSuchContainer(r);
+      return [k, { label: c.label, ok, error: ok ? null : r.error }];
+    }));
+    return Object.fromEntries(entries);
   });
 
-  // ── Status ──────────────────────────────────────────────────────────────────
+  // ── Status (one docker call for all containers) ─────────────────────────────
   ipcMain.handle('lab:status', async () => {
-    const results = {};
-    for (const [key, container] of Object.entries(CONTAINERS)) {
-      const result = await runCommand(
-        `docker ps --filter "name=${container.name}" --format "{{.Status}}"`
-      );
-      if (!result.ok) {
-        results[key] = { label: container.label, running: false, error: result.error };
-      } else {
-        const isRunning = result.data.length > 0 && result.data.toLowerCase().startsWith('up');
-        results[key] = { label: container.label, running: isRunning, status: result.data || 'Not running' };
-      }
+    const r = await docker(['ps', '-a', '--filter', 'name=^cyber-', '--format', '{{.Names}}\t{{.Status}}'], 20_000);
+    const rows = new Map();
+    if (r.ok) {
+      r.data.split('\n').filter(Boolean).forEach((line) => {
+        const [name, status = ''] = line.split('\t');
+        rows.set(name.trim(), status.trim());
+      });
     }
-    return results;
+    return Object.fromEntries(Object.entries(CONTAINERS).map(([k, c]) => {
+      if (!r.ok) return [k, { label: c.label, running: false, error: r.error }];
+      const status = rows.get(c.name) || '';
+      return [k, { label: c.label, running: /^up/i.test(status), status: status || 'Not running' }];
+    }));
   });
+
+  // ── Clear the embedded lab's browser storage (used by Factory Reset) ────────
+  ipcMain.handle('lab:clearLabSession', async () => {
+    try {
+      for (const origin of LAB_ORIGINS) {
+        await session.defaultSession.clearStorageData({ origin });
+      }
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  // ── Standalone Lab Windows ──────────────────────────────────────────────────
+  const LAB_WINDOWS = {
+    'lab:openBurpLab':               ['burp-lab.html',                'Burp Suite Lab — CyberCompanion'],
+    'lab:openPriceTamperingLab':     ['price-tampering-lab.html',     'Price Tampering Lab — CyberCompanion'],
+    'lab:openCookieManipulationLab': ['cookie-manipulation-lab.html', 'Cookie Manipulation Lab — CyberCompanion'],
+    'lab:openHeaderManipulationLab': ['header-manipulation-lab.html', 'Header Manipulation Lab — CyberCompanion'],
+    'lab:openSQLiLab':               ['sqli-lab.html',                'SQL Injection Lab — CyberCompanion']
+  };
+  Object.entries(LAB_WINDOWS).forEach(([channel, [file, title]]) => {
+    ipcMain.handle(channel, () => openLabWindow(file, title));
+  });
+}
+
+const openLabWindows = new Map(); // file -> BrowserWindow (one window per lab)
+
+function openLabWindow(file, title) {
+  const existing = openLabWindows.get(file);
+  if (existing && !existing.isDestroyed()) {
+    if (existing.isMinimized()) existing.restore();
+    existing.focus();
+    return true;
+  }
+  const win = new BrowserWindow({
+    width: 1380, height: 860, minWidth: 1100, minHeight: 700,
+    backgroundColor: '#080c14', title,
+    icon: fs.existsSync(APP_ICON) ? APP_ICON : undefined,
+    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true }
+  });
+  win.setMenuBarVisibility(false);
+  win.loadFile(path.join(__dirname, file));
+  openLabWindows.set(file, win);
+  win.on('closed', () => openLabWindows.delete(file));
+  return true;
 }
 
 // ─── Mini Burp Proxy — Session-Level Interception ───────────────────────────────
@@ -197,17 +273,31 @@ function createWindow() {
     minHeight: 700,
     backgroundColor: '#0a0e17',
     title: 'CyberCompanion',
-    icon: path.join(__dirname, 'icon.png'),
+    icon: fs.existsSync(APP_ICON) ? APP_ICON : undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      sandbox: true,
       webviewTag: true
     }
   });
 
-  win.loadFile('index.html');
+  win.loadFile(path.join(__dirname, 'index.html'));
+
+  // ── Webview hardening: the page cannot choose its own preload or options ──
+  win.webContents.on('will-attach-webview', (event, webPreferences, params) => {
+    delete webPreferences.preloadURL;
+    webPreferences.preload = WEBVIEW_PRELOAD;
+    webPreferences.nodeIntegration = false;
+    webPreferences.nodeIntegrationInSubFrames = false;
+    webPreferences.contextIsolation = true;
+    webPreferences.sandbox = true;
+    webPreferences.webSecurity = true;
+    if (params.src && params.src !== 'about:blank' && !isLabUrl(params.src)) {
+      event.preventDefault();
+    }
+  });
 
   // ── Intercept webview traffic using session.webRequest ────────────────────
   win.webContents.on('did-attach-webview', (_event, webContents) => {
@@ -251,7 +341,7 @@ function createWindow() {
               bodyStr += Buffer.from(chunk.bytes).toString('utf-8');
             }
           }
-          rawRequest += `Content-Type: application/json\r\n`;
+          rawRequest += `Content-Type: ${details.resourceType === 'xhr' ? 'application/json' : 'application/x-www-form-urlencoded'}\r\n`;
           rawRequest += `Content-Length: ${Buffer.byteLength(bodyStr)}\r\n`;
         }
 
@@ -281,17 +371,63 @@ function createWindow() {
   });
 }
 
-// ─── App Lifecycle ──────────────────────────────────────────────────────────────
+// ─── Global navigation / popup policy ───────────────────────────────────────────
 
-app.whenReady().then(() => {
-  registerIpcHandlers();
-  setupProxyIpc();
-  createWindow();
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+app.on('web-contents-created', (_event, contents) => {
+  // Popups never open new Electron windows; safe links go to the system browser.
+  contents.setWindowOpenHandler(({ url }) => {
+    safeOpenExternal(url);
+    return { action: 'deny' };
+  });
+
+  contents.on('will-navigate', (event, url) => {
+    const type = contents.getType();
+    if (type === 'webview') {
+      if (!isLabUrl(url) && url !== 'about:blank') {
+        event.preventDefault();
+        safeOpenExternal(url);
+      }
+      return;
+    }
+    // App windows only ever show local app files.
+    if (!url.startsWith('file://')) {
+      event.preventDefault();
+      safeOpenExternal(url);
+    }
   });
 });
 
+// ─── App Lifecycle ──────────────────────────────────────────────────────────────
+
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    const win = BrowserWindow.getAllWindows()[0];
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.focus();
+    }
+  });
+
+  app.whenReady().then(() => {
+    registerIpcHandlers();
+    setupProxyIpc();
+    createWindow();
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+  });
+}
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('will-quit', () => {
+  // Release any pending proxy requests to avoid hanging callbacks
+  while (proxyQueue.length > 0) {
+    const req = proxyQueue.shift();
+    try { req.callback({ cancel: true }); } catch (e) {}
+  }
 });

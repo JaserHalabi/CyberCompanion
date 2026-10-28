@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL Injection Lab — CyberCompanion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg-deep:#080c14;--bg-card:#111827;--bg-panel:#0f1721;
+      --border:rgba(255,255,255,0.08);
+      --red:#ef4444;--red-dim:rgba(239,68,68,0.12);
+      --green:#22c55e;--amber:#f59e0b;--violet:#8b5cf6;--cyan:#5b8def;
+      --text:#e2e8f0;--text-muted:#64748b;--text-dim:#94a3b8;
+    }
+    html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text)}
+
+    /* ── Titlebar ── */
+    .titlebar{display:flex;align-items:center;justify-content:space-between;height:44px;padding:0 16px;
+      background:linear-gradient(90deg,#0d1117,#111827);border-bottom:1px solid var(--border);
+      user-select:none;-webkit-app-region:drag;flex-shrink:0}
+    .titlebar-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px}
+    .badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+      background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+    .btn-close{width:28px;height:28px;border-radius:6px;border:none;background:rgba(255,255,255,.06);
+      color:var(--text-dim);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
+      transition:all .2s;-webkit-app-region:no-drag}
+    .btn-close:hover{background:rgba(239,68,68,.2);color:#ef4444}
+
+    /* ── Root layout ── */
+    .lab-root{display:flex;flex-direction:column;height:calc(100vh - 44px)}
+    .lab-main{display:flex;flex:1;overflow:hidden;min-height:0}
+
+    /* ── Scenario tab bar ── */
+    .scenario-bar{display:flex;align-items:center;background:#0d1117;
+      border-bottom:1px solid var(--border);padding:0 16px;flex-shrink:0;height:42px;gap:4px}
+    .s-tab{padding:0 16px;height:42px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;
+      color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+    .s-tab:hover{color:var(--text-dim)}
+    .s-tab.active{color:#f87171;border-bottom-color:var(--red)}
+    .s-tab .tb{font-size:10px;padding:2px 6px;border-radius:3px;background:rgba(239,68,68,.1);color:#f87171}
+    .s-tab.active-b{color:#c084fc;border-bottom-color:var(--violet)}
+    .s-tab.active-b .tb{background:rgba(139,92,246,.1);color:#c084fc}
+    .debug-btn{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-muted);
+      cursor:pointer;padding:5px 12px;border-radius:5px;border:1px solid var(--border);
+      background:rgba(255,255,255,.02);transition:all .2s;font-weight:600}
+    .debug-btn:hover{color:var(--text);background:rgba(255,255,255,.04)}
+    .debug-btn.on{color:var(--amber);border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
+
+    /* ── Target panel ── */
+    .target-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+    .t-chrome{display:flex;align-items:center;gap:8px;padding:8px 14px;height:38px;
+      background:var(--bg-card);border-bottom:1px solid var(--border);flex-shrink:0}
+    .cdot{width:8px;height:8px;border-radius:50%}
+    .cdot-r{background:#ff5f56}.cdot-a{background:#ffbd2e}.cdot-g{background:#27c93f}
+    .t-url{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;
+      padding:3px 10px;font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+    .t-body{flex:1;overflow-y:auto;background:#0f172a}
+
+    /* ── Corp Login Portal ── */
+    .corp-nav{height:54px;background:#1e293b;border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;align-items:center;padding:0 24px}
+    .corp-logo{font-size:17px;font-weight:800;color:#f8fafc;letter-spacing:-.3px}
+    .corp-logo em{color:#ef4444;font-style:normal;font-weight:400;font-size:13px;margin-left:4px}
+    .corp-nav-status{margin-left:auto;font-size:12px;color:#64748b;font-family:'JetBrains Mono',monospace}
+
+    .login-wrap{display:flex;align-items:center;justify-content:center;min-height:calc(100% - 54px);padding:40px 20px}
+    .login-card{background:#1e293b;border:1px solid rgba(255,255,255,.07);border-radius:14px;
+      padding:36px;width:100%;max-width:420px;box-shadow:0 25px 50px rgba(0,0,0,.4);
+      transition:transform .15s ease}
+    .login-card h2{font-size:20px;font-weight:700;color:#f8fafc;margin-bottom:4px}
+    .login-card p{font-size:13px;color:#64748b;margin-bottom:28px}
+    .f-label{display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:.3px}
+    .f-wrap{margin-bottom:16px}
+    .f-inp{width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.05);color:#e2e8f0;font-size:14px;font-family:'JetBrains Mono',monospace;
+      outline:none;transition:all .2s}
+    .f-inp:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(239,68,68,.1)}
+    .f-inp.sqli{border-color:var(--amber)!important;box-shadow:0 0 0 3px rgba(245,158,11,.12)!important;
+      background:rgba(245,158,11,.04)!important}
+    .login-btn{width:100%;padding:11px;border-radius:8px;border:none;
+      background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;font-size:14px;
+      font-weight:700;cursor:pointer;transition:all .2s;margin-top:4px;letter-spacing:.3px}
+    .login-btn:hover{opacity:.9;transform:translateY(-1px)}
+    .f-msg{margin-top:14px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;
+      text-align:center;display:none}
+    .f-msg.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5;display:block}
+    .f-msg.ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#86efac;display:block}
+    .f-msg.warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fcd34d;display:block}
+
+    /* Admin success ── */
+    .admin-panel{display:none;padding:32px 24px;animation:fadeIn .4s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .admin-title{font-size:22px;font-weight:800;color:#f8fafc;margin-bottom:4px}
+    .admin-sub{font-size:13px;color:#64748b;margin-bottom:20px}
+    .flag-box{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#4ade80;
+      background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);padding:14px 22px;
+      border-radius:8px;box-shadow:0 0 24px rgba(34,197,94,.12);letter-spacing:.5px;display:inline-block}
+    .admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+    .a-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:14px}
+    .a-card h4{font-size:10px;color:#64748b;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+    .a-card p{font-size:16px;font-weight:700;color:#f8fafc}
+
+    /* ── Shop Search App ── */
+    .shop-nav{height:54px;background:#1e1b4b;border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;align-items:center;padding:0 24px}
+    .shop-logo{font-size:17px;font-weight:800;color:#f8fafc}
+    .shop-logo em{color:#a78bfa;font-style:normal}
+    .search-wrap{padding:28px 24px}
+    .search-head h2{font-size:20px;font-weight:700;color:#f8fafc;margin-bottom:4px}
+    .search-head p{font-size:13px;color:#64748b;margin-bottom:20px}
+    .search-row{display:flex;gap:10px;margin-bottom:20px}
+    .s-inp{flex:1;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.05);color:#e2e8f0;font-size:13px;font-family:'JetBrains Mono',monospace;
+      outline:none;transition:all .2s}
+    .s-inp:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.1)}
+    .s-inp.sqli{border-color:var(--amber)!important;box-shadow:0 0 0 3px rgba(245,158,11,.12)!important;
+      background:rgba(245,158,11,.04)!important}
+    .s-btn{padding:10px 22px;border-radius:8px;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);
+      color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
+    .s-btn:hover{opacity:.9}
+    .results-box{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
+    .r-table{width:100%;border-collapse:collapse;font-size:13px}
+    .r-table th{padding:10px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;
+      letter-spacing:.5px;color:#64748b;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06)}
+    .r-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:#e2e8f0;
+      font-family:'JetBrains Mono',monospace;font-size:12px}
+    .r-table tr:hover td{background:rgba(255,255,255,.02)}
+    .r-table tr.injected td{color:#fbbf24;background:rgba(251,191,36,.04)}
+    .no-results{padding:40px;text-align:center;color:#374151;font-size:14px;font-family:'Inter',monospace}
+
+    /* ── SQL Debug Panel ── */
+    .debug-panel{background:#06090f;border-top:1px solid rgba(251,191,36,.2);flex-shrink:0;
+      max-height:0;opacity:0;overflow:hidden;transition:max-height .35s ease,opacity .35s ease}
+    .debug-panel.open{max-height:210px;opacity:1}
+    .debug-inner{padding:14px 18px}
+    .debug-title-row{font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;
+      letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+    .debug-query{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;white-space:pre-wrap;word-break:break-all}
+    .kw{color:#60a5fa}.str{color:#4ade80}.tbl{color:#c084fc}.cmt{color:#4b5563;font-style:italic}.op{color:#f87171}
+    .debug-eval{margin-top:10px;font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:8px}
+    .e-badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700}
+    .e-true{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+    .e-false{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+    .e-err{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+
+    /* ── Tutorial Panel ── */
+    .tut-panel{width:308px;flex-shrink:0;display:flex;flex-direction:column;
+      background:var(--bg-panel);border-left:1px solid var(--border)}
+    .tut-hdr{padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .tut-hdr h3{font-size:13px;font-weight:700;color:var(--red);letter-spacing:.3px}
+    .tut-hdr p{font-size:11px;color:var(--text-muted);margin-top:2px}
+    .tut-sc-label{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;
+      letter-spacing:1px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+    .tut-prog{padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .prog-track{height:4px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden}
+    .prog-fill{height:100%;border-radius:2px;transition:width .5s ease;
+      background:linear-gradient(90deg,#ef4444,#f59e0b)}
+    .prog-lbl{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--text-muted)}
+    .tut-steps{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+    .t-step{padding:12px 14px;border-radius:8px;border:1px solid var(--border);
+      background:rgba(255,255,255,.02);transition:all .25s}
+    .t-step.active{background:var(--red-dim);border-color:rgba(239,68,68,.25);
+      box-shadow:0 0 16px rgba(239,68,68,.08)}
+    .t-step.done{background:rgba(34,197,94,.04);border-color:rgba(34,197,94,.15);opacity:.7}
+    .t-step.locked{opacity:.28;pointer-events:none}
+    .snum{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+      border-radius:50%;font-size:11px;font-weight:700;margin-bottom:6px;
+      border:1.5px solid var(--border);color:var(--text-muted)}
+    .t-step.active .snum{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.1)}
+    .t-step.done .snum{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)}
+    .s-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+    .s-desc{font-size:11.5px;color:var(--text-muted);line-height:1.55}
+    .t-step.active .s-desc{color:var(--text-dim)}
+    .s-payload{margin-top:8px;padding:7px 10px;border-radius:5px;background:#080c14;
+      border:1px solid rgba(239,68,68,.2);font-family:'JetBrains Mono',monospace;font-size:11px;
+      color:#fbbf24;display:none;line-height:1.5;word-break:break-all}
+    .t-step.active .s-payload{display:block}
+    .s-action{margin-top:8px;padding:6px 10px;border-radius:5px;background:rgba(239,68,68,.06);
+      border:1px solid rgba(239,68,68,.2);font-size:11px;color:#f87171;font-weight:600;display:none}
+    .t-step.active .s-action{display:block}
+    .tut-explain{margin:0 14px 8px;padding:10px 12px;border-radius:6px;background:rgba(96,165,250,.05);
+      border:1px solid rgba(96,165,250,.15);font-size:11px;color:#93c5fd;line-height:1.6;
+      flex-shrink:0;display:none}
+    .tut-explain.show{display:block}
+    .tut-explain code{font-family:'JetBrains Mono',monospace;color:#fbbf24;font-size:10.5px}
+    .tut-hint{margin:0 14px 14px;padding:11px 12px;border-radius:7px;background:rgba(245,158,11,.05);
+      border:1px solid rgba(245,158,11,.2);font-size:12px;color:#fbbf24;line-height:1.55;
+      flex-shrink:0;display:none}
+    .tut-hint.show{display:block}
+    .tut-hint strong{display:block;margin-bottom:3px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;opacity:.7}
+    .tut-win{margin:14px;padding:16px;border-radius:10px;text-align:center;
+      background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);display:none;flex-shrink:0}
+    .tut-win.show{display:block}
+    .tut-win h4{font-size:14px;font-weight:700;color:#4ade80;margin-bottom:4px}
+    .tut-win p{font-size:12px;color:#86efac}
+    .tut-foot{padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px}
+    .btn-rst{flex:1;padding:7px;border-radius:6px;border:1px solid var(--border);
+      background:rgba(255,255,255,.03);color:var(--text-muted);font-size:11px;font-weight:600;
+      cursor:pointer;transition:all .2s}
+    .btn-rst:hover{background:rgba(255,255,255,.06);color:var(--text)}
+    .btn-next{flex:1;padding:7px;border-radius:6px;border:1px solid rgba(139,92,246,.3);
+      background:rgba(139,92,246,.08);color:#c084fc;font-size:11px;font-weight:600;
+      cursor:pointer;transition:all .2s;display:none}
+    .btn-next:hover{background:rgba(139,92,246,.15)}
+    .btn-next.show{display:block}
+
+    /* ── Shared ── */
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+    .toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+      z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+    .toast{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;
+      backdrop-filter:blur(12px);animation:su .3s ease;border:1px solid}
+    .toast.s{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.3);color:#4ade80}
+    .toast.e{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3);color:#f87171}
+    .toast.i{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);color:#c084fc}
+    .toast.w{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#fbbf24}
+    @keyframes su{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes tpulse{0%,100%{box-shadow:0 0 0 2px rgba(239,68,68,.5)}50%{box-shadow:0 0 0 5px rgba(239,68,68,.15)}}
+    .tpulse{animation:tpulse 1.2s ease-in-out infinite!important;border-radius:8px}
+  </style>
+</head>
+<body>
+
+<!-- Titlebar -->
+<div class="titlebar">
+  <div class="titlebar-brand">
+    <span>🔴</span><span>CyberCompanion</span>
+    <span class="badge">SQL Injection Lab</span>
+  </div>
+  <button class="btn-close" onclick="window.close()">&#x2715;</button>
+</div>
+
+<div class="lab-root">
+  <!-- Scenario tabs -->
+  <div class="scenario-bar">
+    <div class="s-tab active" id="tabA" onclick="switchScenario('A')">
+      🔐 Scenario A <span class="tb">Auth Bypass</span>
+    </div>
+    <div class="s-tab" id="tabB" onclick="switchScenario('B')">
+      🔍 Scenario B <span class="tb">UNION Extraction</span>
+    </div>
+    <div class="debug-btn" id="debugBtn" onclick="toggleDebug()">
+      🗄 SQL Debug Panel
+    </div>
+  </div>
+
+  <div class="lab-main">
+    <!-- Target panel -->
+    <div class="target-panel">
+      <div class="t-chrome">
+        <div class="cdot cdot-r"></div>
+        <div class="cdot cdot-a"></div>
+        <div class="cdot cdot-g"></div>
+        <div class="t-url" id="tUrl">corpdb.local/login</div>
+      </div>
+      <div class="t-body" id="tBody">
+
+        <!-- Scenario A: Login -->
+        <div id="scA">
+          <div class="corp-nav">
+            <div class="corp-logo">CorpDB<em>Internal Portal</em></div>
+            <div class="corp-nav-status" id="navStatus">v2.3.1 — Secure Login</div>
+          </div>
+          <div class="login-wrap" id="loginSection">
+            <div class="login-card" id="loginCard">
+              <h2>Administrator Login</h2>
+              <p>Enter your credentials to access the internal database portal.</p>
+              <div class="f-wrap">
+                <label class="f-label">Username</label>
+                <input class="f-inp" id="fUser" type="text" placeholder="Enter username..." autocomplete="off" oninput="onLoginInput()" onkeydown="if(event.key==='Enter')submitLogin()">
+              </div>
+              <div class="f-wrap">
+                <label class="f-label">Password</label>
+                <input class="f-inp" id="fPass" type="password" placeholder="Enter password..." autocomplete="off" oninput="onLoginInput()" onkeydown="if(event.key==='Enter')submitLogin()">
+              </div>
+              <button class="login-btn" onclick="submitLogin()">Sign In</button>
+              <div class="f-msg" id="loginMsg"></div>
+            </div>
+          </div>
+          <div class="admin-panel" id="adminPanel">
+            <div class="admin-title">Welcome, Administrator 🔓</div>
+            <div class="admin-sub">SQL Injection bypass successful — authentication skipped entirely.</div>
+            <div class="flag-box">FLAG{sqli_auth_bypass_admin}</div>
+            <div class="admin-grid">
+              <div class="a-card"><h4>Auth Method</h4><p style="color:#f87171;font-size:14px">SQL Injection</p></div>
+              <div class="a-card"><h4>Password Used</h4><p style="color:#fbbf24;font-size:14px">None ✓</p></div>
+              <div class="a-card"><h4>Users in DB</h4><p>4</p></div>
+              <div class="a-card"><h4>Tables</h4><p>3</p></div>
+              <div class="a-card"><h4>Engine</h4><p style="font-size:14px">MySQL 5.7</p></div>
+              <div class="a-card"><h4>Status</h4><p style="color:#4ade80;font-size:14px">Compromised</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scenario B: Search -->
+        <div id="scB" style="display:none">
+          <div class="shop-nav">
+            <div class="shop-logo">Shop<em>DB</em> &nbsp;Product Catalog</div>
+          </div>
+          <div class="search-wrap">
+            <div class="search-head">
+              <h2>Product Search</h2>
+              <p>Search our catalog of 10,000+ items</p>
+            </div>
+            <div class="search-row">
+              <input class="s-inp" id="sInput" type="text" placeholder="Search products..." autocomplete="off"
+                oninput="onSearchInput()" onkeydown="if(event.key==='Enter')submitSearch()">
+              <button class="s-btn" onclick="submitSearch()">Search</button>
+            </div>
+            <div class="results-box">
+              <table class="r-table">
+                <thead><tr id="rHead">
+                  <th>ID</th><th>Product Name</th><th>Price</th><th>Category</th>
+                </tr></thead>
+                <tbody id="rBody">
+                  <tr><td colspan="4" class="no-results">Enter a search term to find products</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /t-body -->
+
+      <!-- SQL Debug Panel -->
+      <div class="debug-panel" id="debugPanel">
+        <div class="debug-inner">
+          <div class="debug-title-row">🗄 Live SQL Query Engine</div>
+          <div class="debug-query" id="dQuery">
+            <span style="color:#374151;font-style:italic">-- Submit a form to see the generated SQL query --</span>
+          </div>
+          <div class="debug-eval" id="dEval" style="display:none">
+            Result: <span class="e-badge" id="eBadge"></span>
+            <span id="eNote" style="font-size:11px;color:#64748b"></span>
+          </div>
+        </div>
+      </div>
+    </div><!-- /target-panel -->
+
+    <!-- Tutorial panel -->
+    <div class="tut-panel">
+      <div class="tut-hdr">
+        <h3>SQL Injection Lab</h3>
+        <p>Manual input manipulation techniques</p>
+        <div class="tut-sc-label" id="scLabel">Scenario A · Authentication Bypass</div>
+      </div>
+      <div class="tut-prog">
+        <div class="prog-track"><div class="prog-fill" id="pFill" style="width:0%"></div></div>
+        <div class="prog-lbl"><span id="pLabel">Step 1 / 8</span><span id="pPct">0%</span></div>
+      </div>
+      <div class="tut-steps" id="tutSteps"></div>
+      <div class="tut-explain" id="tutExplain"></div>
+      <div class="tut-hint" id="tutHint"><strong>💡 Hint</strong><span id="hintTxt"></span></div>
+      <div class="tut-win" id="tutWin">
+        <div style="font-size:26px;margin-bottom:6px">🏆</div>
+        <h4>Lab Complete!</h4>
+        <p id="winMsg">You have mastered SQL injection!</p>
+      </div>
+      <div class="tut-foot">
+        <button class="btn-rst" onclick="resetLab()">↺ Restart</button>
+        <button class="btn-next" id="btnNext" onclick="goScenarioB()">Next: UNION Attack →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+'use strict';
+function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ════════════════════════════════════════
+// MockDatabaseEngine
+// ════════════════════════════════════════
+var DB = {
+  users: [
+    {id:1,username:'admin',  password:'Sup3rS3cr3t!', role:'administrator'},
+    {id:2,username:'alice',  password:'alice1234',    role:'user'},
+    {id:3,username:'bob',    password:'b0bpassw0rd',  role:'user'},
+    {id:4,username:'svc_acc',password:'svc_p@ss!',   role:'service'}
+  ],
+  products: [
+    {id:1, name:'Laptop Pro X',           price:'$1,299', category:'Electronics'},
+    {id:2, name:'Mechanical Keyboard',    price:'$149',   category:'Peripherals'},
+    {id:3, name:'4K Monitor 27"',         price:'$549',   category:'Electronics'},
+    {id:4, name:'USB-C Hub',              price:'$49',    category:'Accessories'},
+    {id:5, name:'Wireless Mouse',         price:'$79',    category:'Peripherals'},
+    {id:6, name:'SSD 1TB',               price:'$119',   category:'Storage'},
+    {id:7, name:'RAM 32GB DDR5',          price:'$199',   category:'Components'},
+    {id:8, name:'Webcam HD 1080p',        price:'$89',    category:'Peripherals'},
+    {id:9, name:'Network Switch 24-port', price:'$229',   category:'Networking'},
+    {id:10,name:'Security Dongle Pro',    price:'$500',   category:'Security'}
+  ],
+
+  evalLogin: function(u, p) {
+    var qs = "SELECT * FROM users\nWHERE username = '"+u+"'\n  AND password = '"+p+"';";
+    var sqliHit = /['";\-]|OR|UNION|SELECT|DROP|1=1|\/\*/i.test(u) || /['";\-]|OR|UNION|SELECT|DROP|1=1|\/\*/i.test(p);
+    // Unbalanced quote → SQL error
+    var qcount = ((u+p).match(/'/g)||[]).length;
+    var hasComment = /--/.test(u+p);
+    var hasUnion = /UNION/i.test(u+p);
+    if (qcount % 2 !== 0 && !hasComment && !hasUnion) {
+      return {ok:false,user:null,sqli:true,err:true,qs:qs};
+    }
+    // Bypass patterns: OR '1'='1  /  admin'--  /  ' OR 1=1
+    if (/'\s*(or|OR)\s*'?1'?\s*=\s*'?1|--|\bOR\b.*1\s*=\s*1/i.test(u) ||
+        /'\s*(or|OR)\s*'?1'?\s*=\s*'?1|--|\bOR\b.*1\s*=\s*1/i.test(p)) {
+      return {ok:true,user:DB.users[0],sqli:true,err:false,qs:qs};
+    }
+    // Normal lookup
+    for (var i=0;i<DB.users.length;i++) {
+      if (DB.users[i].username===u && DB.users[i].password===p)
+        return {ok:true,user:DB.users[i],sqli:false,err:false,qs:qs};
+    }
+    return {ok:false,user:null,sqli:sqliHit,err:false,qs:qs};
+  },
+
+  evalSearch: function(t) {
+    var qs = "SELECT id,name,price,category\nFROM products\nWHERE name LIKE '%"+t+"%';";
+    var sqliHit = /['";\-]|UNION|SELECT|DROP/i.test(t);
+    var qcount = (t.match(/'/g)||[]).length;
+    var hasComment = /--/.test(t);
+    var hasUnion = /UNION/i.test(t);
+    if (qcount % 2 !== 0 && !hasComment && !hasUnion)
+      return {rows:[],union:false,sqli:true,err:true,qs:qs};
+    if (/'\s*UNION\s+SELECT/i.test(t)) {
+      qs = "SELECT id,name,price,category\nFROM products\nWHERE name LIKE '%"+t+"%'\nUNION\nSELECT 1,username,password,role\nFROM users; --";
+      return {rows:DB.users.map(function(u){return{id:u.id,name:u.username,price:u.password,category:u.role,inj:true};}),union:true,sqli:true,err:false,qs:qs};
+    }
+    var low = t.toLowerCase();
+    var res = DB.products.filter(function(p){return p.name.toLowerCase().indexOf(low)!==-1||p.category.toLowerCase().indexOf(low)!==-1;});
+    return {rows:res,union:false,sqli:sqliHit,err:false,qs:qs};
+  }
+};
+
+// ════════════════════════════════════════
+// DebugQueryViewer
+// ════════════════════════════════════════
+function renderDebug(qs, result) {
+  var html = qs.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\b(SELECT|FROM|WHERE|AND|OR|UNION|LIKE|NOT|IN|AS|LIMIT)\b/g,'<span class="kw">$1</span>')
+    .replace(/'([^']*)'/g,"<span class='str'>'$1'</span>")
+    .replace(/\b(users|products|orders)\b/g,'<span class="tbl">$1</span>')
+    .replace(/(--[^\n]*)/g,'<span class="cmt">$1</span>');
+  document.getElementById('dQuery').innerHTML = html;
+  var ev = document.getElementById('dEval');
+  ev.style.display = 'flex';
+  var badge = document.getElementById('eBadge');
+  var note  = document.getElementById('eNote');
+  if (result.err) {
+    badge.className='e-badge e-err'; badge.textContent='SQL ERROR';
+    note.textContent='Unbalanced quote — syntax error. Injection point confirmed!';
+  } else if (result.ok || result.union || (result.rows && result.rows.length)) {
+    badge.className='e-badge e-true';
+    badge.textContent='TRUE / '+(result.rows?result.rows.length:1)+' row(s)';
+    note.textContent=result.sqli?'⚠ SQLi payload accepted — injection successful!':'Normal query returned results.';
+  } else {
+    badge.className='e-badge e-false'; badge.textContent='FALSE / 0 rows';
+    note.textContent=result.sqli?'⚠ SQLi attempt detected — payload not effective yet':'No matching records.';
+  }
+  if (!debugOpen) openDebug();
+}
+
+// ════════════════════════════════════════
+// TutorialController
+// ════════════════════════════════════════
+var STEPS = [
+  {sc:'A',title:'Test Normal Credentials',
+   desc:'First, observe how the app behaves with valid-looking but wrong credentials.',
+   payload:'',action:'Type any username + wrong password, click Sign In',
+   explain:'The query: <code>WHERE username=\'you\' AND password=\'wrong\'</code> — both must be TRUE. They are not, so login fails.',
+   hint:'Try username: alice, password: wrongpassword',
+   check:function(){return F.triedNormal;}},
+  {sc:'A',title:"Inject a Single Quote ( ' )",
+   desc:"Add a single quote to the username field. This breaks the SQL string boundary and causes a syntax error — proof the input flows directly into the query.",
+   payload:"admin'",action:"Type   admin'   in the username field and submit",
+   explain:"Query becomes <code>WHERE username='admin'' AND...</code> — the extra <code>'</code> breaks the SQL parser, confirming injection is possible.",
+   hint:"Type exactly:  admin'  (with the trailing quote) in the Username box",
+   check:function(){return F.triedQuote;}},
+  {sc:'A',title:"Inject the OR Bypass Payload",
+   desc:"Inject a boolean condition that is always TRUE to short-circuit the password check entirely.",
+   payload:"admin' OR '1'='1",action:"Enter the payload in Username, leave Password empty",
+   explain:"Query becomes: <code>WHERE username='admin' OR '1'='1' AND password=''</code>. Since <code>'1'='1'</code> is always TRUE, the whole WHERE evaluates TRUE — password never checked.",
+   hint:"Username:  admin' OR '1'='1  — leave password blank",
+   check:function(){return F.bypassedLogin;}},
+  {sc:'A',title:'Capture the Admin Flag',
+   desc:'You are now authenticated as Administrator. Collect the flag from the admin dashboard.',
+   payload:'FLAG{sqli_auth_bypass_admin}',action:'Read the flag displayed on the admin panel',
+   explain:"The server executed your manipulated query and returned the admin row — no valid password was required. This is <code>Authentication Bypass</code> via SQL Injection (OWASP A03).",
+   hint:'The flag appears on the unlocked admin panel after successful bypass',
+   check:function(){return F.flagA;}},
+  {sc:'B',title:'Test a Normal Search',
+   desc:'Switch to Scenario B. Try a normal product search to understand how results look.',
+   payload:'laptop',action:"Type 'laptop' into the search bar and press Search",
+   explain:"The query: <code>SELECT id,name,price FROM products WHERE name LIKE '%laptop%'</code> returns only products. The <code>users</code> table is completely separate.",
+   hint:"Search for 'laptop' or 'keyboard' first",
+   check:function(){return F.triedSearch;}},
+  {sc:'B',title:"Break the Query with a Quote",
+   desc:"Inject a single quote to confirm this field is also vulnerable.",
+   payload:"'",action:"Type just  '  in the search bar and search",
+   explain:"The broken query <code>WHERE name LIKE '%'%'</code> causes a SQL syntax error — injection confirmed.",
+   hint:"Type just  '  (one single quote) in the search bar",
+   check:function(){return F.searchQuote;}},
+  {sc:'B',title:'Craft the UNION SELECT Payload',
+   desc:"Append a UNION SELECT to pull data from the hidden 'users' table directly into the results.",
+   payload:"' UNION SELECT 1, username, password FROM users --",
+   action:"Paste the full payload into the search bar and search",
+   explain:"<code>UNION SELECT</code> appends a second result set. The injected query pulls <code>username, password</code> from <code>users</code>. The <code>--</code> comments out the rest of the original query so it doesn't cause an error.",
+   hint:"Paste:   ' UNION SELECT 1, username, password FROM users --",
+   check:function(){return F.unionDone;}},
+  {sc:'B',title:'Extract the Secret Credentials',
+   desc:'The user table data is now rendered in the search results. Find the admin credentials.',
+   payload:'FLAG{sqli_union_data_exfil}',
+   action:'Read the admin password from the injected (yellow) rows in the table',
+   explain:"This is <code>In-Band SQLi</code> — sensitive data from a privileged table is returned directly in the app's own UI. No separate channel needed. Real attacks extract credit cards, hashes, and PII this way.",
+   hint:'Look for the admin row highlighted in yellow in the search results',
+   check:function(){return F.flagB;}}
+];
+
+var F = {triedNormal:false,triedQuote:false,bypassedLogin:false,flagA:false,triedSearch:false,searchQuote:false,unionDone:false,flagB:false};
+var step = 0;
+var sc = 'A';
+var debugOpen = false;
+var attempts = 0;
+
+function renderSteps() {
+  var c = document.getElementById('tutSteps');
+  c.innerHTML = '';
+  var offset = sc==='A' ? 0 : 4;
+  var scSteps = STEPS.filter(function(s){return s.sc===sc;});
+  scSteps.forEach(function(s,i) {
+    var gi = offset+i;
+    var cls = 't-step '+(gi===step?'active':gi<step?'done':'locked');
+    var div = document.createElement('div');
+    div.className = cls;
+    div.innerHTML =
+      '<div class="snum">'+(gi<step?'✓':(i+1))+'</div>'+
+      '<div class="s-title">'+s.title+'</div>'+
+      '<div class="s-desc">'+s.desc+'</div>'+
+      (s.payload?'<div class="s-payload">'+s.payload+'</div>':'')+
+      '<div class="s-action">'+s.action+'</div>';
+    c.appendChild(div);
+    if (gi===step) setTimeout(function(d){d.scrollIntoView({behavior:'smooth',block:'nearest'});},80,div);
+  });
+  var pct = Math.round((step/STEPS.length)*100);
+  document.getElementById('pFill').style.width = pct+'%';
+  document.getElementById('pLabel').textContent = 'Step '+(step+1)+' / '+STEPS.length;
+  document.getElementById('pPct').textContent   = pct+'%';
+  if (step < STEPS.length) {
+    var cs = STEPS[step];
+    document.getElementById('hintTxt').textContent = cs.hint;
+    document.getElementById('tutHint').classList.add('show');
+    document.getElementById('tutExplain').innerHTML = cs.explain;
+    document.getElementById('tutExplain').classList.add('show');
+  }
+  pulse();
+}
+
+function advance() {
+  if (step >= STEPS.length-1 && STEPS[step].check()) {
+    step = STEPS.length;
+    document.getElementById('tutWin').classList.add('show');
+    document.getElementById('winMsg').textContent = sc==='A'
+      ? 'Scenario A complete! Move to Scenario B for UNION attacks.'
+      : 'Both scenarios complete! You are an SQL Injection expert.';
+    document.getElementById('tutHint').classList.remove('show');
+    document.getElementById('tutExplain').classList.remove('show');
+    if (sc==='A') document.getElementById('btnNext').classList.add('show');
+    toast('Lab complete! 🏆','s'); return;
+  }
+  toast('Step '+(step+1)+' complete!','s');
+  step++;
+  renderSteps();
+}
+
+function checkStep() {
+  if (step >= STEPS.length) return;
+  if (STEPS[step].check()) advance();
+}
+
+function pulse() {
+  document.querySelectorAll('.tpulse').forEach(function(e){e.classList.remove('tpulse');});
+  var map={0:'#fUser',1:'#fUser',2:'#fUser',3:'#adminPanel',4:'#sInput',5:'#sInput',6:'#sInput',7:'#rBody'};
+  var el = document.querySelector(map[step]);
+  if (el) el.classList.add('tpulse');
+}
+
+// ════════════════════════════════════════
+// Scenario A: Login
+// ════════════════════════════════════════
+var SQLI_RE = /['";\-]|OR|UNION|SELECT|1=1/i;
+
+function onLoginInput() {
+  var u = document.getElementById('fUser').value;
+  var p = document.getElementById('fPass').value;
+  document.getElementById('fUser').className = 'f-inp'+(SQLI_RE.test(u)?' sqli':'');
+  document.getElementById('fPass').className = 'f-inp'+(SQLI_RE.test(p)?' sqli':'');
+  if (debugOpen) {
+    var qs = "SELECT * FROM users\nWHERE username = '"+u+"'\n  AND password = '"+p+"';";
+    renderDebug(qs,{ok:false,rows:[],sqli:false,err:false});
+  }
+}
+
+function submitLogin() {
+  var u = document.getElementById('fUser').value.trim();
+  var p = document.getElementById('fPass').value;
+  var msg = document.getElementById('loginMsg');
+  attempts++;
+  var r = DB.evalLogin(u,p);
+  renderDebug(r.qs,r);
+
+  if (r.err) {
+    msg.className='f-msg warn';
+    msg.textContent='SQL Error: syntax error near \'\'\' at line 2 — check your query.';
+    toast("SQL syntax error! Injection point confirmed.",'w');
+    F.triedQuote = true; setTimeout(checkStep,100); return;
+  }
+  if (r.ok) {
+    if (r.sqli) {
+      F.bypassedLogin = true;
+      setTimeout(function(){
+        F.flagA = true;
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('adminPanel').style.display   = 'block';
+        document.getElementById('navStatus').textContent = 'Welcome, Administrator 🔓';
+        msg.className='f-msg ok'; msg.textContent='SQL Injection bypass successful!';
+        toast('Admin access granted via SQLi!','s');
+        checkStep();
+      },300);
+    } else {
+      msg.className='f-msg ok'; msg.textContent='Login successful. Welcome, '+r.user.username+'.';
+    }
+  } else {
+    if (!F.triedNormal && attempts>=1) { F.triedNormal=true; setTimeout(checkStep,100); }
+    msg.className='f-msg err'; msg.textContent='Invalid username or password. Access denied.';
+    var card = document.getElementById('loginCard');
+    card.style.transform='translateX(-5px)';
+    setTimeout(function(){card.style.transform='translateX(5px)';},80);
+    setTimeout(function(){card.style.transform='none';},160);
+  }
+  setTimeout(checkStep,200);
+}
+
+// ════════════════════════════════════════
+// Scenario B: Search
+// ════════════════════════════════════════
+function onSearchInput() {
+  var t = document.getElementById('sInput').value;
+  document.getElementById('sInput').className = 's-inp'+(SQLI_RE.test(t)?' sqli':'');
+  if (debugOpen) {
+    var qs = "SELECT id,name,price,category\nFROM products\nWHERE name LIKE '%"+t+"%';";
+    renderDebug(qs,{ok:false,rows:[],sqli:false,err:false});
+  }
+}
+
+function submitSearch() {
+  var t = document.getElementById('sInput').value.trim();
+  var r = DB.evalSearch(t);
+  renderDebug(r.qs,r);
+  var tbody = document.getElementById('rBody');
+  var thead = document.getElementById('rHead');
+
+  if (r.err) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:#f87171;padding:20px;font-family:\'JetBrains Mono\',monospace;font-size:12px">SQL Error: syntax error near \'%'+esc(t)+'%\' — unbalanced string literal.</td></tr>';
+    toast("SQL error triggered!",'w');
+    F.searchQuote=true; setTimeout(checkStep,100); return;
+  }
+
+  if (r.union) {
+    F.unionDone = true;
+    thead.innerHTML = '<th>ID</th><th style="color:#fbbf24">⚠ username (INJECTED)</th><th style="color:#fbbf24">⚠ password (INJECTED)</th><th style="color:#fbbf24">⚠ role (INJECTED)</th>';
+    tbody.innerHTML = r.rows.map(function(row){
+      return '<tr class="'+(row.inj?'injected':'')+'"><td>'+row.id+'</td><td>'+row.name+'</td><td>'+row.price+'</td><td>'+row.category+'</td></tr>';
+    }).join('');
+    toast('UNION injection successful! User table extracted!','s');
+    setTimeout(function(){F.flagB=true; checkStep();},600);
+    return;
+  }
+
+  thead.innerHTML = '<th>ID</th><th>Product Name</th><th>Price</th><th>Category</th>';
+  if (!r.rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="no-results">No products found for "'+esc(t)+'"</td></tr>';
+  } else {
+    if (!F.triedSearch) { F.triedSearch=true; setTimeout(checkStep,100); }
+    tbody.innerHTML = r.rows.map(function(p){
+      return '<tr><td>'+p.id+'</td><td>'+p.name+'</td><td>'+p.price+'</td><td>'+p.category+'</td></tr>';
+    }).join('');
+  }
+  setTimeout(checkStep,100);
+}
+
+// ════════════════════════════════════════
+// UI helpers
+// ════════════════════════════════════════
+function switchScenario(s) {
+  sc = s;
+  document.getElementById('scA').style.display = s==='A'?'block':'none';
+  document.getElementById('scB').style.display = s==='B'?'block':'none';
+  document.getElementById('tabA').className = 's-tab'+(s==='A'?' active':'');
+  document.getElementById('tabB').className = 's-tab'+(s==='B'?' active-b':'');
+  document.getElementById('tUrl').textContent = s==='A'?'corpdb.local/login':'shopdb.local/catalog';
+  document.getElementById('scLabel').textContent = s==='A'?'Scenario A · Authentication Bypass':'Scenario B · UNION Extraction';
+  document.getElementById('dQuery').innerHTML = '<span style="color:#374151;font-style:italic">-- Submit a form to see the SQL query --</span>';
+  document.getElementById('dEval').style.display = 'none';
+  renderSteps();
+}
+
+function openDebug() {
+  debugOpen = true;
+  document.getElementById('debugPanel').classList.add('open');
+  document.getElementById('debugBtn').classList.add('on');
+}
+function toggleDebug() {
+  debugOpen = !debugOpen;
+  document.getElementById('debugPanel').className = 'debug-panel'+(debugOpen?' open':'');
+  document.getElementById('debugBtn').className   = 'debug-btn'+(debugOpen?' on':'');
+}
+
+function goScenarioB() {
+  if (step < 4) step = 4;
+  switchScenario('B');
+  document.getElementById('btnNext').classList.remove('show');
+  document.getElementById('tutWin').classList.remove('show');
+}
+
+function resetLab() {
+  step=0; sc='A'; debugOpen=false; attempts=0;
+  Object.keys(F).forEach(function(k){F[k]=false;});
+  document.getElementById('loginSection').style.display = 'flex';
+  document.getElementById('adminPanel').style.display   = 'none';
+  document.getElementById('loginMsg').className         = 'f-msg';
+  document.getElementById('fUser').value = '';
+  document.getElementById('fPass').value = '';
+  document.getElementById('fUser').className = 'f-inp';
+  document.getElementById('fPass').className = 'f-inp';
+  document.getElementById('sInput').value = '';
+  document.getElementById('sInput').className = 's-inp';
+  document.getElementById('rBody').innerHTML = '<tr><td colspan="4" class="no-results">Enter a search term to find products</td></tr>';
+  document.getElementById('rHead').innerHTML = '<th>ID</th><th>Product Name</th><th>Price</th><th>Category</th>';
+  document.getElementById('tutWin').classList.remove('show');
+  document.getElementById('btnNext').classList.remove('show');
+  document.getElementById('debugPanel').classList.remove('open');
+  document.getElementById('debugBtn').classList.remove('on');
+  document.getElementById('dQuery').innerHTML = '<span style="color:#374151;font-style:italic">-- Submit a form to see the generated SQL query --</span>';
+  document.getElementById('dEval').style.display = 'none';
+  document.getElementById('navStatus').textContent = 'v2.3.1 — Secure Login';
+  switchScenario('A');
+  toast('Lab restarted.','i');
+}
+
+function toast(msg, type) {
+  var el = document.createElement('div');
+  el.className = 'toast '+type; el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(function(){el.remove();},3500);
+}
+
+// Boot
+setInterval(checkStep, 700);
+renderSteps();
+</script>
+</body>
+</html>

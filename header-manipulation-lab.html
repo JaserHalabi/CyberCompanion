@@ -1,0 +1,563 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Header Manipulation Lab — CyberCompanion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg-deep:#080c14;--bg-base:#0d1117;--bg-card:#111827;--bg-panel:#0f1721;--border:rgba(255,255,255,0.08);--cyan:#5b8def;--cyan-dim:rgba(91, 141, 239,0.15);--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--violet:#8b5cf6;--text:#e2e8f0;--text-muted:#64748b;--text-dim:#94a3b8;--burp-orange:#ff6633;--burp-dark:#1a1a2e;--burp-border:rgba(255,102,51,0.3)}
+    html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text)}
+
+    /* ─── Titlebar ─── */
+    .titlebar{display:flex;align-items:center;justify-content:space-between;height:44px;padding:0 16px;background:linear-gradient(90deg,#0d1117,#111827);border-bottom:1px solid var(--border);user-select:none;-webkit-app-region:drag;flex-shrink:0}
+    .titlebar-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px}
+    .badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:rgba(255,102,51,.15);color:var(--burp-orange);border:1px solid rgba(255,102,51,.3)}
+    .btn-close{width:28px;height:28px;border-radius:6px;border:none;background:rgba(255,255,255,.06);color:var(--text-dim);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;-webkit-app-region:no-drag}
+    .btn-close:hover{background:rgba(239,68,68,.2);color:#ef4444}
+
+    /* ─── Layout ─── */
+    .lab-layout{display:flex;height:calc(100vh - 44px);overflow:hidden}
+
+    /* ─── Target Panel ─── */
+    .target-panel{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);min-width:0;background:#0b0f18}
+    .target-header{display:flex;align-items:center;gap:8px;padding:8px 14px;height:38px;background:var(--bg-card);border-bottom:1px solid var(--border);flex-shrink:0}
+    .dot{width:8px;height:8px;border-radius:50%}
+    .dot-red{background:#ff5f56}.dot-amber{background:#ffbd2e}.dot-green{background:#27c93f}
+    .target-url{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+    .target-body{flex:1;overflow-y:auto;position:relative}
+
+    /* ─── CorpNet Portal (locked state) ─── */
+    .cn-topbar{height:52px;background:#111928;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;padding:0 20px;gap:12px}
+    .cn-logo{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;display:flex;align-items:center;gap:8px}
+    .cn-logo .dot-badge{width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 6px #ef4444}
+    .cn-status{margin-left:auto;font-size:11px;color:#6b7280;font-family:'JetBrains Mono',monospace}
+
+    .cn-locked{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100% - 52px);padding:40px 20px;text-align:center}
+    .cn-lock-icon{font-size:64px;margin-bottom:20px;filter:grayscale(1) opacity(.7)}
+    .cn-error-code{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#ef4444;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding:4px 12px;border:1px solid rgba(239,68,68,.3);border-radius:4px;display:inline-block;background:rgba(239,68,68,.05)}
+    .cn-locked h2{font-size:22px;font-weight:700;color:#f8fafc;margin-bottom:12px}
+    .cn-locked p{font-size:14px;color:#6b7280;max-width:420px;line-height:1.6;margin-bottom:28px}
+    .cn-locked code{font-family:'JetBrains Mono',monospace;color:#f59e0b;font-size:13px;background:rgba(245,158,11,.08);padding:2px 6px;border-radius:4px;border:1px solid rgba(245,158,11,.2)}
+    .cn-retry-btn{padding:12px 28px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#f87171;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px}
+    .cn-retry-btn:hover{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.55);color:#fca5a5;transform:translateY(-1px)}
+    .cn-ip-badge{margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#374151;padding:6px 16px;border:1px solid rgba(255,255,255,.05);border-radius:6px;background:rgba(255,255,255,.02)}
+
+    /* ─── CorpNet Portal (unlocked success state) ─── */
+    .cn-success{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100% - 52px);padding:40px 20px;text-align:center}
+    .cn-success-glow{font-size:64px;margin-bottom:20px;animation:bounceIn .5s cubic-bezier(.175,.885,.32,1.275)}
+    @keyframes bounceIn{0%{transform:scale(0)}100%{transform:scale(1)}}
+    .cn-ok-code{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#22c55e;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding:4px 12px;border:1px solid rgba(34,197,94,.3);border-radius:4px;display:inline-block;background:rgba(34,197,94,.05)}
+    .cn-success h2{font-size:22px;font-weight:700;color:#f8fafc;margin-bottom:12px}
+    .cn-success p{font-size:14px;color:#94a3b8;max-width:440px;line-height:1.6;margin-bottom:24px}
+    .cn-flag{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:#22c55e;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);padding:12px 28px;border-radius:8px;letter-spacing:1px;box-shadow:0 0 20px rgba(34,197,94,.15)}
+    .cn-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:480px;margin-top:24px}
+    .cn-admin-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:14px;text-align:left}
+    .cn-admin-card h4{font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:4px}
+    .cn-admin-card p{font-size:13px;color:#e2e8f0;font-family:'JetBrains Mono',monospace}
+
+    .proxy-badge{position:absolute;top:14px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:999px;font-size:12px;font-weight:600;z-index:100;display:none;backdrop-filter:blur(10px)}
+    .proxy-badge.intercepting{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:#fbbf24;display:block;animation:pulse-badge 1.5s ease-in-out infinite}
+    @keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.5}}
+
+    /* ─── Burp Window ─── */
+    .burp-window{width:510px;flex-shrink:0;display:flex;flex-direction:column;background:var(--burp-dark);border-left:1px solid var(--burp-border);font-family:'JetBrains Mono',monospace}
+    .burp-titlebar{display:flex;align-items:center;background:#12122a;border-bottom:2px solid var(--burp-border);flex-shrink:0;user-select:none}
+    .burp-app-name{padding:0 16px;height:36px;display:flex;align-items:center;font-size:12px;font-weight:700;color:var(--burp-orange);border-right:1px solid rgba(255,102,51,.2);gap:8px}
+    .burp-tabs{display:flex;flex:1}
+    .burp-tab{padding:0 14px;height:36px;display:flex;align-items:center;font-size:11px;color:#6b7280;cursor:pointer;border-right:1px solid rgba(255,255,255,.04);transition:all .15s;font-family:'Inter',sans-serif}
+    .burp-tab:hover{color:#d1d5db;background:rgba(255,255,255,.03)}
+    .burp-tab.active{color:#e2e8f0;background:rgba(255,102,51,.06);border-bottom:2px solid var(--burp-orange)}
+    .burp-intercept-bar{display:flex;align-items:center;gap:6px;padding:8px 10px;background:#111128;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;flex-wrap:wrap}
+    .burp-action-btn{padding:5px 12px;border-radius:4px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#9ca3af;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;white-space:nowrap}
+    .burp-action-btn:hover{background:rgba(255,255,255,.1);color:#e2e8f0}
+    .burp-action-btn:disabled{opacity:.35;cursor:not-allowed}
+    .btn-intercept-on{background:rgba(34,197,94,.12)!important;border-color:rgba(34,197,94,.35)!important;color:#4ade80!important}
+    .btn-intercept-off{background:rgba(239,68,68,.12)!important;border-color:rgba(239,68,68,.35)!important;color:#f87171!important}
+    .btn-forward{background:rgba(91, 141, 239,.1)!important;border-color:rgba(91, 141, 239,.3)!important;color:#5b8def!important}
+    .btn-forward:hover:not(:disabled){background:rgba(91, 141, 239,.2)!important}
+    .btn-drop{background:rgba(239,68,68,.1)!important;border-color:rgba(239,68,68,.3)!important;color:#f87171!important}
+    .btn-drop:hover:not(:disabled){background:rgba(239,68,68,.2)!important}
+    .burp-editor-wrap{flex:1;display:flex;flex-direction:column;min-height:0}
+    .burp-editor-label{padding:5px 12px;font-size:10px;font-weight:600;color:#4b5563;text-transform:uppercase;letter-spacing:1px;background:#0e0e22;border-bottom:1px solid rgba(255,255,255,.04);flex-shrink:0;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:8px}
+    .inject-hint{font-size:10px;color:#f59e0b;margin-left:auto;opacity:.75}
+    .burp-editor{flex:1;padding:12px 14px;resize:none;border:none;outline:none;background:#0c0c20;color:#d1fae5;font-size:12.5px;font-family:'JetBrains Mono',monospace;line-height:1.65;caret-color:var(--burp-orange)}
+    .burp-editor::selection{background:rgba(255,102,51,.25)}
+    .burp-response-pane{border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;max-height:175px;display:flex;flex-direction:column}
+    .response-body{flex:1;padding:10px 14px;font-size:12px;color:#86efac;font-family:'JetBrains Mono',monospace;overflow-y:auto;background:#080816;line-height:1.6;white-space:pre}
+    .burp-status{display:flex;align-items:center;gap:8px;padding:6px 12px;font-size:11px;background:#0a0a1e;border-top:1px solid rgba(255,255,255,.04);flex-shrink:0;color:#4b5563;font-family:'Inter',sans-serif}
+    .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .status-dot.green{background:#22c55e;box-shadow:0 0 6px #22c55e}
+    .status-dot.amber{background:#f59e0b;box-shadow:0 0 6px #f59e0b;animation:blink 1s step-end infinite}
+    .status-dot.red{background:#ef4444}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+    /* ─── Tutorial Panel ─── */
+    .tutorial-panel{width:310px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg-panel);border-left:1px solid var(--border)}
+    .tut-header{padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .tut-header h3{font-size:13px;font-weight:700;color:var(--cyan);letter-spacing:.3px}
+    .tut-header p{font-size:11px;color:var(--text-muted);margin-top:2px}
+    .tut-progress{padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .progress-track{height:4px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden}
+    .progress-fill{height:100%;border-radius:2px;transition:width .5s ease;background:linear-gradient(90deg,var(--cyan),var(--violet))}
+    .progress-label{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--text-muted)}
+    .tut-steps{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+    .tut-step{padding:12px 14px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.02);transition:all .25s}
+    .tut-step.active{background:rgba(91, 141, 239,.04);border-color:rgba(91, 141, 239,.25);box-shadow:0 0 20px rgba(91, 141, 239,.06)}
+    .tut-step.done{background:rgba(34,197,94,.04);border-color:rgba(34,197,94,.15);opacity:.75}
+    .tut-step.locked{opacity:.35}
+    .step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;margin-bottom:7px;border:1.5px solid var(--border);color:var(--text-muted)}
+    .tut-step.active .step-num{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+    .tut-step.done .step-num{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)}
+    .step-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+    .step-desc{font-size:11.5px;color:var(--text-muted);line-height:1.55}
+    .tut-step.active .step-desc{color:var(--text-dim)}
+    .step-code{margin-top:8px;padding:7px 10px;border-radius:5px;background:#0c0c20;border:1px solid rgba(255,255,255,.06);font-family:'JetBrains Mono',monospace;font-size:11px;color:#fbbf24;display:none;word-break:break-all;line-height:1.5}
+    .tut-step.active .step-code{display:block}
+    .step-action{margin-top:8px;padding:6px 10px;border-radius:6px;background:rgba(91, 141, 239,.06);border:1px solid rgba(91, 141, 239,.2);font-size:11px;color:var(--cyan);font-weight:600;display:none}
+    .tut-step.active .step-action{display:block}
+    .tut-hint{margin:0 14px 14px;padding:12px 14px;border-radius:8px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);font-size:12px;color:#fbbf24;line-height:1.55;flex-shrink:0;display:none}
+    .tut-hint.show{display:block}
+    .tut-hint strong{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;opacity:.7}
+    .tut-success{margin:14px;padding:16px;border-radius:10px;text-align:center;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);display:none;flex-shrink:0}
+    .tut-success.show{display:block}
+    .tut-success .emoji{font-size:28px;margin-bottom:6px}
+    .tut-success h4{font-size:14px;font-weight:700;color:#4ade80;margin-bottom:4px}
+    .tut-success p{font-size:12px;color:#86efac}
+    .tut-footer{padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0}
+    .btn-reset{width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn-reset:hover{background:rgba(255,255,255,.06);color:var(--text);border-color:rgba(255,255,255,.15)}
+
+    /* ─── Shared utilities ─── */
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+    .toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+    .toast{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;backdrop-filter:blur(12px);animation:slide-up .3s ease;pointer-events:auto;border:1px solid}
+    .toast.success{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.3);color:#4ade80}
+    .toast.error{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3);color:#f87171}
+    .toast.info{background:rgba(91, 141, 239,.1);border-color:rgba(91, 141, 239,.3);color:#5b8def}
+    @keyframes slide-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes tut-pulse{0%,100%{box-shadow:0 0 0 3px rgba(91, 141, 239,.5),0 0 20px rgba(91, 141, 239,.2)}50%{box-shadow:0 0 0 5px rgba(91, 141, 239,.3),0 0 30px rgba(91, 141, 239,.15)}}
+    .tut-pulse{animation:tut-pulse 1.2s ease-in-out infinite!important;border-radius:8px}
+    .tut-highlight{box-shadow:0 0 0 3px rgba(91, 141, 239,.5),0 0 20px rgba(91, 141, 239,.2)!important}
+  </style>
+</head>
+<body>
+
+<div class="titlebar">
+  <div class="titlebar-brand">
+    <span>🔴</span>
+    <span>CyberCompanion</span>
+    <span class="badge">Header Manipulation Lab</span>
+  </div>
+  <button class="btn-close" onclick="window.close()">&#x2715;</button>
+</div>
+
+<div class="lab-layout">
+
+  <!-- ══ TARGET PANEL ══════════════════════════════════════════ -->
+  <div class="target-panel">
+    <div class="target-header">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-amber"></div>
+      <div class="dot dot-green"></div>
+      <div class="target-url" id="targetUrl">corpnet.local/admin</div>
+    </div>
+    <div class="target-body">
+      <div class="proxy-badge" id="proxyBadge">&#x23F8; Request Intercepted&hellip;</div>
+
+      <!-- Top bar -->
+      <div class="cn-topbar">
+        <div class="cn-logo">
+          <div class="dot-badge" id="statusLed"></div>
+          CorpNet Portal
+        </div>
+        <div class="cn-status" id="httpStatus">HTTP/1.1 403 Forbidden</div>
+      </div>
+
+      <!-- Locked view -->
+      <div class="cn-locked" id="page-locked">
+        <div class="cn-lock-icon">&#x1F512;</div>
+        <div class="cn-error-code">403 Forbidden</div>
+        <h2>Access Restricted</h2>
+        <p>This portal is restricted to <code>internal network administrators</code> only.<br>
+          Your detected IP address is <code id="detectedIp">203.0.113.45</code> &mdash; not authorised.</p>
+        <button class="cn-retry-btn" id="btnRetry" onclick="handleRetry()">
+          &#x21BA; Retry Connection
+        </button>
+        <div class="cn-ip-badge">Required: 127.0.0.1 (Localhost) &nbsp;|&nbsp; Detected: <span id="ipBadge">203.0.113.45</span></div>
+      </div>
+
+      <!-- Success view -->
+      <div class="cn-success" id="page-success">
+        <div class="cn-success-glow">&#x1F513;</div>
+        <div class="cn-ok-code">200 OK &mdash; Welcome, Administrator</div>
+        <h2>Internal Dashboard Unlocked</h2>
+        <p>IP spoof via <code style="color:#fbbf24;font-family:'JetBrains Mono',monospace;font-size:13px">X-Forwarded-For: 127.0.0.1</code> accepted.<br>
+          The server trusted your injected header and granted access.</p>
+        <div class="cn-flag">FLAG{header_spoofing_success}</div>
+        <div class="cn-admin-grid">
+          <div class="cn-admin-card"><h4>Active Sessions</h4><p>247</p></div>
+          <div class="cn-admin-card"><h4>Server Uptime</h4><p>99.97%</p></div>
+          <div class="cn-admin-card"><h4>Your Spoofed IP</h4><p style="color:#fbbf24">127.0.0.1</p></div>
+          <div class="cn-admin-card"><h4>Auth Method</h4><p style="color:#f87171">Header Bypass</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BURP WINDOW ════════════════════════════════════════════ -->
+  <div class="burp-window">
+    <div class="burp-titlebar">
+      <div class="burp-app-name">&#x1F7E0; Burp Suite Professional</div>
+      <div class="burp-tabs">
+        <div class="burp-tab" onclick="burpTab(this)">Dashboard</div>
+        <div class="burp-tab active" onclick="burpTab(this)">Proxy</div>
+        <div class="burp-tab" onclick="burpTab(this)">Repeater</div>
+        <div class="burp-tab" onclick="burpTab(this)">Intruder</div>
+      </div>
+    </div>
+    <div class="burp-intercept-bar">
+      <button class="burp-action-btn btn-intercept-on" id="btnIntercept" onclick="toggleIntercept()">Intercept is ON</button>
+      <button class="burp-action-btn btn-forward" id="btnForward" onclick="forwardRequest()" disabled>Forward</button>
+      <button class="burp-action-btn btn-drop"    id="btnDrop"    onclick="dropRequest()"    disabled>Drop</button>
+      <button class="burp-action-btn"             id="btnAction"  onclick="showActionMenu()" disabled>Action</button>
+    </div>
+    <div class="burp-editor-wrap">
+      <div class="burp-editor-label">
+        Request (Editable)
+        <span class="inject-hint" id="injectHint" style="display:none">&#x26A0; Add X-Forwarded-For header below User-Agent</span>
+      </div>
+      <textarea class="burp-editor" id="burpEditor" spellcheck="false"
+        placeholder="Waiting for intercepted request...&#10;&#10;1. Make sure Intercept is ON&#10;2. Click Retry Connection on the target site&#10;3. The raw HTTP request will appear here"></textarea>
+    </div>
+    <div class="burp-response-pane">
+      <div class="burp-editor-label" style="color:#22c55e">Response</div>
+      <div class="response-body" id="responseBody">-- No response yet --</div>
+    </div>
+    <div class="burp-status">
+      <div class="status-dot green" id="statusDot"></div>
+      <span id="statusText">Proxy running &middot; Intercept ON</span>
+      <span style="margin-left:auto;opacity:.4">corpnet.local:443</span>
+    </div>
+  </div>
+
+  <!-- ══ TUTORIAL PANEL ═════════════════════════════════════════ -->
+  <div class="tutorial-panel">
+    <div class="tut-header">
+      <h3>Header Manipulation Lab</h3>
+      <p>X-Forwarded-For IP Spoofing Attack</p>
+    </div>
+    <div class="tut-progress">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-label"><span id="progressLabel">Step 0 / 5</span><span id="progressPct">0%</span></div>
+    </div>
+    <div class="tut-steps" id="stepsContainer"></div>
+    <div class="tut-hint" id="hintBox"><strong>Hint</strong><span id="hintText"></span></div>
+    <div class="tut-success" id="successBanner">
+      <div class="emoji">&#x1F3C6;</div>
+      <h4>Lab Complete!</h4>
+      <p>You bypassed IP-based access control by injecting a spoofed X-Forwarded-For header. Many real-world servers blindly trust this header!</p>
+    </div>
+    <div class="tut-footer"><button class="btn-reset" onclick="resetLab()">&#x21BA; Restart Lab</button></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div><script>
+'use strict';
+
+// ─── State ────────────────────────────────────────────────────
+var interceptOn = true;
+var pendingReq  = null;
+var currentStep = 0;
+var isSuccess   = false;
+
+// ─── Steps definition ─────────────────────────────────────────
+var STEPS = [
+  {
+    title:  'Enable Intercept',
+    desc:   'Ensure the Burp proxy intercept is ON so all outgoing requests from the target site are paused before reaching the server.',
+    action: 'The toggle must read "Intercept is ON"',
+    code:   '',
+    hint:   'Click the green "Intercept is ON" button in the Burp panel if it is not already active.',
+    check:  function() { return interceptOn; }
+  },
+  {
+    title:  'Retry Connection',
+    desc:   'Click "Retry Connection" on the CorpNet Portal. Because Intercept is ON, the GET /admin request will be frozen before it reaches the server.',
+    action: 'Click the "Retry Connection" button on the target site',
+    code:   '',
+    hint:   'Click the red "Retry Connection" button on the locked CorpNet Portal page.',
+    check:  function() { return pendingReq !== null; }
+  },
+  {
+    title:  'Inspect the Headers',
+    desc:   'The raw HTTP GET request is now visible in the Burp editor. Notice there is no X-Forwarded-For header — the server sees your real external IP.',
+    action: 'Review the headers in the Burp editor',
+    code:   'GET /admin HTTP/1.1\nHost: corpnet.local\nUser-Agent: Mozilla/5.0 ...',
+    hint:   'Scroll through the Burp editor. The request has Host, User-Agent and Cookie headers but NO X-Forwarded-For.',
+    check:  function() {
+      var v = document.getElementById('burpEditor').value;
+      return pendingReq !== null && v.indexOf('GET /admin') !== -1;
+    }
+  },
+  {
+    title:  'Inject X-Forwarded-For Header',
+    desc:   'Add a new header line after User-Agent to spoof your IP. Many load balancers and back-end servers blindly trust this header to identify the client.',
+    action: 'Add the line below after the User-Agent header',
+    code:   'X-Forwarded-For: 127.0.0.1',
+    hint:   'Place your cursor after the User-Agent line in the Burp editor and type a new line: X-Forwarded-For: 127.0.0.1',
+    check:  function() {
+      var v = document.getElementById('burpEditor').value;
+      return /^\s*X-Forwarded-For\s*:\s*127\.0\.0\.1\s*$/im.test(v);
+    }
+  },
+  {
+    title:  'Forward the Request',
+    desc:   'Click "Forward" to send the tampered request. The server reads your X-Forwarded-For header, sees 127.0.0.1, and grants admin access!',
+    action: 'Click the Forward button in the Burp toolbar',
+    code:   '',
+    hint:   'Click the cyan "Forward" button. Watch the CorpNet portal update from 403 to 200 OK.',
+    check:  function() { return isSuccess; }
+  }
+];
+
+// ─── DOM refs ─────────────────────────────────────────────────
+var stepsContainer = document.getElementById('stepsContainer');
+var progressFill   = document.getElementById('progressFill');
+var progressLabel  = document.getElementById('progressLabel');
+var progressPct    = document.getElementById('progressPct');
+var hintBox        = document.getElementById('hintBox');
+var hintText       = document.getElementById('hintText');
+var successBanner  = document.getElementById('successBanner');
+var burpEditor     = document.getElementById('burpEditor');
+var statusDot      = document.getElementById('statusDot');
+var statusText     = document.getElementById('statusText');
+var proxyBadge     = document.getElementById('proxyBadge');
+var btnForward     = document.getElementById('btnForward');
+var btnDrop        = document.getElementById('btnDrop');
+var btnAction      = document.getElementById('btnAction');
+var btnIntercept   = document.getElementById('btnIntercept');
+var responseBody   = document.getElementById('responseBody');
+var injectHint     = document.getElementById('injectHint');
+
+// ─── Render steps ─────────────────────────────────────────────
+function renderSteps() {
+  stepsContainer.innerHTML = '';
+  STEPS.forEach(function(step, idx) {
+    var cls = 'tut-step ' + (idx === currentStep ? 'active' : idx < currentStep ? 'done' : 'locked');
+    var div = document.createElement('div');
+    div.className = cls;
+    div.innerHTML =
+      '<div class="step-num">' + (idx < currentStep ? '&#x2713;' : (idx + 1)) + '</div>' +
+      '<div class="step-title">' + step.title + '</div>' +
+      '<div class="step-desc">'  + step.desc  + '</div>' +
+      (step.code ? '<div class="step-code">' + step.code + '</div>' : '') +
+      '<div class="step-action">' + step.action + '</div>';
+    stepsContainer.appendChild(div);
+    if (idx === currentStep) {
+      setTimeout(function(d) { d.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100, div);
+    }
+  });
+
+  var pct = Math.round((currentStep / STEPS.length) * 100);
+  progressFill.style.width  = pct + '%';
+  progressLabel.textContent = 'Step ' + currentStep + ' / ' + STEPS.length;
+  progressPct.textContent   = pct + '%';
+
+  if (currentStep < STEPS.length) {
+    hintText.textContent = STEPS[currentStep].hint;
+    hintBox.classList.add('show');
+  } else {
+    hintBox.classList.remove('show');
+  }
+
+  // Show injection hint in Burp editor label on step 4
+  injectHint.style.display = (currentStep === 3) ? 'inline' : 'none';
+
+  highlightTarget();
+}
+
+// ─── Auto progress check ──────────────────────────────────────
+function checkStep() {
+  if (currentStep >= STEPS.length) return;
+  if (STEPS[currentStep].check()) {
+    toast('Step ' + (currentStep + 1) + ' complete!', 'success');
+    currentStep++;
+    renderSteps();
+    if (currentStep >= STEPS.length) {
+      successBanner.classList.add('show');
+      hintBox.classList.remove('show');
+      toast('Lab Complete! Excellent work!', 'success');
+    }
+  }
+}
+
+// ─── Pulse highlight ──────────────────────────────────────────
+function highlightTarget() {
+  document.querySelectorAll('.tut-pulse').forEach(function(el) { el.classList.remove('tut-pulse'); });
+  var map = { 0: '#btnIntercept', 1: '#btnRetry', 2: '#burpEditor', 3: '#burpEditor', 4: '#btnForward' };
+  var sel = map[currentStep];
+  if (sel) {
+    var el = document.querySelector(sel);
+    if (el) el.classList.add('tut-pulse');
+  }
+}
+
+// ─── Intercept toggle ─────────────────────────────────────────
+function toggleIntercept() {
+  interceptOn = !interceptOn;
+  btnIntercept.textContent = interceptOn ? 'Intercept is ON' : 'Intercept is OFF';
+  btnIntercept.className   = 'burp-action-btn ' + (interceptOn ? 'btn-intercept-on' : 'btn-intercept-off');
+  statusDot.className      = 'status-dot ' + (interceptOn ? 'green' : 'red');
+  statusText.textContent   = interceptOn ? 'Proxy running \u00B7 Intercept ON' : 'Proxy running \u00B7 Intercept OFF';
+  if (!interceptOn && pendingReq) {
+    processRequest(false);
+  }
+  checkStep();
+}
+
+// ─── Retry Connection clicked ─────────────────────────────────
+function handleRetry() {
+  if (interceptOn) {
+    var raw =
+      'GET /admin HTTP/1.1\n' +
+      'Host: corpnet.local\n' +
+      'Accept: text/html,application/xhtml+xml\n' +
+      'User-Agent: Mozilla/5.0 (CyberCompanion Lab)\n' +
+      'Cookie: session=abc123; remember_me=false\n' +
+      'Connection: keep-alive\n' +
+      '\n';
+    burpEditor.value = raw;
+    pendingReq = { type: 'admin' };
+    proxyBadge.className = 'proxy-badge intercepting';
+    btnForward.disabled = false;
+    btnDrop.disabled    = false;
+    btnAction.disabled  = false;
+    statusDot.className = 'status-dot amber';
+    statusText.textContent = 'Request PAUSED \u2014 Waiting for action\u2026';
+    toast('Request intercepted! Inject X-Forwarded-For in the Burp panel.', 'info');
+    setTimeout(checkStep, 50);
+  } else {
+    // No intercept — denied immediately
+    responseBody.textContent =
+      'HTTP/1.1 403 Forbidden\nContent-Type: text/html\n\n{"error":"Access denied. Not on internal network."}';
+    toast('Access denied — try enabling Intercept first!', 'error');
+  }
+}
+
+// ─── Process the (possibly tampered) request ──────────────────
+function processRequest(modified) {
+  var granted = false;
+  if (modified) {
+    var v = burpEditor.value;
+    granted = /^\s*X-Forwarded-For\s*:\s*127\.0\.0\.1\s*$/im.test(v);
+  }
+
+  pendingReq = null;
+  proxyBadge.className   = 'proxy-badge';
+  btnForward.disabled    = true;
+  btnDrop.disabled       = true;
+  btnAction.disabled     = true;
+  statusDot.className    = 'status-dot green';
+  statusText.textContent = 'Proxy running \u00B7 Intercept ON';
+
+  if (granted) {
+    // ── Victory ──
+    isSuccess = true;
+    document.getElementById('page-locked').style.display   = 'none';
+    document.getElementById('page-success').style.display  = 'flex';
+    document.getElementById('httpStatus').textContent       = 'HTTP/1.1 200 OK';
+    document.getElementById('statusLed').style.background  = '#22c55e';
+    document.getElementById('statusLed').style.boxShadow   = '0 0 6px #22c55e';
+    document.getElementById('targetUrl').textContent        = 'corpnet.local/admin — 200 OK';
+    responseBody.textContent =
+      'HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  "status": "granted",\n  "role": "administrator",\n  "ip_seen": "127.0.0.1",\n  "method": "X-Forwarded-For bypass",\n  "flag": "FLAG{header_spoofing_success}"\n}';
+    toast('IP spoofing successful! Admin access granted.', 'success');
+    setTimeout(checkStep, 100);
+  } else {
+    responseBody.textContent =
+      'HTTP/1.1 403 Forbidden\nContent-Type: application/json\n\n{\n  "error": "Access Denied",\n  "your_ip": "203.0.113.45",\n  "required": "127.0.0.1 (localhost)"\n}';
+    toast('Still blocked. Did you add X-Forwarded-For: 127.0.0.1?', 'error');
+  }
+}
+
+// ─── Forward ──────────────────────────────────────────────────
+function forwardRequest() {
+  if (!pendingReq) return;
+  processRequest(true);
+  toast('Request forwarded.', 'info');
+  setTimeout(checkStep, 100);
+}
+
+// ─── Drop ─────────────────────────────────────────────────────
+function dropRequest() {
+  if (!pendingReq) return;
+  pendingReq = null;
+  proxyBadge.className   = 'proxy-badge';
+  btnForward.disabled    = true;
+  btnDrop.disabled       = true;
+  btnAction.disabled     = true;
+  burpEditor.value       = '-- Request dropped by proxy --';
+  responseBody.textContent = 'Connection reset by proxy (request dropped)';
+  statusDot.className    = 'status-dot green';
+  statusText.textContent = 'Proxy running \u00B7 Intercept ON';
+  toast('Request dropped.', 'error');
+}
+
+// ─── Burp tab click ───────────────────────────────────────────
+function burpTab(el) {
+  document.querySelectorAll('.burp-tab').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function showActionMenu() {
+  toast('In real Burp Suite: use "Send to Repeater" to test headers repeatedly.', 'info');
+}
+
+// ─── Reset ────────────────────────────────────────────────────
+function resetLab() {
+  currentStep = 0;
+  pendingReq  = null;
+  isSuccess   = false;
+  interceptOn = true;
+  btnIntercept.textContent = 'Intercept is ON';
+  btnIntercept.className   = 'burp-action-btn btn-intercept-on';
+  statusDot.className      = 'status-dot green';
+  statusText.textContent   = 'Proxy running \u00B7 Intercept ON';
+  btnForward.disabled = true;
+  btnDrop.disabled    = true;
+  btnAction.disabled  = true;
+  proxyBadge.className    = 'proxy-badge';
+  burpEditor.value        = '';
+  responseBody.textContent = '-- No response yet --';
+  successBanner.classList.remove('show');
+  document.getElementById('page-locked').style.display  = 'flex';
+  document.getElementById('page-success').style.display = 'none';
+  document.getElementById('httpStatus').textContent     = 'HTTP/1.1 403 Forbidden';
+  document.getElementById('statusLed').style.background = '#ef4444';
+  document.getElementById('statusLed').style.boxShadow  = '0 0 6px #ef4444';
+  document.getElementById('targetUrl').textContent      = 'corpnet.local/admin';
+  renderSteps();
+  toast('Lab restarted.', 'info');
+}
+
+// ─── Toast ────────────────────────────────────────────────────
+function toast(msg, type) {
+  var el = document.createElement('div');
+  el.className   = 'toast ' + (type || 'info');
+  el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(function() { el.remove(); }, 3500);
+}
+
+// ─── Init ─────────────────────────────────────────────────────
+setInterval(checkStep, 700);
+document.getElementById('statusLed').style.background = '#ef4444';
+document.getElementById('statusLed').style.boxShadow  = '0 0 6px #ef4444';
+renderSteps();
+</script>
+</body>
+</html>

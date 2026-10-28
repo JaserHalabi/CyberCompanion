@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Blocks remote script execution (the main injection risk) while leaving the
+       inline event handlers, srcdoc practice-lab iframes and Google Fonts working. -->
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'" />
   <title>CyberCompanion — Web Pentesting Lab Guide</title>
   <meta name="description" content="An interactive, offline educational guide for beginners learning Web Application Penetration Testing." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -13,13 +16,65 @@
 </head>
 <body>
 
+  <!-- ═══ SVG Logo Defs — defined once, reused everywhere via <use> ═══ -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
+    <defs>
+      <linearGradient id="logo-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#00f0ff"/>
+        <stop offset="100%" stop-color="#8b5cf6"/>
+      </linearGradient>
+      <linearGradient id="logo-grad-h" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#00f0ff"/>
+        <stop offset="100%" stop-color="#8b5cf6"/>
+      </linearGradient>
+      <symbol id="cc-logo" viewBox="0 0 64 64" fill="none">
+        <!-- Swirls behind/around -->
+        <path d="M 14 30 C 8 30, 6 24, 12 22 C 18 20, 20 26, 14 28 C 11 29, 9 28, 9 26" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M 50 26 C 56 26, 58 20, 52 18 C 46 16, 44 22, 50 24 C 53 25, 55 24, 55 22" stroke="rgba(139,92,246,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M 28 62 C 22 62, 20 56, 26 54 C 32 52, 34 58, 28 60 C 25 61, 23 60, 23 58" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+        <!-- Ghost Body -->
+        <path d="M 32 6 C 20 6, 16 18, 16 28 
+                 C 16 34, 15 36, 12 40 C 9 44, 13 46, 16 44 
+                 C 19 42, 20 40, 22 42 C 26 46, 20 54, 26 58
+                 C 32 62, 36 56, 40 58 C 44 60, 48 54, 46 50
+                 C 44 46, 45 42, 48 44 C 51 46, 55 44, 52 40
+                 C 49 36, 48 34, 48 28
+                 C 48 18, 44 6, 32 6 Z"
+              fill="#f8fafc" opacity="0.95" filter="drop-shadow(0 0 10px rgba(0,240,255,0.6))"/>
+              
+        <!-- Eyes -->
+        <ellipse cx="28" cy="25" rx="3" ry="4.5" fill="#111827" transform="rotate(-5 28 25)" />
+        <ellipse cx="40" cy="25" rx="3" ry="4.5" fill="#111827" transform="rotate(-5 40 25)" />
+        
+        <!-- Stars / Sparkles -->
+        <path d="M 12 18 Q 12 14, 8 14 Q 12 14, 12 10 Q 12 14, 16 14 Q 12 14, 12 18 Z" fill="#fde047" opacity="0.9"/>
+        <path d="M 48 10 Q 48 8, 46 8 Q 48 8, 48 6 Q 48 8, 50 8 Q 48 8, 48 10 Z" fill="#fde047" opacity="0.9"/>
+        <path d="M 54 38 Q 54 36, 52 36 Q 54 36, 54 34 Q 54 36, 56 36 Q 54 36, 54 38 Z" fill="#e2e8f0" opacity="0.9"/>
+        <circle cx="20" cy="10" r="1" fill="#e2e8f0" opacity="0.8"/>
+        <circle cx="56" cy="18" r="1" fill="#fde047" opacity="0.8"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ═══ SPLASH SCREEN — cold launch only ═══ -->
+  <div id="splash" aria-hidden="true">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <svg viewBox="0 0 64 64"><use href="#cc-logo"/></svg>
+        <div class="splash-logo-glow"></div>
+      </div>
+      <div class="splash-wordmark">CyberCompanion</div>
+      <div class="splash-sub">Web Pentest Lab Guide</div>
+      <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+    </div>
+  </div>
+
   <!-- ═══════════ SIDEBAR ═══════════ -->
   <aside id="sidebar" class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
+        <svg viewBox="0 0 64 64"><use href="#cc-logo"/></svg>
       </div>
       <div class="brand-text">
         <h1>CyberCompanion</h1>
@@ -48,9 +103,9 @@
     <div class="sidebar-footer">
       <div class="sidebar-divider"></div>
       <div class="footer-info" style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-        <span class="version-badge">v1.0.4</span>
+        <span class="version-badge">v1.1.4</span>
         <button style="background:transparent; border:none; color:var(--text-muted); font-size:16px; cursor:pointer; transition:color 0.2s; display:flex; align-items:center; gap:5px;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-muted)'" onclick="window.__app.toggleSettings()">
-          ⚙️ <span class="settings-text" data-i18n="btn_settings">Settings</span>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> <span class="settings-text" data-i18n="btn_settings">Settings</span>
         </button>
       </div>
     </div>
@@ -113,9 +168,7 @@
       <div class="welcome-hero" id="welcomeHero">
         <div class="hero-glow"></div>
         <div class="hero-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
+          <svg viewBox="0 0 64 64"><use href="#cc-logo"/></svg>
         </div>
         <h2 class="hero-title">Welcome to CyberCompanion</h2>
         <p class="hero-desc">Select a module from the sidebar to begin your Web Application Penetration Testing journey. Boot the lab environment to practice on real vulnerable applications.</p>
@@ -146,10 +199,12 @@
       <!-- Webview Container -->
       <div id="webviewContainer" class="webview-container">
         <webview id="juiceshopView"
-          src="about:blank"
-          allowpopups
-          disablewebsecurity>
+          src="about:blank">
         </webview>
+        <iframe id="cyberMartView"
+          src="about:blank"
+          style="flex: 1; border: none; width: 100%; height: 100%; background: #0f172a; display: none;">
+        </iframe>
 
         <!-- Loading Overlay -->
         <div id="webviewLoading" class="webview-loading">
@@ -163,7 +218,7 @@
         <div class="overlay-header" style="flex-direction: column; align-items: stretch; padding: 10px 15px 0;">
           <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
             <div class="overlay-header-left">
-              <span class="overlay-header-icon">🎯</span>
+              <span class="overlay-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></span>
               <span class="overlay-header-title">Lab Dashboard</span>
             </div>
             <button id="btnDevTools" class="btn btn-secondary btn-sm">
@@ -202,14 +257,14 @@
 
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-icon">🏆</div>
+              <div class="stat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg></div>
               <div class="stat-info">
                 <span class="stat-value" id="challengesSolved">0/0</span>
                 <span class="stat-label">Challenges</span>
               </div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon">⚡</div>
+              <div class="stat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 11 14 11 22 21 10 13 10 13 2"/></svg></div>
               <div class="stat-info">
                 <span class="stat-value" id="totalXP">0</span>
                 <span class="stat-label">Total XP</span>
@@ -228,7 +283,7 @@
           </div>
         </div>
         
-        <div id="proxyContent" class="overlay-content tab-content" style="display:none; padding:15px; display:none; flex-direction:column;">
+        <div id="proxyContent" class="overlay-content tab-content" style="display:none; padding:15px; flex-direction:column;">
           <div class="mini-burp-controls" style="display:flex; gap:8px; margin-bottom:12px;">
             <button id="btnBurpForward" class="btn btn-sm btn-primary" style="flex:1;" title="Send request to server">Forward</button>
             <button id="btnBurpDrop" class="btn btn-sm btn-danger" style="flex:1;" title="Drop the request">Drop</button>
@@ -263,7 +318,7 @@
         <!-- Left Panel: Objectives & Remediation -->
         <div class="soc-panel soc-left">
           <div class="soc-header">
-            <h3>🛡️ Security Operations Center</h3>
+            <h3><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Security Operations Center</h3>
             <span class="soc-badge">ACTIVE AUDIT</span>
           </div>
           
@@ -296,7 +351,7 @@
 
           <div id="remediationPanel" class="soc-card remediation-card locked">
             <div class="remediation-overlay">
-              <span class="lock-icon">🔒</span>
+              <span class="lock-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
               <p>Flag a valid threat to unlock Remediation</p>
             </div>
             <h4>Remediation Action Required</h4>
@@ -335,7 +390,7 @@
         <!-- Right Panel: Threat Intel -->
         <div class="soc-panel soc-right" style="flex:1;">
           <div class="soc-header">
-            <h3>🌐 Threat Intel Feed</h3>
+            <h3><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z"/></svg> Threat Intel Feed</h3>
           </div>
           <div id="threatIntelPanel" class="soc-card intel-card" style="margin-top:15px; font-family:var(--font-mono); font-size:12px; color:var(--text-secondary); line-height:1.5;">
             <p>Select a log entry to analyze IP reputation and threat score.</p>
@@ -349,11 +404,11 @@
   <div id="settingsModal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 data-i18n="settings_title">⚙️ Global Settings</h3>
+        <h3 data-i18n="settings_title">Global Settings</h3>
         <button class="close-modal" onclick="window.__app.toggleSettings()">&times;</button>
       </div>
       <div class="setting-group">
-        <label data-i18n="settings_language_label">🌐 Language / اللغة</label>
+        <label data-i18n="settings_language_label">Language / اللغة</label>
         <select id="languageSelect" class="theme-select" onchange="window.__app.setLanguage(this.value)">
           <option value="en">English</option>
           <option value="ar">العربية (Arabic)</option>

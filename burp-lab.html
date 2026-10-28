@@ -1,0 +1,484 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Burp Suite Lab - CyberCompanion</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg-deep:#080c14;--bg-base:#0d1117;--bg-card:#111827;--bg-panel:#0f1721;--bg-hover:#1c2533;--border:rgba(255,255,255,0.08);--border-glow:rgba(91, 141, 239,0.35);--cyan:#5b8def;--cyan-dim:rgba(91, 141, 239,0.15);--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--violet:#8b5cf6;--text:#e2e8f0;--text-muted:#64748b;--text-dim:#94a3b8;--burp-orange:#ff6633;--burp-dark:#1a1a2e;--burp-panel:#16213e;--burp-border:rgba(255,102,51,0.3)}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text)}
+.titlebar{display:flex;align-items:center;justify-content:space-between;height:44px;padding:0 16px;background:linear-gradient(90deg,#0d1117 0%,#111827 100%);border-bottom:1px solid var(--border);user-select:none;-webkit-app-region:drag;flex-shrink:0}
+.titlebar-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:.5px}
+.titlebar-brand .badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:rgba(255,102,51,.15);color:var(--burp-orange);border:1px solid rgba(255,102,51,.3)}
+.titlebar-actions{display:flex;gap:8px;-webkit-app-region:no-drag}
+.btn-close{width:28px;height:28px;border-radius:6px;border:none;background:rgba(255,255,255,.06);color:var(--text-dim);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s}
+.btn-close:hover{background:rgba(239,68,68,.2);color:#ef4444}
+.lab-layout{display:flex;height:calc(100vh - 44px);overflow:hidden}
+.target-panel{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);min-width:0}
+.target-header{display:flex;align-items:center;gap:8px;padding:8px 14px;height:38px;background:var(--bg-card);border-bottom:1px solid var(--border);flex-shrink:0}
+.target-header .dot{width:8px;height:8px;border-radius:50%}
+.dot-red{background:#ff5f56}.dot-amber{background:#ffbd2e}.dot-green{background:#27c93f}
+.target-url{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+.target-body{flex:1;overflow-y:auto;position:relative}
+.cm-navbar{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-bottom:1px solid rgba(59,130,246,.2);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.cm-brand{font-size:20px;font-weight:700;background:linear-gradient(135deg,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cm-nav-links{display:flex;align-items:center;gap:6px}
+.cm-nav-links a{color:#94a3b8;text-decoration:none;padding:6px 12px;border-radius:6px;font-size:13px;font-weight:500;transition:all .2s}
+.cm-nav-links a:hover{color:#e2e8f0;background:rgba(255,255,255,.06)}
+.cm-btn{padding:7px 16px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.cm-btn-primary{background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff}
+.cm-btn-primary:hover{opacity:.85}
+.cm-btn-ghost{background:transparent;color:#94a3b8;border:1px solid rgba(255,255,255,.1)}
+.cm-btn-ghost:hover{background:rgba(255,255,255,.06);color:#e2e8f0}
+.cm-page{display:none;animation:fadeIn .25s ease}
+.cm-page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.cm-hero{padding:40px 24px;text-align:center}
+.cm-hero h1{font-size:28px;font-weight:700;margin-bottom:10px}
+.cm-hero p{color:#94a3b8;font-size:15px;margin-bottom:24px}
+.cm-product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:0 16px 20px}
+.cm-product-card{background:rgba(30,41,59,.6);border:1px solid rgba(59,130,246,.12);border-radius:10px;padding:16px;transition:all .2s;cursor:pointer}
+.cm-product-card:hover{border-color:rgba(59,130,246,.35);transform:translateY(-2px)}
+.cm-product-card .price{color:#06b6d4;font-weight:700;font-size:18px;margin:8px 0 4px}
+.cm-product-card .name{color:#e2e8f0;font-size:14px;font-weight:600}
+.cm-product-card .cat{color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.cm-product-icon{font-size:36px;margin-bottom:8px}
+.cm-login-wrapper{display:flex;align-items:center;justify-content:center;min-height:calc(100% - 56px);padding:20px}
+.cm-login-card{width:100%;max-width:380px;background:rgba(17,24,39,.8);border:1px solid rgba(59,130,246,.15);border-radius:14px;padding:32px 28px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.cm-login-card h2{font-size:22px;font-weight:700;margin-bottom:4px}
+.cm-login-card p{color:#64748b;font-size:13px;margin-bottom:24px}
+.cm-form-group{margin-bottom:16px}
+.cm-form-group label{display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.cm-form-group input{width:100%;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;font-size:14px;font-family:inherit;transition:border-color .2s,box-shadow .2s;outline:none}
+.cm-form-group input:focus{border-color:rgba(59,130,246,.5);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.cm-submit-btn{width:100%;padding:12px;border-radius:8px;border:none;background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity .2s,transform .1s}
+.cm-submit-btn:hover{opacity:.88}
+.cm-submit-btn:active{transform:scale(.98)}
+.cm-message{margin-top:14px;padding:10px 14px;border-radius:8px;font-size:13px;text-align:center;display:none}
+.cm-message.success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80;display:block}
+.cm-message.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;display:block}
+.cm-message.pending{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fbbf24;display:block}
+.cm-admin-panel{padding:20px}
+.cm-admin-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);margin-bottom:14px}
+.cm-admin-table{width:100%;border-collapse:collapse;font-size:13px}
+.cm-admin-table th{text-align:left;padding:8px 12px;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,.06)}
+.cm-admin-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:#94a3b8}
+.cm-admin-table td:first-child{color:#e2e8f0}
+.proxy-badge{position:absolute;top:14px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:999px;font-size:12px;font-weight:600;z-index:100;display:none;backdrop-filter:blur(10px)}
+.proxy-badge.intercepting{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:#fbbf24;display:block;animation:pulse-badge 1.5s ease-in-out infinite}
+@keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.5}}
+.burp-window{width:520px;flex-shrink:0;display:flex;flex-direction:column;background:var(--burp-dark);border-left:1px solid var(--burp-border);border-right:1px solid var(--burp-border);font-family:'JetBrains Mono',monospace}
+.burp-titlebar{display:flex;align-items:center;gap:0;background:#12122a;border-bottom:2px solid var(--burp-border);flex-shrink:0;user-select:none}
+.burp-app-name{padding:0 16px;height:36px;display:flex;align-items:center;font-size:12px;font-weight:700;color:var(--burp-orange);border-right:1px solid rgba(255,102,51,.2);gap:8px}
+.burp-tabs{display:flex;flex:1}
+.burp-tab{padding:0 16px;height:36px;display:flex;align-items:center;font-size:11px;color:#6b7280;cursor:pointer;border-right:1px solid rgba(255,255,255,.04);transition:all .15s;font-family:'Inter',sans-serif}
+.burp-tab:hover{color:#d1d5db;background:rgba(255,255,255,.03)}
+.burp-tab.active{color:#e2e8f0;background:rgba(255,102,51,.06);border-bottom:2px solid var(--burp-orange)}
+.burp-intercept-bar{display:flex;align-items:center;gap:6px;padding:8px 10px;background:#111128;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;flex-wrap:wrap}
+.burp-action-btn{padding:5px 12px;border-radius:4px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#9ca3af;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;white-space:nowrap}
+.burp-action-btn:hover{background:rgba(255,255,255,.1);color:#e2e8f0}
+.burp-action-btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-intercept-on{background:rgba(34,197,94,.12)!important;border-color:rgba(34,197,94,.35)!important;color:#4ade80!important}
+.btn-intercept-off{background:rgba(239,68,68,.12)!important;border-color:rgba(239,68,68,.35)!important;color:#f87171!important}
+.btn-forward{background:rgba(91, 141, 239,.1)!important;border-color:rgba(91, 141, 239,.3)!important;color:#5b8def!important}
+.btn-forward:hover:not(:disabled){background:rgba(91, 141, 239,.2)!important}
+.btn-drop{background:rgba(239,68,68,.1)!important;border-color:rgba(239,68,68,.3)!important;color:#f87171!important}
+.btn-drop:hover:not(:disabled){background:rgba(239,68,68,.2)!important}
+.burp-editor-wrap{flex:1;display:flex;flex-direction:column;min-height:0}
+.burp-editor-label{padding:5px 12px;font-size:10px;font-weight:600;color:#4b5563;text-transform:uppercase;letter-spacing:1px;background:#0e0e22;border-bottom:1px solid rgba(255,255,255,.04);flex-shrink:0;font-family:'Inter',sans-serif}
+.burp-editor{flex:1;padding:12px 14px;resize:none;border:none;outline:none;background:#0c0c20;color:#d1fae5;font-size:12.5px;font-family:'JetBrains Mono',monospace;line-height:1.65;caret-color:var(--burp-orange)}
+.burp-editor::selection{background:rgba(255,102,51,.25)}
+.burp-status{display:flex;align-items:center;gap:8px;padding:6px 12px;font-size:11px;background:#0a0a1e;border-top:1px solid rgba(255,255,255,.04);flex-shrink:0;color:#4b5563;font-family:'Inter',sans-serif}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.status-dot.green{background:#22c55e;box-shadow:0 0 6px #22c55e}
+.status-dot.amber{background:#f59e0b;box-shadow:0 0 6px #f59e0b;animation:blink 1s step-end infinite}
+.status-dot.red{background:#ef4444}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.burp-response-pane{border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;max-height:200px;display:flex;flex-direction:column}
+.response-body{flex:1;padding:10px 14px;font-size:12px;color:#86efac;font-family:'JetBrains Mono',monospace;overflow-y:auto;background:#080816;line-height:1.6;white-space:pre}
+.tutorial-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg-panel);border-left:1px solid var(--border)}
+.tut-header{padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.tut-header h3{font-size:14px;font-weight:700;color:var(--cyan);letter-spacing:.3px}
+.tut-header p{font-size:11px;color:var(--text-muted);margin-top:2px}
+.tut-progress{padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.progress-track{height:4px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;transition:width .5s ease;background:linear-gradient(90deg,var(--cyan),var(--violet))}
+.progress-label{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--text-muted)}
+.tut-steps{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.tut-step{padding:12px 14px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.02);transition:all .25s;position:relative}
+.tut-step.active{background:rgba(91, 141, 239,.04);border-color:rgba(91, 141, 239,.25);box-shadow:0 0 20px rgba(91, 141, 239,.06)}
+.tut-step.done{background:rgba(34,197,94,.04);border-color:rgba(34,197,94,.15);opacity:.75}
+.tut-step.locked{opacity:.35}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;margin-bottom:7px;border:1.5px solid var(--border);color:var(--text-muted)}
+.tut-step.active .step-num{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+.tut-step.done .step-num{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)}
+.step-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+.step-desc{font-size:11.5px;color:var(--text-muted);line-height:1.55}
+.tut-step.active .step-desc{color:var(--text-dim)}
+.step-action{margin-top:10px;padding:7px 10px;border-radius:6px;background:rgba(91, 141, 239,.06);border:1px solid rgba(91, 141, 239,.2);font-size:11px;color:var(--cyan);font-weight:600;display:none}
+.tut-step.active .step-action{display:block}
+.tut-hint{margin:0 14px 14px;padding:12px 14px;border-radius:8px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);font-size:12px;color:#fbbf24;line-height:1.55;flex-shrink:0;display:none}
+.tut-hint.show{display:block}
+.tut-hint strong{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;opacity:.7}
+.tut-success{margin:14px;padding:16px;border-radius:10px;text-align:center;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);display:none;flex-shrink:0}
+.tut-success.show{display:block}
+.tut-success .emoji{font-size:28px;margin-bottom:6px}
+.tut-success h4{font-size:14px;font-weight:700;color:#4ade80;margin-bottom:4px}
+.tut-success p{font-size:12px;color:#86efac}
+.tut-footer{padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.btn-reset{width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-reset:hover{background:rgba(255,255,255,.06);color:var(--text);border-color:rgba(255,255,255,.15)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
+.toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;backdrop-filter:blur(12px);animation:slide-up .3s ease;pointer-events:auto;border:1px solid}
+.toast.success{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.3);color:#4ade80}
+.toast.error{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3);color:#f87171}
+.toast.info{background:rgba(91, 141, 239,.1);border-color:rgba(91, 141, 239,.3);color:#5b8def}
+@keyframes slide-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.tut-highlight{box-shadow:0 0 0 3px rgba(91, 141, 239,.5),0 0 20px rgba(91, 141, 239,.2)!important;border-color:rgba(91, 141, 239,.5)!important}
+@keyframes tut-pulse{0%,100%{box-shadow:0 0 0 3px rgba(91, 141, 239,.5),0 0 20px rgba(91, 141, 239,.2)}50%{box-shadow:0 0 0 5px rgba(91, 141, 239,.3),0 0 30px rgba(91, 141, 239,.15)}}
+.tut-pulse{animation:tut-pulse 1.2s ease-in-out infinite!important}
+</style>
+</head>
+<body>
+<div class="titlebar">
+  <div class="titlebar-brand">
+    <span>🔴</span>
+    <span>CyberCompanion</span>
+    <span class="badge">Burp Suite Lab</span>
+  </div>
+  <div class="titlebar-actions">
+    <button class="btn-close" onclick="window.close()">x</button>
+  </div>
+</div>
+<div class="lab-layout">
+  <div class="target-panel">
+    <div class="target-header">
+      <div class="dot dot-red"></div><div class="dot dot-amber"></div><div class="dot dot-green"></div>
+      <div class="target-url" id="targetUrl">cybermart.local</div>
+    </div>
+    <div class="target-body">
+      <div class="proxy-badge" id="proxyBadge">Pause Request Intercepted...</div>
+      <nav class="cm-navbar">
+        <div class="cm-brand">CyberMart</div>
+        <div class="cm-nav-links">
+          <a href="#" onclick="showPage('home');return false">Home</a>
+          <a href="#" onclick="showPage('products');return false">Products</a>
+          <a href="#" id="adminLink" style="display:none;color:#f87171" onclick="showPage('admin');return false">Admin</a>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="cm-btn cm-btn-ghost" id="navLoginBtn" onclick="showPage('login')">Login</button>
+          <button class="cm-btn cm-btn-primary" id="navLogoutBtn" style="display:none" onclick="logoutUser()">Logout</button>
+        </div>
+      </nav>
+      <div class="cm-page active" id="page-home">
+        <div class="cm-hero">
+          <h1>Welcome to CyberMart</h1>
+          <p>Your trusted online store. Log in to browse exclusive products.</p>
+          <button class="cm-btn cm-btn-primary" onclick="showPage('login')" id="heroLoginBtn">Login to Shop</button>
+        </div>
+        <div class="cm-product-grid">
+          <div class="cm-product-card"><div class="cm-product-icon">💻</div><div class="name">Pro Laptop</div><div class="price">$1,299</div><div class="cat">Electronics</div></div>
+          <div class="cm-product-card"><div class="cm-product-icon">🎧</div><div class="name">Headphones</div><div class="price">$249</div><div class="cat">Audio</div></div>
+          <div class="cm-product-card"><div class="cm-product-icon">📱</div><div class="name">Smart Phone</div><div class="price">$899</div><div class="cat">Mobile</div></div>
+        </div>
+      </div>
+      <div class="cm-page" id="page-products">
+        <div class="cm-hero"><h1>Products</h1><p>Browse our catalog below.</p></div>
+        <div class="cm-product-grid">
+          <div class="cm-product-card"><div class="cm-product-icon">⌨️</div><div class="name">Mechanical Keyboard</div><div class="price">$149</div><div class="cat">Peripherals</div></div>
+          <div class="cm-product-card"><div class="cm-product-icon">🖥️</div><div class="name">4K Monitor</div><div class="price">$599</div><div class="cat">Display</div></div>
+          <div class="cm-product-card"><div class="cm-product-icon">🖱️</div><div class="name">Gaming Mouse</div><div class="price">$79</div><div class="cat">Peripherals</div></div>
+        </div>
+      </div>
+      <div class="cm-page" id="page-login">
+        <div class="cm-login-wrapper">
+          <div class="cm-login-card">
+            <h2>Sign In</h2>
+            <p>Enter your credentials to access CyberMart</p>
+            <div class="cm-form-group"><label for="emailInput">Email Address</label><input type="email" id="emailInput" placeholder="you@example.com" autocomplete="off"></div>
+            <div class="cm-form-group"><label for="passwordInput">Password</label><input type="password" id="passwordInput" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="off"></div>
+            <button class="cm-submit-btn" id="loginBtn" onclick="handleLogin()">Sign In</button>
+            <div class="cm-message" id="loginMsg"></div>
+          </div>
+        </div>
+      </div>
+      <div class="cm-page" id="page-admin">
+        <div class="cm-admin-panel">
+          <div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:10px;padding:16px;margin-bottom:16px">
+            <div class="cm-admin-badge">🔴 Admin Panel — You are in!</div>
+            <p style="font-size:13px;color:#f87171;margin-top:4px">You successfully escalated privileges by tampering with the isAdmin parameter in the intercepted request. This is a classic <strong>Broken Access Control</strong> vulnerability (OWASP Top 10 #1).</p>
+          </div>
+          <h3 style="font-size:16px;margin-bottom:12px">User Management</h3>
+          <table class="cm-admin-table">
+            <thead><tr><th>ID</th><th>Email</th><th>Role</th><th>Last Login</th></tr></thead>
+            <tbody>
+              <tr><td>001</td><td>admin@cybermart.local</td><td style="color:#f87171">Admin</td><td>Now</td></tr>
+              <tr><td>002</td><td>alice@example.com</td><td>User</td><td>2h ago</td></tr>
+              <tr><td>003</td><td>bob@example.com</td><td>User</td><td>1d ago</td></tr>
+              <tr><td>004</td><td>charlie@example.com</td><td>User</td><td>3d ago</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="burp-window">
+    <div class="burp-titlebar">
+      <div class="burp-app-name">🟠 Burp Suite Professional</div>
+      <div class="burp-tabs">
+        <div class="burp-tab" onclick="burpTab(this)">Dashboard</div>
+        <div class="burp-tab active" onclick="burpTab(this)">Proxy</div>
+        <div class="burp-tab" onclick="burpTab(this)">Repeater</div>
+        <div class="burp-tab" onclick="burpTab(this)">Intruder</div>
+      </div>
+    </div>
+    <div class="burp-intercept-bar">
+      <button class="burp-action-btn btn-intercept-on" id="btnIntercept" onclick="toggleIntercept()">Intercept is ON</button>
+      <button class="burp-action-btn btn-forward" id="btnForward" onclick="forwardRequest()" disabled>Forward</button>
+      <button class="burp-action-btn btn-drop" id="btnDrop" onclick="dropRequest()" disabled>Drop</button>
+      <button class="burp-action-btn" id="btnAction" onclick="showActionMenu()" disabled>Action</button>
+    </div>
+    <div class="burp-editor-wrap">
+      <div class="burp-editor-label">Request (Editable)</div>
+      <textarea class="burp-editor" id="burpEditor" spellcheck="false" placeholder="Waiting for intercepted request...&#10;&#10;1. Make sure Intercept is ON&#10;2. Submit the login form on the left&#10;3. The request will appear here"></textarea>
+    </div>
+    <div class="burp-response-pane">
+      <div class="burp-editor-label" style="color:#22c55e">Response</div>
+      <div class="response-body" id="responseBody">-- No response yet --</div>
+    </div>
+    <div class="burp-status">
+      <div class="status-dot green" id="statusDot"></div>
+      <span id="statusText">Proxy running · Intercept ON</span>
+      <span style="margin-left:auto;opacity:.4">cybermart.local:80</span>
+    </div>
+  </div>
+  <div class="tutorial-panel">
+    <div class="tut-header">
+      <h3>Burp Suite Basics</h3>
+      <p>Interactive HTTP Interception Tutorial</p>
+    </div>
+    <div class="tut-progress">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-label"><span id="progressLabel">Step 0 / 6</span><span id="progressPct">0%</span></div>
+    </div>
+    <div class="tut-steps" id="stepsContainer"></div>
+    <div class="tut-hint" id="hintBox"><strong>Hint</strong><span id="hintText"></span></div>
+    <div class="tut-success" id="successBanner">
+      <div class="emoji">🎉</div>
+      <h4>Lab Complete!</h4>
+      <p>You intercepted, tampered with, and forwarded an HTTP request — just like a real pentester using Burp Suite!</p>
+    </div>
+    <div class="tut-footer"><button class="btn-reset" onclick="resetLab()">Restart Lab</button></div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div><script>
+'use strict';
+var interceptOn=true,pendingReq=null,currentStep=0,isAdmin=false;
+var STEPS=[
+  {title:'Enable Intercept',desc:'Make sure Intercept is ON (green button). This tells Burp to pause all outgoing HTTP requests before they reach the server.',action:'The toggle should read "Intercept is ON"',hint:'Look at the green "Intercept is ON" button in the Burp panel. If it says OFF, click it to enable.',check:function(){return interceptOn;}},
+  {title:'Open the Login Page',desc:'Navigate to the CyberMart login page by clicking the "Login" button in the top navbar or the "Login to Shop" button on the homepage.',action:'Click "Login" in the top navigation bar',hint:'The Login button is in the top-right corner of the CyberMart site above.',check:function(){return document.getElementById('page-login').classList.contains('active');}},
+  {title:'Fill In Credentials',desc:'Enter any email address and password. Since Burp will intercept the request before it hits the server, it does not matter what you type!',action:'Type any email and password into the form',hint:'Try: test@example.com / password123 — or any text you like.',check:function(){var e=document.getElementById('emailInput').value.trim();var p=document.getElementById('passwordInput').value.trim();return e.length>3&&p.length>2;}},
+  {title:'Submit the Form',desc:'Click the "Sign In" button. Because Intercept is ON, the request will FREEZE and appear in the Burp editor in raw HTTP format — watch the middle panel!',action:'Click "Sign In" to send the request',hint:'After clicking Sign In, check the Burp editor (middle panel) for the raw HTTP request.',check:function(){return pendingReq!==null;}},
+  {title:'Modify the Request',desc:'In the Burp editor, find the JSON body. Change "isAdmin": false to "isAdmin": true. This simulates a Broken Access Control attack — escalating your privileges by tampering with the raw request!',action:'Find "isAdmin": false in the Burp editor and change it to true',hint:'Scroll to the bottom of the Burp editor. The JSON body contains the isAdmin field. Simply change false to true.',check:function(){var v=document.getElementById('burpEditor').value;return v.indexOf('"isAdmin": true')!==-1||v.indexOf('"isAdmin":true')!==-1;}},
+  {title:'Forward the Request',desc:'Click "Forward" to send your modified request to the server. The server will see isAdmin: true and grant you admin access! Check the CyberMart site — you should now see the Admin panel.',action:'Click the Forward button in the Burp toolbar',hint:'The Forward button is cyan/teal colored in the Burp toolbar. Click it to release the request.',check:function(){return isAdmin;}}
+];
+var stepsContainer=document.getElementById('stepsContainer');
+var progressFill=document.getElementById('progressFill');
+var progressLabel=document.getElementById('progressLabel');
+var progressPct=document.getElementById('progressPct');
+var hintBox=document.getElementById('hintBox');
+var hintText=document.getElementById('hintText');
+var successBanner=document.getElementById('successBanner');
+var burpEditor=document.getElementById('burpEditor');
+var statusDot=document.getElementById('statusDot');
+var statusText=document.getElementById('statusText');
+var proxyBadge=document.getElementById('proxyBadge');
+var btnForward=document.getElementById('btnForward');
+var btnDrop=document.getElementById('btnDrop');
+var btnAction=document.getElementById('btnAction');
+var btnIntercept=document.getElementById('btnIntercept');
+var responseBody=document.getElementById('responseBody');
+function renderSteps(){
+  stepsContainer.innerHTML='';
+  STEPS.forEach(function(step,idx){
+    var div=document.createElement('div');
+    var cls='tut-step';
+    if(idx===currentStep)cls+=' active';
+    else if(idx<currentStep)cls+=' done';
+    else cls+=' locked';
+    div.className=cls;
+    div.id='tut-step-'+idx;
+    div.innerHTML='<div class="step-num">'+(idx<currentStep?'✓':(idx+1))+'</div>'
+      +'<div class="step-title">'+step.title+'</div>'
+      +'<div class="step-desc">'+step.desc+'</div>'
+      +'<div class="step-action">'+step.action+'</div>';
+    stepsContainer.appendChild(div);
+    if(idx===currentStep){setTimeout(function(d){d.scrollIntoView({behavior:'smooth',block:'nearest'})},100,div);}
+  });
+  var pct=Math.round((currentStep/STEPS.length)*100);
+  progressFill.style.width=pct+'%';
+  progressLabel.textContent='Step '+currentStep+' / '+STEPS.length;
+  progressPct.textContent=pct+'%';
+  if(currentStep<STEPS.length){hintText.textContent=STEPS[currentStep].hint;hintBox.classList.add('show');}
+  else{hintBox.classList.remove('show');}
+  highlightTarget();
+}
+function checkStep(){
+  if(currentStep>=STEPS.length)return;
+  if(STEPS[currentStep].check()){
+    toast('Step '+(currentStep+1)+' complete!','success');
+    currentStep++;
+    renderSteps();
+    if(currentStep>=STEPS.length){
+      successBanner.classList.add('show');
+      hintBox.classList.remove('show');
+      toast('Lab Complete! Excellent work!','success');
+    }
+  }
+}
+function highlightTarget(){
+  document.querySelectorAll('.tut-highlight,.tut-pulse').forEach(function(el){el.classList.remove('tut-highlight','tut-pulse');});
+  if(currentStep>=STEPS.length)return;
+  var targets={0:'#btnIntercept',1:'#navLoginBtn',2:'#emailInput',3:'#loginBtn',4:'#burpEditor',5:'#btnForward'};
+  var sel=targets[currentStep];
+  if(sel){var el=document.querySelector(sel);if(el){el.classList.add('tut-highlight','tut-pulse');}}
+}
+function toggleIntercept(){
+  interceptOn=!interceptOn;
+  btnIntercept.textContent=interceptOn?'Intercept is ON':'Intercept is OFF';
+  btnIntercept.className=interceptOn?'burp-action-btn btn-intercept-on':'burp-action-btn btn-intercept-off';
+  statusDot.className='status-dot '+(interceptOn?'green':'red');
+  statusText.textContent=interceptOn?'Proxy running - Intercept ON':'Proxy running - Intercept OFF';
+  if(!interceptOn&&pendingReq){processPendingRequest(pendingReq,false);pendingReq=null;proxyBadge.className='proxy-badge';btnForward.disabled=true;btnDrop.disabled=true;btnAction.disabled=true;}
+  checkStep();
+}
+function showPage(page){
+  document.querySelectorAll('.cm-page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('page-'+page).classList.add('active');
+  var urls={home:'cybermart.local/',login:'cybermart.local/login',products:'cybermart.local/products',admin:'cybermart.local/admin'};
+  document.getElementById('targetUrl').textContent=urls[page]||'cybermart.local';
+  setTimeout(checkStep,50);
+}
+function handleLogin(){
+  var email=document.getElementById('emailInput').value.trim();
+  var password=document.getElementById('passwordInput').value.trim();
+  var msg=document.getElementById('loginMsg');
+  if(!email||!password){msg.className='cm-message error';msg.textContent='Please enter both email and password.';return;}
+  if(interceptOn){
+    var rawBody=JSON.stringify({email:email,password:password,isAdmin:false});
+    var raw='POST /api/login HTTP/1.1\n'
+      +'Host: cybermart.local\n'
+      +'Content-Type: application/json\n'
+      +'Accept: application/json\n'
+      +'Content-Length: '+rawBody.length+'\n'
+      +'Origin: http://cybermart.local\n'
+      +'User-Agent: Mozilla/5.0 (CyberCompanion Lab)\n'
+      +'\n'
+      +rawBody;
+    burpEditor.value=raw;
+    pendingReq={email:email,password:password};
+    proxyBadge.className='proxy-badge intercepting';
+    btnForward.disabled=false;btnDrop.disabled=false;btnAction.disabled=false;
+    statusDot.className='status-dot amber';
+    statusText.textContent='Request PAUSED - Waiting for action...';
+    msg.className='cm-message pending';
+    msg.textContent='Request intercepted by Burp Suite - check the Burp panel!';
+    toast('Request intercepted! Modify it in the Burp panel.','info');
+    setTimeout(checkStep,50);
+  } else {
+    processPendingRequest({email:email,password:password},false);
+  }
+}
+function processPendingRequest(req,modified){
+  var msg=document.getElementById('loginMsg');
+  var adminFlag=false;
+  if(modified){var v=burpEditor.value;adminFlag=v.indexOf('"isAdmin": true')!==-1||v.indexOf('"isAdmin":true')!==-1;}
+  if(adminFlag){
+    isAdmin=true;
+    document.getElementById('adminLink').style.display='inline';
+    document.getElementById('navLoginBtn').style.display='none';
+    document.getElementById('navLogoutBtn').style.display='block';
+    responseBody.textContent='HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  "success": true,\n  "role": "admin",\n  "isAdmin": true,\n  "message": "Welcome back, Admin!",\n  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."\n}';
+    msg.className='cm-message success';
+    msg.textContent='Admin access granted via parameter tampering!';
+    toast('Admin access! Privilege escalation successful!','success');
+    showPage('admin');
+    setTimeout(checkStep,100);
+  } else {
+    responseBody.textContent='HTTP/1.1 401 Unauthorized\nContent-Type: application/json\n\n{\n  "error": "Invalid email or password."\n}';
+    msg.className='cm-message error';
+    msg.textContent='Invalid credentials. Try intercepting and modifying the request!';
+  }
+  proxyBadge.className='proxy-badge';
+  btnForward.disabled=true;btnDrop.disabled=true;btnAction.disabled=true;
+  statusDot.className='status-dot green';
+  statusText.textContent='Proxy running - Intercept ON';
+}
+function forwardRequest(){
+  if(!pendingReq)return;
+  var req=pendingReq;pendingReq=null;
+  processPendingRequest(req,true);
+  toast('Request forwarded to server.','info');
+  setTimeout(checkStep,100);
+}
+function dropRequest(){
+  if(!pendingReq)return;
+  pendingReq=null;
+  proxyBadge.className='proxy-badge';
+  btnForward.disabled=true;btnDrop.disabled=true;btnAction.disabled=true;
+  burpEditor.value='-- Request dropped by proxy --';
+  responseBody.textContent='Connection reset by proxy (request dropped)';
+  statusDot.className='status-dot green';
+  statusText.textContent='Proxy running - Intercept ON';
+  var msg=document.getElementById('loginMsg');
+  msg.className='cm-message error';
+  msg.textContent='Connection failed - request was dropped by the proxy.';
+  toast('Request dropped.','error');
+}
+function burpTab(el){document.querySelectorAll('.burp-tab').forEach(function(t){t.classList.remove('active');});el.classList.add('active');}
+function showActionMenu(){toast('In real Burp Suite: try "Send to Repeater" or "Send to Intruder" from this menu.','info');}
+function logoutUser(){
+  isAdmin=false;
+  document.getElementById('adminLink').style.display='none';
+  document.getElementById('navLoginBtn').style.display='block';
+  document.getElementById('navLogoutBtn').style.display='none';
+  document.getElementById('emailInput').value='';
+  document.getElementById('passwordInput').value='';
+  document.getElementById('loginMsg').className='cm-message';
+  responseBody.textContent='-- No response yet --';
+  showPage('home');
+}
+function resetLab(){
+  currentStep=0;pendingReq=null;isAdmin=false;interceptOn=true;
+  btnIntercept.textContent='Intercept is ON';
+  btnIntercept.className='burp-action-btn btn-intercept-on';
+  statusDot.className='status-dot green';
+  statusText.textContent='Proxy running - Intercept ON';
+  btnForward.disabled=true;btnDrop.disabled=true;btnAction.disabled=true;
+  proxyBadge.className='proxy-badge';
+  burpEditor.value='';
+  responseBody.textContent='-- No response yet --';
+  document.getElementById('loginMsg').className='cm-message';
+  successBanner.classList.remove('show');
+  logoutUser();
+  renderSteps();
+  toast('Lab restarted.','info');
+}
+function toast(msg,type){
+  var el=document.createElement('div');
+  el.className='toast '+(type||'info');
+  el.textContent=msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(function(){el.remove();},3500);
+}
+setInterval(checkStep,700);
+renderSteps();
+</script>
+</body>
+</html>

@@ -1,3 +1,25 @@
+/* ── Splash Screen Controller — runs before any other init ───────────────────
+   Shows on cold launch only (sessionStorage flag).
+   Total sequence: logo in (0.6s) → text in (0.5s) → bar fill (0.9s) → exit (0.5s)
+   ─────────────────────────────────────────────────────────────────────────── */
+(function initSplash() {
+  const splash = document.getElementById('splash');
+  if (!splash) return;
+
+  // Skip on hot reloads / re-navigations within the same session
+  if (sessionStorage.getItem('cc_launched')) {
+    splash.remove();
+    return;
+  }
+  sessionStorage.setItem('cc_launched', '1');
+
+  // Bar fill animation ends at ~1.4s, we exit at 1.45s and remove at 1.95s
+  setTimeout(() => {
+    splash.classList.add('splash-exit');
+    setTimeout(() => splash.remove(), 520);
+  }, 1450);
+})();
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    CyberCompanion — Renderer v1.1
    5 Modules · Docker Wizard · Defense Sections · Copy Buttons
@@ -16,6 +38,22 @@ const ICONS = {
   docker:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
   shield:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`
 };
+
+/* ─── Line icons (stroke, inherit currentColor) — replace emoji ───────────── */
+const LI = {
+  target:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg>`,
+  terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
+  flask:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><line x1="7.5" y1="15" x2="16.5" y2="15"/></svg>`,
+  shield:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  signal:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5a9 9 0 0 1 14 0"/><path d="M8.5 15.5a4.5 4.5 0 0 1 7 0"/><circle cx="12" cy="18.5" r="1"/></svg>`,
+  trophy:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg>`,
+  bolt:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 11 14 11 22 21 10 13 10 13 2"/></svg>`,
+  activity: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+  lock:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+  globe:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z"/></svg>`,
+  gear:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
+};
+
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    MODULE DATA
@@ -824,16 +862,37 @@ function buildSidebar() {
     const item = document.createElement('div');
     item.className = 'nav-item';
     item.dataset.index = i;
+    item.dataset.module = mod.id;
     item.innerHTML = `
       <div class="nav-num">${mod.num}</div>
-      <div class="nav-label">${mod.title}</div>
+      <div class="nav-label">${escapeHtml(mod.title)}</div>
     `;
     item.addEventListener('click', () => selectModule(i));
     sidebarNav.appendChild(item);
   });
 }
 
+function selectModuleById(moduleId) {
+  const idx = MODULES.findIndex(m => m.id === moduleId);
+  if (idx >= 0) selectModule(idx);
+}
+
+function stopSocSimulator() {
+  if (socStreamInterval) { clearInterval(socStreamInterval); socStreamInterval = null; }
+  socFlaggedScenario = null;
+}
+
+function exitSoc() {
+  stopSocSimulator();
+  document.getElementById('socMode').style.display = 'none';
+  document.getElementById('labMode').style.display = 'none';
+  document.getElementById('contentArea').style.display = '';
+}
+
 function selectModule(index) {
+  stopSocSimulator();
+  document.getElementById('socMode').style.display = 'none';
+  document.getElementById('contentArea').style.display = '';
   activeModuleIndex = index;
   document.querySelectorAll('.nav-item').forEach((el, i) => {
     el.classList.toggle('active', i === index);
@@ -862,7 +921,7 @@ function renderModule(mod) {
     <div class="section-card fade-in fade-in-delay-1">
       <div class="section-header">
         <div class="section-icon concept">${ICONS.concept}</div>
-        <h3 class="section-title">Core Concept</h3>
+        <h3 class="section-title">${t('section_concept')}</h3>
       </div>
       <div class="section-body">
         ${mod.concept.map(p => `<p>${p}</p>`).join('')}
@@ -873,7 +932,7 @@ function renderModule(mod) {
     <div class="section-card fade-in fade-in-delay-2">
       <div class="section-header">
         <div class="section-icon analogy">${ICONS.analogy}</div>
-        <h3 class="section-title">Real-World Analogy</h3>
+        <h3 class="section-title">${t('section_analogy')}</h3>
       </div>
       <div class="section-body">
         <div class="analogy-box">
@@ -887,7 +946,7 @@ function renderModule(mod) {
     <div class="section-card fade-in fade-in-delay-3">
       <div class="section-header">
         <div class="section-icon exercise">${ICONS.exercise}</div>
-        <h3 class="section-title">Step-by-Step Lab Exercise</h3>
+        <h3 class="section-title">${t('section_steps')}</h3>
       </div>
       <div class="section-body">
         <ol class="step-list">
@@ -910,7 +969,7 @@ function renderModule(mod) {
     <div class="section-card fade-in fade-in-delay-4">
       <div class="section-header">
         <div class="section-icon defense">${ICONS.shield}</div>
-        <h3 class="section-title">Defense & Remediation</h3>
+        <h3 class="section-title">${t('section_defense')}</h3>
       </div>
       <div class="section-body">
         <ul class="defense-list">
@@ -932,7 +991,7 @@ function renderModule(mod) {
     <div class="section-card fade-in fade-in-delay-5">
       <div class="section-header">
         <div class="section-icon reference">${ICONS.reference}</div>
-        <h3 class="section-title">Interactive Reference Table</h3>
+        <h3 class="section-title">${t('section_reference')}</h3>
       </div>
       <div class="section-body">
         <div class="payload-table-wrap">
@@ -965,7 +1024,7 @@ function renderModule(mod) {
     <!-- Interactive Challenges -->
     <div class="section-card fade-in fade-in-delay-5" id="interactiveChallengesSection" style="display:none;">
       <div class="section-header" style="background: rgba(0, 240, 255, 0.05); border-bottom: 1px solid var(--border-accent);">
-        <div class="section-icon concept" style="background: var(--cyan); color: #000;">🎯</div>
+        <div class="section-icon concept">${LI.target}</div>
         <h3 class="section-title" style="color: var(--cyan);">Interactive Challenges</h3>
       </div>
       <div class="section-body">
@@ -994,9 +1053,32 @@ function renderModule(mod) {
     `;
   } else if (window.TUTORIALS) {
     const modsTuts = Object.entries(window.TUTORIALS).filter(([key, tut]) => tut.module === mod.id);
+
     if (modsTuts.length > 0) {
       document.getElementById('interactiveChallengesSection').style.display = 'block';
       const list = document.getElementById('challengesList');
+
+      // ── Lab button lookup table — add new labs here, never touch the template ──
+      const LAB_BTN_MAP = [
+        { flag: 'requiresSQLiLab',            fn: 'openSQLiLab',               label: 'Launch SQLi Lab',               grad: '#ef4444,#b91c1c', glow: '239,68,68'   },
+        { flag: 'requiresHeaderManipulation',  fn: 'openHeaderManipulationLab', label: 'Launch Header Manipulation Lab', grad: '#f59e0b,#d97706', glow: '245,158,11'  },
+        { flag: 'requiresCookieManipulation',  fn: 'openCookieManipulationLab', label: 'Launch Cookie Manipulation Lab', grad: '#10b981,#059669', glow: '16,185,129'  },
+        { flag: 'requiresPriceTampering',      fn: 'openPriceTamperingLab',     label: 'Launch Price Tampering Lab',     grad: '#8b5cf6,#6366f1', glow: '139,92,246'  },
+        { flag: 'requiresCyberMart',           fn: 'openBurpLab',               label: 'Launch Burp Suite Lab',          grad: '#ff6633,#cc3300', glow: '255,102,51'  },
+      ];
+
+      function resolveLabButton(key, tut) {
+        const match = LAB_BTN_MAP.find(e => tut[e.flag]);
+        if (match) {
+          return `<button class="btn btn-boot" onclick="window.labAPI.${match.fn}()" style="background:linear-gradient(135deg,${match.grad});box-shadow:0 0 15px rgba(${match.glow},0.4);letter-spacing:0.3px;">${match.label}</button>`;
+        }
+        if (tut.requiresWebview) {
+          return `<button class="btn btn-boot" onclick="window.__app.startTutorial('${key}')" style="background:linear-gradient(135deg,var(--cyan),var(--success));box-shadow:0 0 15px rgba(34,197,94,0.2);">Juice Shop Tutorial</button>
+                  <button class="btn btn-secondary" onclick="window.__app.startChallenge('${key}')" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-accent);">Open Sandbox</button>`;
+        }
+        return `<button class="btn btn-boot" onclick="window.__app.startTutorial('${key}')" style="background:linear-gradient(135deg,var(--cyan),var(--violet));box-shadow:0 0 15px rgba(0,240,255,0.2);">Integrated Tutorial</button>`;
+      }
+
       list.innerHTML = modsTuts.map(([key, tut]) => `
         <div style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-elevated); padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius-sm);">
           <div>
@@ -1004,23 +1086,22 @@ function renderModule(mod) {
             <div style="font-size:12px; color:var(--text-secondary);">${escapeHtml(tut.description)}</div>
           </div>
           <div style="display:flex; gap:8px;">
-            <button class="btn btn-secondary" onclick="window.__app.startChallenge('${key}')">
-              Real Challenge
-            </button>
-            <button class="btn btn-boot" onclick="window.__app.startTutorial('${key}')" style="background: linear-gradient(135deg, var(--cyan), var(--violet)); box-shadow: 0 0 15px rgba(0,240,255,0.2);">
-              Start Tutorial
-            </button>
+            ${resolveLabButton(key, tut)}
           </div>
         </div>
       `).join('');
     }
   }
 
+  if (mod.id === 'burp-proxy') {
+    // CyberMart tutorials now launch via Lab Mode — no inline embed needed.
+  }
+  
   if (mod.id === 'nmap') {
     const terminalHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="nmapTerminalSection">
         <div class="section-header" style="background: rgba(0, 240, 255, 0.05); border-bottom: 1px solid var(--border-accent);">
-          <div class="section-icon concept" style="background: var(--cyan); color: #000;">💻</div>
+          <div class="section-icon concept">${LI.terminal}</div>
           <h3 class="section-title" style="color: var(--cyan);">Interactive Nmap Terminal</h3>
         </div>
         <div class="section-body">
@@ -1062,7 +1143,7 @@ function renderModule(mod) {
     const terminalHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="hydraTerminalSection">
         <div class="section-header" style="background: rgba(236, 72, 153, 0.05); border-bottom: 1px solid rgba(236, 72, 153, 0.3);">
-          <div class="section-icon concept" style="background: #ec4899; color: #fff;">💻</div>
+          <div class="section-icon concept">${LI.terminal}</div>
           <h3 class="section-title" style="color: #ec4899;">Interactive Hydra Terminal</h3>
         </div>
         <div class="section-body">
@@ -1107,7 +1188,7 @@ Ready. Type 'hydra' for usage help.</div>
     const terminalHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="sqlmapTerminalSection">
         <div class="section-header" style="background: rgba(251, 146, 60, 0.06); border-bottom: 1px solid rgba(251, 146, 60, 0.3);">
-          <div class="section-icon concept" style="background: #fb923c; color: #fff;">💻</div>
+          <div class="section-icon concept">${LI.terminal}</div>
           <h3 class="section-title" style="color: #fb923c;">Interactive SQLmap Terminal</h3>
         </div>
         <div class="section-body">
@@ -1150,7 +1231,7 @@ Ready. Type 'hydra' for usage help.</div>
     const xssHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="xssLabSection">
         <div class="section-header" style="background: rgba(139, 92, 246, 0.06); border-bottom: 1px solid rgba(139, 92, 246, 0.3);">
-          <div class="section-icon concept" style="background: #8b5cf6; color: #fff;">🧪</div>
+          <div class="section-icon concept">${LI.flask}</div>
           <h3 class="section-title" style="color: #8b5cf6;">XSS Injection Sandbox</h3>
         </div>
         <div class="section-body">
@@ -1158,7 +1239,7 @@ Ready. Type 'hydra' for usage help.</div>
           <div style="display:flex; gap:10px; margin-top:16px; align-items:stretch;">
             <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
               <div style="background:var(--bg-deep); border:1px solid rgba(139,92,246,0.3); border-radius:var(--radius-sm); padding:12px;">
-                <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">⚡ Quick Payloads</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Quick Payloads</div>
                 <div style="display:flex; flex-wrap:wrap; gap:6px;">
                   <button class="xss-payload-btn" data-payload="&lt;script&gt;alert('XSS')&lt;/script&gt;" style="padding:4px 10px; font-size:11px; font-family:var(--font-mono); background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.4); color:#a78bfa; border-radius:4px; cursor:pointer;">&lt;script&gt;alert()&lt;/script&gt;</button>
                   <button class="xss-payload-btn" data-payload="&lt;img src=x onerror=alert('IMG XSS')&gt;" style="padding:4px 10px; font-size:11px; font-family:var(--font-mono); background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.4); color:#a78bfa; border-radius:4px; cursor:pointer;">&lt;img onerror&gt;</button>
@@ -1179,11 +1260,11 @@ Ready. Type 'hydra' for usage help.</div>
           <div style="margin-top:12px; border:2px solid rgba(139,92,246,0.4); border-radius:var(--radius); overflow:hidden;">
             <div style="background:rgba(139,92,246,0.08); padding:8px 14px; display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(139,92,246,0.2);">
               <div style="display:flex;gap:6px;"><span style="width:12px;height:12px;background:#ff5f56;border-radius:50%;display:inline-block;"></span><span style="width:12px;height:12px;background:#ffbd2e;border-radius:50%;display:inline-block;"></span><span style="width:12px;height:12px;background:#27c93f;border-radius:50%;display:inline-block;"></span></div>
-              <span style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">🔴 VULNERABLE PAGE — http://simulated-target.local/search</span>
+              <span style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">VULNERABLE PAGE — http://simulated-target.local/search</span>
             </div>
-            <iframe id="xssSandboxFrame" sandbox="allow-scripts" style="width:100%; height:260px; border:none; background:#fff;" srcdoc="&lt;html&gt;&lt;body style='font-family:Arial,sans-serif; padding:20px; background:#f8f8f8;'&gt;&lt;h3 style='color:#333;'&gt;🛍️ VulnShop — Product Search&lt;/h3&gt;&lt;div style='background:#fff; border:1px solid #ddd; padding:10px; border-radius:4px;'&gt;&lt;input type='text' placeholder='Search products...' style='width:80%;padding:6px;border:1px solid #ccc;border-radius:3px;'&gt; &lt;button style='padding:6px 14px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;'&gt;Search&lt;/button&gt;&lt;/div&gt;&lt;p style='color:#777;font-size:13px;margin-top:10px;'&gt;Showing results for: &lt;span id='search-result'&gt;(nothing yet)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+            <iframe id="xssSandboxFrame" sandbox="allow-scripts allow-modals" style="width:100%; height:260px; border:none; background:#fff;" srcdoc="&lt;html&gt;&lt;body style='font-family:Arial,sans-serif; padding:20px; background:#f8f8f8;'&gt;&lt;h3 style='color:#333;'&gt;🛍️ VulnShop — Product Search&lt;/h3&gt;&lt;div style='background:#fff; border:1px solid #ddd; padding:10px; border-radius:4px;'&gt;&lt;input type='text' placeholder='Search products...' style='width:80%;padding:6px;border:1px solid #ccc;border-radius:3px;'&gt; &lt;button style='padding:6px 14px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;'&gt;Search&lt;/button&gt;&lt;/div&gt;&lt;p style='color:#777;font-size:13px;margin-top:10px;'&gt;Showing results for: &lt;span id='search-result'&gt;(nothing yet)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
           </div>
-          <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">⚠️ This sandbox uses a restricted iframe. Real payloads that steal cookies or make network requests won't work here (by design), but injection execution will be visible.</p>
+          <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">Note: this sandbox uses a restricted iframe. Real payloads that steal cookies or make network requests won't work here (by design), but injection execution will be visible.</p>
         </div>
       </div>
     `;
@@ -1222,12 +1303,12 @@ Ready. Type 'hydra' for usage help.</div>
           resultEl.style.background = 'rgba(239,68,68,0.1)';
           resultEl.style.border = '1px solid rgba(239,68,68,0.4)';
           resultEl.style.color = '#f87171';
-          resultEl.innerHTML = '🚨 <strong>XSS Payload Detected!</strong> The application reflected your input without sanitization. In a real site, this would execute in every visitor\'s browser.';
+          resultEl.innerHTML = '<strong>XSS Payload Detected!</strong> The application reflected your input without sanitization. In a real site, this would execute in every visitor\'s browser.';
         } else {
           resultEl.style.background = 'rgba(34,197,94,0.1)';
           resultEl.style.border = '1px solid rgba(34,197,94,0.4)';
           resultEl.style.color = '#4ade80';
-          resultEl.innerHTML = '✅ Input reflected but <strong>no script injection detected</strong>. Try adding HTML tags like <code>&lt;script&gt;</code> or <code>onerror</code>.';
+          resultEl.innerHTML = 'Input reflected but <strong>no script injection detected</strong>. Try adding HTML tags like <code>&lt;script&gt;</code> or <code>onerror</code>.';
         }
       }
 
@@ -1246,7 +1327,7 @@ Ready. Type 'hydra' for usage help.</div>
     const burpLabHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="burpLabSection">
         <div class="section-header" style="background: rgba(0,240,255,0.05); border-bottom: 1px solid var(--border-accent);">
-          <div class="section-icon concept" style="background: var(--cyan); color: #000;">🛡️</div>
+          <div class="section-icon concept">${LI.shield}</div>
           <h3 class="section-title" style="color: var(--cyan);">Proxy Intercept Practice Lab</h3>
         </div>
         <div class="section-body">
@@ -1259,7 +1340,7 @@ Ready. Type 'hydra' for usage help.</div>
                 <span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);">http://simulated-target.local/login</span>
               </div>
               <div style="padding:24px;">
-                <h4 style="color:var(--text-primary); margin:0 0 16px 0;">🔐 Login</h4>
+                <h4 style="color:var(--text-primary); margin:0 0 16px 0;">Login</h4>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                   <input type="email" id="burpLabEmail" value="user@company.com" style="padding:8px 12px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-primary); border-radius:4px; font-size:13px; font-family:var(--font-mono);">
                   <input type="password" id="burpLabPass" value="mypassword" style="padding:8px 12px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-primary); border-radius:4px; font-size:13px; font-family:var(--font-mono);">
@@ -1269,7 +1350,7 @@ Ready. Type 'hydra' for usage help.</div>
             </div>
             <!-- Intercepted Request Display -->
             <div style="display:flex; flex-direction:column; gap:10px;">
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">📡 Intercepted Request</div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Intercepted Request</div>
               <textarea id="burpLabIntercepted" rows="8" spellcheck="false" style="width:100%; box-sizing:border-box; background:var(--bg-deep); border:1px solid var(--cyan); color:#a6accd; font-family:var(--font-mono); font-size:11px; padding:10px; border-radius:4px; resize:vertical; outline:none;">— Submit the form to intercept a request —</textarea>
               <div style="display:flex; gap:8px;">
                 <button id="burpLabForward" style="flex:1; padding:8px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:#4ade80; border-radius:4px; cursor:pointer; font-weight:700;">▶ Forward</button>
@@ -1279,7 +1360,7 @@ Ready. Type 'hydra' for usage help.</div>
             </div>
           </div>
           <div style="margin-top:14px; padding:10px 14px; background:rgba(0,240,255,0.05); border:1px solid rgba(0,240,255,0.2); border-radius:4px; font-size:12px; color:var(--text-secondary);">
-            💡 <strong>Try it:</strong> After intercepting, change the email to <code>admin@company.com'--</code> and click Forward. This simulates SQL Injection via Burp!
+            <strong>Try it:</strong> After intercepting, change the email to <code>admin@company.com'--</code> and click Forward. This simulates SQL Injection via Burp!
           </div>
         </div>
       </div>
@@ -1306,7 +1387,7 @@ Ready. Type 'hydra' for usage help.</div>
         const raw = `POST /rest/user/login HTTP/1.1\nHost: simulated-target.local\nContent-Type: application/json\nContent-Length: ${JSON.stringify({email,password:pass}).length}\nUser-Agent: Mozilla/5.0 (Windows NT 10.0)\nCookie: token=abc123xyz\n\n${JSON.stringify({email, password: pass}, null, 2)}`;
         if (interceptedArea) interceptedArea.value = raw;
         if (responseEl) responseEl.style.display = 'none';
-        submitBtn.textContent = '⏸ Request Intercepted!';
+        submitBtn.textContent = 'Request Intercepted!';
         submitBtn.style.background = 'rgba(239,68,68,0.3)';
         setTimeout(() => { submitBtn.textContent = 'Submit (Intercept ON)'; submitBtn.style.background = 'linear-gradient(135deg,var(--cyan),var(--violet))'; }, 3000);
       });
@@ -1315,17 +1396,27 @@ Ready. Type 'hydra' for usage help.</div>
         const req = interceptedArea ? interceptedArea.value : '';
         const isSQLi = /['"-]{1,2}(--|#|;|or\s+1=1|union\s+select)/i.test(req);
         const isAdminEmail = /admin@/i.test(req);
+        const priceMatch = req.match(/"price"\s*:\s*(-?\d+(?:\.\d+)?)/i);
+        const isPriceTamper = priceMatch && parseFloat(priceMatch[1]) <= 0;
+        const isXff = /^x-forwarded-for\s*:\s*127\.0\.0\.1\s*$/im.test(req);
         responseEl.style.display = 'block';
-        if (isSQLi || isAdminEmail) {
+        if (isPriceTamper || isXff) {
           responseEl.style.background = 'rgba(239,68,68,0.1)';
           responseEl.style.border = '1px solid rgba(239,68,68,0.4)';
           responseEl.style.color = '#f87171';
-          responseEl.innerHTML = '🚨 <strong>HTTP/1.1 200 OK</strong><br>{ "authentication": { "token": "eyJhbGciOiJSUzI1NiJ9...", "umail": "admin@company.com" } }<br><br>⚠️ <em>SQLi payload or admin account bypass accepted! You\'re in as admin.</em>';
+          responseEl.innerHTML = isPriceTamper
+            ? '<strong>HTTP/1.1 200 OK</strong><br>{ "order": "confirmed", "charged": ' + escapeHtml(priceMatch[1]) + ' }<br><br><em>The server trusted the client-supplied price.</em>'
+            : '<strong>HTTP/1.1 200 OK</strong><br>{ "access": "granted", "ip_seen": "127.0.0.1" }<br><br><em>The server trusted the spoofed X-Forwarded-For header.</em>';
+        } else if (isSQLi || isAdminEmail) {
+          responseEl.style.background = 'rgba(239,68,68,0.1)';
+          responseEl.style.border = '1px solid rgba(239,68,68,0.4)';
+          responseEl.style.color = '#f87171';
+          responseEl.innerHTML = '<strong>HTTP/1.1 200 OK</strong><br>{ "authentication": { "token": "eyJhbGciOiJSUzI1NiJ9...", "umail": "admin@company.com" } }<br><br><em>SQLi payload or admin account bypass accepted! You\'re in as admin.</em>';
         } else {
           responseEl.style.background = 'rgba(34,197,94,0.1)';
           responseEl.style.border = '1px solid rgba(34,197,94,0.4)';
           responseEl.style.color = '#4ade80';
-          responseEl.innerHTML = '✅ <strong>HTTP/1.1 401 Unauthorized</strong><br>{ "error": "Invalid email or password" }<br><br>Request forwarded normally. Try modifying the email with a SQLi payload!';
+          responseEl.innerHTML = '<strong>HTTP/1.1 401 Unauthorized</strong><br>{ "error": "Invalid email or password" }<br><br>Request forwarded normally. Try modifying the email with a SQLi payload!';
         }
       });
 
@@ -1341,7 +1432,7 @@ Ready. Type 'hydra' for usage help.</div>
     const sqliLabHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="sqliLabSection">
         <div class="section-header" style="background: rgba(239,68,68,0.06); border-bottom: 1px solid rgba(239,68,68,0.3);">
-          <div class="section-icon concept" style="background: #ef4444; color: #fff;">🎯</div>
+          <div class="section-icon concept">${LI.target}</div>
           <h3 class="section-title" style="color: #ef4444;">SQLi Practice Lab — No Docker Required</h3>
         </div>
         <div class="section-body">
@@ -1360,24 +1451,50 @@ Ready. Type 'hydra' for usage help.</div>
                   <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">PASSWORD</label>
                   <input type="text" id="sqliPass" value="anything" style="width:100%;box-sizing:border-box;padding:8px 10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text-primary);border-radius:4px;font-family:var(--font-mono);font-size:12px;outline:none;">
                 </div>
-                <button id="sqliSubmit" style="padding:10px; background:linear-gradient(135deg,#ef4444,#b91c1c); color:#fff; font-weight:700; border:none; border-radius:4px; cursor:pointer;">🎯 Submit Injection</button>
+                <button id="sqliSubmit" style="padding:10px; background:linear-gradient(135deg,#ef4444,#b91c1c); color:#fff; font-weight:700; border:none; border-radius:4px; cursor:pointer;">Submit Injection</button>
               </div>
             </div>
             <div style="display:flex; flex-direction:column; gap:10px;">
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">🖥️ Server Response</div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Server Response</div>
               <div id="sqliResponse" style="flex:1; background:var(--bg-deep); border:1px solid var(--border); border-radius:4px; padding:14px; font-family:var(--font-mono); font-size:12px; color:var(--text-secondary); min-height:120px;">Submit a payload to see the server's response...</div>
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">📋 Generated SQL</div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Generated SQL</div>
               <div id="sqliGeneratedSQL" style="background:var(--bg-deep); border:1px solid var(--border); border-radius:4px; padding:10px; font-family:var(--font-mono); font-size:11px; color:#64748b; white-space:pre-wrap;">SELECT * FROM users WHERE email='?' AND password='?'</div>
             </div>
           </div>
           <div style="margin-top:14px; background:var(--bg-deep); border:1px solid var(--border); border-radius:4px; padding:12px;">
-            <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">⚡ COMMON PAYLOADS — Click to load:</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">COMMON PAYLOADS — Click to load:</div>
             <div style="display:flex; flex-wrap:wrap; gap:6px;">
               <button class="sqli-payload-btn" data-email="' OR 1=1--" data-pass="anything" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:4px;cursor:pointer;">' OR 1=1--</button>
               <button class="sqli-payload-btn" data-email="admin@site.com'--" data-pass="anything" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:4px;cursor:pointer;">admin'--</button>
               <button class="sqli-payload-btn" data-email="' UNION SELECT 1,username,password FROM users--" data-pass="x" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:4px;cursor:pointer;">UNION SELECT</button>
               <button class="sqli-payload-btn" data-email="' OR 'a'='a" data-pass="' OR 'a'='a" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:4px;cursor:pointer;">'OR'a'='a</button>
-              <button class="sqli-payload-btn" data-email="normal@user.com" data-pass="correctpassword" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#4ade80;border-radius:4px;cursor:pointer;">✅ Valid Login</button>
+              <button class="sqli-payload-btn" data-email="normal@user.com" data-pass="correctpassword" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#4ade80;border-radius:4px;cursor:pointer;">Valid Login</button>
+            </div>
+          </div>
+          
+          <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:4px; padding:16px; border-left:3px solid #ef4444;">
+              <h4 style="color:#e2e8f0; font-size:13px; margin-bottom:8px;">Step 1: Authentication Bypass</h4>
+              <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px; line-height:1.5;"><strong>Goal:</strong> Log in without knowing the password.</p>
+              <ul style="font-size:12px; color:var(--text-secondary); padding-left:20px; line-height:1.5; margin-bottom:8px;">
+                <li>Click the <span style="color:#ef4444; font-family:var(--font-mono);">' OR 1=1--</span> payload button above.</li>
+                <li>Click <strong>Submit Injection</strong>.</li>
+              </ul>
+              <div style="background:rgba(239,68,68,0.05); padding:8px; border-radius:4px; font-size:11px; color:#f87171;">
+                <strong>Why it works:</strong> The database evaluates <code style="font-family:var(--font-mono);">1=1</code> as TRUE, and the <code style="font-family:var(--font-mono);">--</code> comments out the password check!
+              </div>
+            </div>
+            
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:4px; padding:16px; border-left:3px solid #f59e0b;">
+              <h4 style="color:#e2e8f0; font-size:13px; margin-bottom:8px;">Step 2: UNION Data Extraction</h4>
+              <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px; line-height:1.5;"><strong>Goal:</strong> Steal hidden data from the database.</p>
+              <ul style="font-size:12px; color:var(--text-secondary); padding-left:20px; line-height:1.5; margin-bottom:8px;">
+                <li>Click the <span style="color:#f59e0b; font-family:var(--font-mono);">UNION SELECT</span> payload button above.</li>
+                <li>Click <strong>Submit Injection</strong>.</li>
+              </ul>
+              <div style="background:rgba(245,158,11,0.05); padding:8px; border-radius:4px; font-size:11px; color:#fbbf24;">
+                <strong>Why it works:</strong> This appends a second query result to the first, pulling sensitive user data right into the server response.
+              </div>
             </div>
           </div>
         </div>
@@ -1421,27 +1538,28 @@ Ready. Type 'hydra' for usage help.</div>
           responseEl.style.background = 'rgba(251,146,60,0.1)';
           responseEl.style.border = '1px solid rgba(251,146,60,0.4)';
           responseEl.style.color = '#fb923c';
-          responseEl.innerHTML = '⚠️ <strong>UNION-based Injection Detected</strong><br><br>Database dump:<br>admin@site.com : $2b$12$hash1...<br>user@site.com : $2b$12$hash2...<br><br><em>All user records extracted!</em>';
+          responseEl.innerHTML = '<strong>UNION-based Injection Detected</strong><br><br>Database dump:<br>admin@site.com : $2b$12$hash1...<br>user@site.com : $2b$12$hash2...<br><br><em>All user records extracted!</em>';
         } else if (isBypass) {
           responseEl.style.background = 'rgba(239,68,68,0.1)';
           responseEl.style.border = '1px solid rgba(239,68,68,0.4)';
           responseEl.style.color = '#f87171';
-          responseEl.innerHTML = '🚨 <strong>Authentication Bypassed!</strong><br><br>Logged in as: <strong>admin@site.com</strong><br>Role: <strong>Administrator</strong><br>Token: eyJhbGciOiJSUzI1NiJ9...<br><br><em>The WHERE clause was broken by your injection.</em>';
+          responseEl.innerHTML = '<strong>Authentication Bypassed!</strong><br><br>Logged in as: <strong>admin@site.com</strong><br>Role: <strong>Administrator</strong><br>Token: eyJhbGciOiJSUzI1NiJ9...<br><br><em>The WHERE clause was broken by your injection.</em>';
         } else if (isValid) {
           responseEl.style.background = 'rgba(34,197,94,0.1)';
           responseEl.style.border = '1px solid rgba(34,197,94,0.4)';
           responseEl.style.color = '#4ade80';
-          responseEl.innerHTML = '✅ <strong>Login Successful</strong><br><br>Welcome back, normal@user.com<br>Role: user<br><br><em>This is a legitimate authentication — no injection.</em>';
+          responseEl.innerHTML = '<strong>Login Successful</strong><br><br>Welcome back, normal@user.com<br>Role: user<br><br><em>This is a legitimate authentication — no injection.</em>';
         } else {
           responseEl.style.background = 'rgba(255,255,255,0.03)';
           responseEl.style.border = '1px solid var(--border)';
           responseEl.style.color = 'var(--text-secondary)';
-          responseEl.innerHTML = '❌ <strong>401 Unauthorized</strong><br><br>Invalid email or password.<br><br><em>Payload did not bypass authentication. Try a different injection.</em>';
+          responseEl.innerHTML = '<strong>401 Unauthorized</strong><br><br>Invalid email or password.<br><br><em>Payload did not bypass authentication. Try a different injection.</em>';
         }
       }
 
       if (submitBtn) submitBtn.addEventListener('click', evalSQLi);
       if (emailIn) emailIn.addEventListener('keydown', e => { if (e.key === 'Enter') evalSQLi(); });
+      if (passIn) passIn.addEventListener('keydown', e => { if (e.key === 'Enter') evalSQLi(); });
     }, 100);
   }
 
@@ -1450,7 +1568,7 @@ Ready. Type 'hydra' for usage help.</div>
     const packetLabHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="packetLabSection">
         <div class="section-header" style="background: rgba(34,211,238,0.05); border-bottom: 1px solid rgba(34,211,238,0.3);">
-          <div class="section-icon concept" style="background: #22d3ee; color: #000;">📡</div>
+          <div class="section-icon concept">${LI.signal}</div>
           <h3 class="section-title" style="color: #22d3ee;">Live Packet Capture Simulator</h3>
         </div>
         <div class="section-body">
@@ -1469,11 +1587,11 @@ Ready. Type 'hydra' for usage help.</div>
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;">
             <div>
-              <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase;">📋 Packet Detail</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase;">Packet Detail</div>
               <div id="packetDetail" style="background:var(--bg-deep); border:1px solid var(--border); border-radius:4px; padding:12px; font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); height:130px; overflow-y:auto;">Click a packet to inspect it...</div>
             </div>
             <div>
-              <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase;">🔍 Analysis Result</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase;">Analysis Result</div>
               <div id="packetAnalysis" style="background:var(--bg-deep); border:1px solid var(--border); border-radius:4px; padding:12px; font-size:12px; color:var(--text-secondary); height:130px; overflow-y:auto;">Select a suspicious packet to trigger analysis...</div>
             </div>
           </div>
@@ -1529,16 +1647,46 @@ function attachCopyHandlers() {
   });
 }
 
-async function copyToClipboard(text, btnEl) {
+async function writeClipboard(text) {
   try {
-    await navigator.clipboard.writeText(text);
-    btnEl.classList.add('copied');
-    const orig = btnEl.innerHTML;
-    btnEl.innerHTML = btnEl.classList.contains('btn-copy')
-      ? `${ICONS.check}<span>Copied!</span>`
-      : ICONS.check;
-    setTimeout(() => { btnEl.classList.remove('copied'); btnEl.innerHTML = orig; }, 1800);
-  } catch (e) { console.error('Copy failed:', e); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (e) { /* fall through to execCommand */ }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok;
+  } catch (e) { return false; }
+}
+
+async function copyToClipboard(text, btnEl) {
+  // Ignore clicks while the button is already showing its "copied" state,
+  // otherwise the restore timer captures the wrong original markup.
+  if (btnEl.dataset.copying === '1') return;
+  const ok = await writeClipboard(text);
+  if (!ok) { console.error('Copy failed'); return; }
+
+  btnEl.dataset.copying = '1';
+  const orig = btnEl.dataset.origHtml || btnEl.innerHTML;
+  btnEl.dataset.origHtml = orig;
+  btnEl.classList.add('copied');
+  btnEl.innerHTML = btnEl.classList.contains('btn-copy')
+    ? `${ICONS.check}<span>Copied!</span>`
+    : ICONS.check;
+  setTimeout(() => {
+    btnEl.classList.remove('copied');
+    btnEl.innerHTML = btnEl.dataset.origHtml;
+    delete btnEl.dataset.copying;
+    delete btnEl.dataset.origHtml;
+  }, 1800);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -1697,7 +1845,7 @@ async function handleRestart() {
     window.__overlay.stateManager.recalculateLevel();
     const overlayContentEl = document.getElementById('overlayContent');
     if (overlayContentEl) {
-      window.__overlay.renderer.renderProgressDashboard(overlayContentEl);
+      window.__overlay.renderer.renderDashboard();
     }
   }
 
@@ -1722,18 +1870,27 @@ async function handleRefresh() {
   }
 }
 
+let juiceShopPoll = null;
+
 function handleLabResults(results, action) {
+  if (results && results.busy) {
+    labMessage.textContent = results.busy.error || 'A lab operation is already running.';
+    return;
+  }
+
   const errors = [];
-  for (const [key, result] of Object.entries(results)) {
-    if (!result.ok && result.error) {
+  for (const [, result] of Object.entries(results || {})) {
+    if (result && !result.ok && result.error) {
       if (result.error === 'DOCKER_NOT_FOUND') {
         showDockerWizard('unknown');
+        dockerInstalled = false;
         labMessage.textContent = 'Docker is not installed. Follow the setup wizard above.';
         return;
       }
       errors.push(`${result.label}: ${result.error}`);
     }
   }
+
   if (errors.length > 0) {
     showError(errors.join('\n'));
     labMessage.textContent = 'Lab encountered errors — see details below.';
@@ -1743,11 +1900,33 @@ function handleLabResults(results, action) {
     const btnRestart = document.getElementById('btnRestart');
     if (action === 'booted') {
       if (btnRestart) btnRestart.style.display = 'inline-flex';
-      window.labAPI.openUrl('http://localhost:3000');
-      // Delay second URL slightly to prevent browser from ignoring simultaneous requests
-      setTimeout(() => {
-        window.labAPI.openUrl('http://localhost:8080');
-      }, 500);
+
+      if (isLabMode && webviewEl) {
+        labMessage.textContent = 'Waiting for Juice Shop to initialize...';
+        if (juiceShopPoll) clearInterval(juiceShopPoll);
+        let attempts = 0;
+        const MAX_ATTEMPTS = 40; // ~60s at 1.5s intervals
+        juiceShopPoll = setInterval(() => {
+          attempts++;
+          if (attempts > MAX_ATTEMPTS) {
+            clearInterval(juiceShopPoll);
+            juiceShopPoll = null;
+            labMessage.textContent = 'Juice Shop is taking longer than expected. Click Refresh once it is up.';
+            return;
+          }
+          fetch('http://localhost:3000', { mode: 'no-cors' })
+            .then(() => {
+              clearInterval(juiceShopPoll);
+              juiceShopPoll = null;
+              labMessage.textContent = 'Lab is ready!';
+              webviewEl.reload();
+            })
+            .catch(() => {});
+        }, 1500);
+      } else {
+        window.labAPI.openUrl('http://localhost:3000');
+        setTimeout(() => window.labAPI.openUrl('http://localhost:8080'), 500);
+      }
     }
   }
   setTimeout(() => handleRefresh(), 2500);
@@ -1790,11 +1969,14 @@ function clearError() {
 let isLabMode = false;
 let labModeInitialized = false;
 let overlayPanelCollapsed = false;
+let isCyberMartMode = false;
+let pendingCyberMartProxyId = null;
 
 const labModeEl       = document.getElementById('labMode');
 const contentAreaEl   = document.getElementById('contentArea');
 const labPanelEl      = document.getElementById('labPanel');
 const webviewEl       = document.getElementById('juiceshopView');
+const cyberMartView   = document.getElementById('cyberMartView');
 const webviewLoading  = document.getElementById('webviewLoading');
 const btnLabModeText  = document.getElementById('btnLabModeText');
 const overlayPanel    = document.getElementById('overlayPanel');
@@ -1805,7 +1987,9 @@ function toggleLabMode() {
 
   if (isLabMode) {
     // Switch to Lab Mode
+    stopSocSimulator();
     contentAreaEl.style.display = 'none';
+    document.getElementById('socMode').style.display = 'none';
     labModeEl.style.display = 'flex';
     btnLabModeText.textContent = 'Study Mode';
     document.getElementById('btnLabMode').classList.add('active');
@@ -1814,6 +1998,15 @@ function toggleLabMode() {
     if (!labModeInitialized) {
       initLabMode();
       labModeInitialized = true;
+    }
+    
+    // Auto-boot if not online
+    const juiceStatus = document.getElementById('statusJuiceshop');
+    if (juiceStatus) {
+      const dot = juiceStatus.querySelector('.status-dot');
+      if (dot && !dot.classList.contains('online') && !isBooting && window.__app.handleBoot) {
+        window.__app.handleBoot();
+      }
     }
   } else {
     // Switch back to Study Mode
@@ -1824,26 +2017,32 @@ function toggleLabMode() {
   }
 }
 
-function initLabMode() {
+function initLabMode(targetUrl) {
   // Determine absolute path to the preload script
-  const preloadPath = window.location.href.replace('index.html', 'webview-preload.js');
-  webviewEl.setAttribute('preload', preloadPath);
+  // The webview preload is assigned by main.js (will-attach-webview), not by the page.
 
-  // Load Juice Shop in the webview
-  webviewEl.src = 'http://localhost:3000';
+  // Load the target — defaults to Juice Shop, but can be CyberMart
+  webviewEl.src = targetUrl || 'http://localhost:3000';
 
   // Show loading overlay
   webviewLoading.style.display = 'flex';
 
-  // Hide loading when the page finishes loading
-  webviewEl.addEventListener('did-finish-load', () => {
-    webviewLoading.style.display = 'none';
-  });
+  let didFail = false;
 
   webviewEl.addEventListener('did-fail-load', (_event) => {
+    didFail = true;
+    webviewLoading.style.display = 'flex';
     webviewLoading.querySelector('.webview-loading-text').textContent =
-      'Failed to load Juice Shop. Is the lab running?';
-    webviewLoading.querySelector('.webview-loading-spinner').style.display = 'none';
+      'Failed to load Juice Shop. Booting the lab...';
+    webviewLoading.querySelector('.webview-loading-spinner').style.display = 'block';
+  });
+
+  // Hide loading when the page finishes loading
+  webviewEl.addEventListener('did-finish-load', () => {
+    if (!didFail) {
+      webviewLoading.style.display = 'none';
+    }
+    didFail = false;
   });
 
   // Initialize the overlay system if overlay.js is loaded
@@ -1883,11 +2082,55 @@ function startTutorial(tutorialKey) {
   
   const tut = window.TUTORIALS[tutorialKey];
   
-  // Only enter lab mode (split screen with Juice Shop) if the tutorial requires the webview
-  // Nmap and Hydra tutorials run directly inside the content area's simulated terminal
-  if (tut.module !== 'nmap' && tut.module !== 'hydra' && !isLabMode) {
+  // ── Standalone Lab Launchers ──────────────────────────────────────────────
+  if (tut.requiresCyberMart) {
+    if (window.labAPI && window.labAPI.openBurpLab) window.labAPI.openBurpLab();
+    return;
+  }
+  if (tut.requiresPriceTampering) {
+    if (window.labAPI && window.labAPI.openPriceTamperingLab) window.labAPI.openPriceTamperingLab();
+    return;
+  }
+  if (tut.requiresCookieManipulation) {
+    if (window.labAPI && window.labAPI.openCookieManipulationLab) window.labAPI.openCookieManipulationLab();
+    return;
+  }
+  if (tut.requiresHeaderManipulation) {
+    if (window.labAPI && window.labAPI.openHeaderManipulationLab) window.labAPI.openHeaderManipulationLab();
+    return;
+  }
+  if (tut.requiresSQLiLab) {
+    if (window.labAPI && window.labAPI.openSQLiLab) window.labAPI.openSQLiLab();
+    return;
+  }
+
+  if (!tut.steps || !Array.isArray(tut.steps) || tut.steps.length === 0) {
+    return;
+  }
+
+  isCyberMartMode = false;
+  webviewEl.style.display = 'block';
+  cyberMartView.style.display = 'none';
+  // ── Standard Lab / Study Mode toggling ────────────────────────────────────
+  // Integrated tutorials target built-in simulator elements inside contentArea.
+  // If currently in lab mode (Juice Shop), exit it so the user can interact with the integrated system.
+  if (!tut.requiresWebview && isLabMode) {
     toggleLabMode();
   }
+  // If a task specifically requires the Juice Shop webview, launch lab mode.
+  if (tut.requiresWebview && !isLabMode) {
+    toggleLabMode();
+  }
+
+  // Auto-scroll to integrated simulator section if available
+  setTimeout(() => {
+    const simSec = document.getElementById(tut.module + 'LabSection') || 
+                   document.getElementById(tut.module + 'TerminalSection') ||
+                   document.getElementById(tut.module + 'Section');
+    if (simSec) {
+      simSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 100);
   
   const tutorialCSS = `
     #cyber-tut-backdrop {
@@ -1971,7 +2214,12 @@ function startTutorial(tutorialKey) {
     maxRetries: 20,
     active: false,
 
+    cleanupListeners: function() {
+      if (this._cleanup) { try { this._cleanup(); } catch (e) {} this._cleanup = null; }
+    },
+
     play: function(steps) {
+      this.cleanupListeners();
       this.steps = steps;
       this.current = 0;
       this.active = true;
@@ -1982,6 +2230,7 @@ function startTutorial(tutorialKey) {
 
     stop: function() {
       this.active = false;
+      this.cleanupListeners();
       backdrop.style.display = 'none';
       bubble.style.display = 'none';
       this.clearHighlight();
@@ -1992,11 +2241,19 @@ function startTutorial(tutorialKey) {
       for (var i = 0; i < els.length; i++) {
         els[i].classList.remove('cyber-tut-highlight');
       }
+      try {
+        var frame = document.getElementById('cyberMartView');
+        if (frame && frame.contentWindow && frame.contentWindow.document) {
+          var fEls = frame.contentWindow.document.querySelectorAll('.cyber-tut-highlight');
+          for (var j = 0; j < fEls.length; j++) {
+            fEls[j].classList.remove('cyber-tut-highlight');
+          }
+        }
+      } catch(e) { }
       backdrop.style.clipPath = 'none';
     },
 
-    showStep: function() {
-      var self = this;
+    showStep: function() { var self = this;
       if (this.current >= this.steps.length) {
         bubble.innerHTML = '<div class="tut-step-badge">Tutorial Complete!</div>' +
           '<div class="tut-text">Congratulations! You have completed the tutorial.</div>' +
@@ -2013,8 +2270,30 @@ function startTutorial(tutorialKey) {
       this.clearHighlight();
 
       var target = null;
+      var inIframe = false;
+      var frameOffset = { top: 0, left: 0 };
+
       if (step.selector === 'body') {
         target = document.body;
+      } else if (step.selector.startsWith('iframe:')) {
+        inIframe = true;
+        var frame = document.getElementById('cyberMartView');
+        try {
+          if (frame && frame.contentWindow && frame.contentWindow.document) {
+            target = frame.contentWindow.document.querySelector(step.selector.substring(7));
+            var rect = frame.getBoundingClientRect();
+            frameOffset = { top: rect.top, left: rect.left };
+            
+            if (target && !frame.contentWindow.document.getElementById('cyber-tut-styles-iframe')) {
+              var s = frame.contentWindow.document.createElement('style');
+              s.id = 'cyber-tut-styles-iframe';
+              s.textContent = '.cyber-tut-highlight { position: relative !important; z-index: 999995 !important; box-shadow: 0 0 0 4px rgba(0,240,255,0.4), 0 0 20px rgba(0,240,255,0.2) !important; border-radius: 4px; }';
+              frame.contentWindow.document.head.appendChild(s);
+            }
+          }
+        } catch(e) {
+          target = null;
+        }
       } else {
         target = document.querySelector(step.selector);
       }
@@ -2022,7 +2301,7 @@ function startTutorial(tutorialKey) {
       if (!target) {
         this.retryCount++;
         if (this.retryCount < this.maxRetries) {
-          setTimeout(function() { self.showStep(); }, 500);
+          setTimeout(function() { if (self.active) self.showStep(); }, 500);
         } else {
           this.retryCount = 0;
           this.current++;
@@ -2034,13 +2313,20 @@ function startTutorial(tutorialKey) {
 
       if (target !== document.body) {
         target.classList.add('cyber-tut-highlight');
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (!inIframe) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
         setTimeout(function() {
           var rect = target.getBoundingClientRect();
           var pad = 6;
-          var top = rect.top - pad, left = rect.left - pad;
-          var right = rect.right + pad, bottom = rect.bottom + pad;
+          var top = rect.top + frameOffset.top - pad;
+          var left = rect.left + frameOffset.left - pad;
+          var right = rect.right + frameOffset.left + pad;
+          var bottom = rect.bottom + frameOffset.top + pad;
+          
           backdrop.style.clipPath = 'polygon(' +
             '0% 0%, 0% 100%, ' +
             left + 'px 100%, ' +
@@ -2074,6 +2360,11 @@ function startTutorial(tutorialKey) {
         var tRect = target.getBoundingClientRect();
         var bRect = bubble.getBoundingClientRect();
 
+        var tTop = tRect.top + frameOffset.top;
+        var tBottom = tRect.bottom + frameOffset.top;
+        var tLeft = tRect.left + frameOffset.left;
+        var tRight = tRect.right + frameOffset.left;
+
         var bTop, bLeft;
         var pos = step.position || 'bottom';
 
@@ -2081,23 +2372,23 @@ function startTutorial(tutorialKey) {
           bTop = window.innerHeight / 2 - bRect.height / 2;
           bLeft = window.innerWidth / 2 - bRect.width / 2;
         } else if (pos === 'right') {
-          bTop = tRect.top;
-          bLeft = tRect.right + 14;
+          bTop = tTop;
+          bLeft = tRight + 14;
         } else if (pos === 'left') {
-          bTop = tRect.top;
-          bLeft = tRect.left - bRect.width - 14;
+          bTop = tTop;
+          bLeft = tLeft - bRect.width - 14;
         } else if (pos === 'top') {
-          bTop = tRect.top - bRect.height - 14;
-          bLeft = tRect.left;
+          bTop = tTop - bRect.height - 14;
+          bLeft = tLeft;
         } else {
           // bottom (default)
-          bTop = tRect.bottom + 14;
-          bLeft = tRect.left;
+          bTop = tBottom + 14;
+          bLeft = tLeft;
         }
 
         // Clamp to viewport
         if (bLeft + bRect.width > window.innerWidth - 10) bLeft = window.innerWidth - bRect.width - 10;
-        if (bTop + bRect.height > window.innerHeight - 10) bTop = tRect.top - bRect.height - 14;
+        if (bTop + bRect.height > window.innerHeight - 10) bTop = tTop - bRect.height - 14;
         if (bLeft < 10) bLeft = 10;
         if (bTop < 10) bTop = 10;
 
@@ -2112,14 +2403,19 @@ function startTutorial(tutorialKey) {
           self.advance();
         };
         target.addEventListener('click', clickHandler);
+        this._cleanup = function() { target.removeEventListener('click', clickHandler); };
       } else if (step.action === 'input' && target !== document.body) {
         var inputHandler = function() {
-          if (target.value && target.value.trim() === step.waitForValue) {
+          var val = (target.value || '').trim();
+          var want = String(step.waitForValue || '').trim();
+          var matched = target.tagName === 'TEXTAREA' ? val.indexOf(want) !== -1 : val === want;
+          if (want && matched) {
             target.removeEventListener('input', inputHandler);
             self.advance();
           }
         };
         target.addEventListener('input', inputHandler);
+        this._cleanup = function() { target.removeEventListener('input', inputHandler); };
       } else if (step.action === 'enter' && target !== document.body) {
         var keydownHandler = function(e) {
           if (e.key === 'Enter') {
@@ -2129,10 +2425,13 @@ function startTutorial(tutorialKey) {
           }
         };
         target.addEventListener('keydown', keydownHandler);
+        this._cleanup = function() { target.removeEventListener('keydown', keydownHandler); };
       }
     },
 
     advance: function() {
+      if (!this.active) return;
+      this.cleanupListeners();
       this.current++;
       this.retryCount = 0;
       this.showStep();
@@ -2145,25 +2444,23 @@ function startTutorial(tutorialKey) {
 `;
 
   const play = () => {
-    if (tut.module === 'nmap' || tut.module === 'hydra') {
+    if (!tut.requiresWebview) {
       if (!document.getElementById('cyber-tut-styles')) {
         const styleEl = document.createElement('style');
         styleEl.id = 'cyber-tut-styles';
         styleEl.textContent = tutorialCSS;
         document.head.appendChild(styleEl);
       }
-      const engineFn = new Function(tutorialEngineCode);
-      engineFn();
-      
-      // Auto scroll to terminal
-      const termSection = document.getElementById(tut.module === 'nmap' ? 'nmapTerminalSection' : 'hydraTerminalSection');
-      if (termSection) termSection.scrollIntoView({ behavior: 'smooth' });
+      const scriptEl = document.createElement('script');
+      scriptEl.textContent = tutorialEngineCode;
+      document.body.appendChild(scriptEl);
+      scriptEl.remove();
       return;
     }
 
     // If the first step has a hash, navigate there first
     if (tut.steps[0] && tut.steps[0].hash) {
-      webviewEl.executeJavaScript(`window.location.hash = '${tut.steps[0].hash}';`);
+      webviewEl.executeJavaScript(`window.location.hash = ${JSON.stringify(String(tut.steps[0].hash))};`);
       // Give Juice Shop a moment to route, then inject
       setTimeout(() => {
         webviewEl.insertCSS(tutorialCSS)
@@ -2177,7 +2474,7 @@ function startTutorial(tutorialKey) {
     }
   };
 
-  if (tut.module === 'nmap' || tut.module === 'hydra') {
+  if (!tut.requiresWebview) {
     play();
   } else if (webviewLoading.style.display === 'flex') {
     webviewEl.addEventListener('did-finish-load', play, { once: true });
@@ -2198,6 +2495,7 @@ function startTutorial(tutorialKey) {
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 let socStreamInterval = null;
+let socFlaggedScenario = null; // scenario of the log entry the analyst flagged
 let socLogs = [];
 
 let currentSocScenario = 'sqli';
@@ -2227,7 +2525,8 @@ function startSocSimulator() {
   const terminal = document.getElementById('socTerminal');
   terminal.innerHTML = '';
   socLogs = [];
-  
+  socFlaggedScenario = null;
+
   if (socStreamInterval) clearInterval(socStreamInterval);
   
   // Normal log generators
@@ -2313,10 +2612,13 @@ function startSocSimulator() {
     const escapedPath = escapeHtml(actualPath);
     logLine.innerHTML = `<span class="timestamp">[${time}]</span> <span class="ip">${actualIp}</span> <span class="method">${actualMethod}</span> ${escapedPath} HTTP/1.1" <span style="color:${actualStatus === '500' || actualStatus === '401' ? '#ff5f56' : '#27c93f'}">${actualStatus}</span>`;
     
+    const lineScenario = isMalicious ? activeScenario : null;
+
     logLine.onclick = () => {
       // Deselect all
       document.querySelectorAll('.terminal-line').forEach(el => el.classList.remove('selected'));
       logLine.classList.add('selected');
+      socFlaggedScenario = lineScenario;
       
       const intelPanel = document.getElementById('threatIntelPanel');
       if (intelPanel) {
@@ -2328,12 +2630,12 @@ function startSocSimulator() {
         intelPanel.innerHTML = `
           <div class="intel-item" style="background:var(--bg-deep); padding:8px; border-radius:4px; margin-bottom:12px; border-left:3px solid var(--cyan);">
             <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Captured Request</div>
-            <div style="color:var(--cyan); word-break:break-all;"><strong>${actualMethod}</strong> ${actualPath}</div>
-            <div style="color:var(--text-secondary); margin-top:4px; font-size:11px;">Status: ${actualStatus}</div>
+            <div style="color:var(--cyan); word-break:break-all;"><strong>${escapeHtml(actualMethod)}</strong> ${escapeHtml(actualPath)}</div>
+            <div style="color:var(--text-secondary); margin-top:4px; font-size:11px;">Status: ${escapeHtml(actualStatus)}</div>
           </div>
-          <div class="intel-item"><strong>IP Address:</strong> <span>${actualIp}</span></div>
+          <div class="intel-item"><strong>IP Address:</strong> <span>${escapeHtml(actualIp)}</span></div>
           <div class="intel-item"><strong>Source Port:</strong> <span>${sourcePort}</span></div>
-          <div class="intel-item"><strong>User Agent:</strong> <span>${userAgent}</span></div>
+          <div class="intel-item"><strong>User Agent:</strong> <span>${escapeHtml(userAgent)}</span></div>
           <div class="intel-item"><strong>GeoLocation:</strong> <span>${geo}</span></div>
           <div class="intel-item"><strong>Threat Score:</strong> <span>${riskScore}/100</span></div>
           <div class="intel-item"><strong>Reputation:</strong> <span>${rep}</span></div>
@@ -2361,7 +2663,7 @@ function startSocSimulator() {
         // Briefly show error toast
         const toast = document.createElement('div');
         toast.style = 'position:fixed; bottom:20px; right:20px; background:var(--danger); color:white; padding:10px 20px; border-radius:4px; z-index:9999;';
-        toast.textContent = (window.__i18n && window.__i18n.lang === 'ar') ? 'نتيجة إيجابية خاطئة. استمر في البحث.' : 'False Positive. Keep looking.';
+        toast.textContent = currentLanguage === 'ar' ? 'نتيجة إيجابية خاطئة. استمر في البحث.' : 'False Positive. Keep looking.';
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 2000);
       }
@@ -2384,31 +2686,35 @@ function startSocSimulator() {
   }, 800);
 }
 
+// Which remediation actions actually address each threat vector.
+const VALID_REMEDIATION = {
+  sqli:  ['BLOCK_IP'],
+  xss:   ['BLOCK_IP'],
+  path:  ['BLOCK_IP'],
+  ssrf:  ['BLOCK_IP', 'ISOLATE'],
+  brute: ['RATE_LIMIT', 'RESET'],
+  cmdi:  ['ISOLATE'],
+  idor:  ['RESET', 'ISOLATE']
+};
+
+function socToast(message, bg) {
+  const toast = document.createElement('div');
+  toast.style = `position:fixed; bottom:20px; right:20px; background:${bg}; color:white; padding:10px 20px; border-radius:4px; z-index:9999;`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
+}
+
 function submitRemediation(action) {
-  let isValid = false;
-  
-  // Use currently displayed malicious log to determine what the actual active scenario was.
-  // Wait, currentSocScenario might be 'random' but we need to check the active scenario.
-  // Instead of checking activeScenario, we check action validity broadly or map it.
-  
-  // Since we don't save activeScenario globally, we can use a simpler broad check:
-  // BLOCK_IP is valid for SQLi, XSS, Path, Brute, SSRF.
-  // RESET is valid for Brute.
-  // ISOLATE is valid for CmdI.
-  // HOTFIX (if we add it) would be valid for IDOR.
-  
-  if (action === 'BLOCK_IP' || action === 'RATE_LIMIT' || action === 'ISOLATE' || action === 'RESET') {
-     // For demo purposes, we will allow any plausible remediation to succeed,
-     // but we can add specific logic here if needed.
-     isValid = true;
+  // Must have flagged a real threat first.
+  if (!socFlaggedScenario) {
+    socToast('Flag a valid threat in the log before applying remediation.', 'var(--danger)');
+    return;
   }
 
-  if (!isValid) {
-    const toast = document.createElement('div');
-    toast.style = 'position:fixed; bottom:20px; right:20px; background:var(--danger); color:white; padding:10px 20px; border-radius:4px; z-index:9999;';
-    toast.textContent = 'Incorrect Remediation for this Threat Vector. Try again.';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2000);
+  const valid = VALID_REMEDIATION[socFlaggedScenario] || [];
+  if (!valid.includes(action)) {
+    socToast('Incorrect remediation for this threat vector. Try again.', 'var(--danger)');
     return;
   }
 
@@ -2422,33 +2728,36 @@ function submitRemediation(action) {
     wafAction.style.color = 'var(--success)';
   }
 
-  if (socStreamInterval) clearInterval(socStreamInterval);
+  if (socStreamInterval) { clearInterval(socStreamInterval); socStreamInterval = null; }
+  socFlaggedScenario = null;
   const panel = document.getElementById('remediationPanel');
   panel.innerHTML = `
     <div style="text-align:center; padding:20px;">
-      <div style="font-size:40px; margin-bottom:10px;">✅</div>
+      <div style="font-size:30px; line-height:1; margin-bottom:10px; color:var(--success);">&#10003;</div>
       <h3 style="color:var(--success); margin:0 0 10px 0;">Threat Neutralized!</h3>
-      <p style="color:var(--text-secondary); font-size:13px;">Excellent work, Analyst. The ${action} policy has been applied and the network is secure.</p>
+      <p style="color:var(--text-secondary); font-size:13px;">Excellent work, Analyst. The ${escapeHtml(action)} policy has been applied and the network is secure.</p>
       <button class="btn btn-boot" onclick="window.__app.resumeSocSimulator()" style="margin-top:20px;">Continue Monitoring</button>
-      <button class="btn btn-secondary" onclick="window.location.reload()" style="margin-top:20px; margin-left:10px;">Exit SOC</button>
+      <button class="btn btn-secondary" onclick="window.__app.exitSoc()" style="margin-top:20px; margin-left:10px;">Exit SOC</button>
     </div>
   `;
-  
-  // Award XP using overlay state manager
+
+  // Award XP once per neutralised threat (not repeatable by re-clicking).
   if (window.__overlay && window.__overlay.stateManager) {
     const xpGained = 750;
-    window.__overlay.stateManager.totalXP += xpGained;
-    const leveledUp = window.__overlay.stateManager.recalculateLevel();
-    window.__overlay.stateManager.persist();
-    
-    // Show toast
+    const sm = window.__overlay.stateManager;
+    const oldLevel = sm.level;
+    sm.totalXP += xpGained;
+    sm.recalculateLevel();
+    sm.persist();
+    const leveledUp = sm.level > oldLevel;
+
     window.__overlay.renderer.showAchievementToast({
-      challenge: "SOC Analyst Training Complete",
+      challenge: 'SOC Analyst Training Complete',
       xp: xpGained,
-      leveledUp: leveledUp
+      leveledUp
     });
-    
-    const prog = window.__overlay.stateManager.getProgress();
+
+    const prog = sm.getProgress();
     window.__overlay.renderer.updateXP(prog.totalXP, prog.xpPercent, leveledUp);
   }
 }
@@ -2460,9 +2769,9 @@ function startChallenge(tutorialKey) {
   const tut = window.TUTORIALS[tutorialKey];
   
   // Navigate if the first step has a hash, but don't play tutorial
-  if (tut.steps[0] && tut.steps[0].hash) {
+  if (tut.steps && tut.steps[0] && tut.steps[0].hash) {
     const go = () => {
-      webviewEl.executeJavaScript(`window.location.hash = '${tut.steps[0].hash}';`);
+      webviewEl.executeJavaScript(`window.location.hash = ${JSON.stringify(String(tut.steps[0].hash))};`);
     };
     if (webviewLoading.style.display === 'flex') {
       webviewEl.addEventListener('did-finish-load', go, { once: true });
@@ -2483,7 +2792,7 @@ function escapeHtml(str) {
 }
 
 function escapeAttr(str) {
-  return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(str == null ? '' : str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function formatRisk(risk) {
@@ -2505,6 +2814,29 @@ const btnBurpForward = document.getElementById('btnBurpForward');
 const btnBurpDrop = document.getElementById('btnBurpDrop');
 
 let isProxyOn = true;
+let isBurpSimulatorActive = false;
+
+let currentProxyId = null;
+
+// Each proxy achievement is awarded at most once per session so XP cannot be farmed.
+const awardedProxyAchievements = new Set();
+
+/** Awards XP for a proxy achievement once. Returns true if it was newly awarded. */
+function awardProxyXp(id, label, xp) {
+  if (awardedProxyAchievements.has(id)) return false;
+  if (!(window.__overlay && window.__overlay.stateManager)) return false;
+  awardedProxyAchievements.add(id);
+  const sm = window.__overlay.stateManager;
+  const oldLevel = sm.level;
+  sm.totalXP += xp;
+  sm.recalculateLevel();
+  sm.persist();
+  const leveledUp = sm.level > oldLevel;
+  window.__overlay.renderer.showAchievementToast({ challenge: label, xp, leveledUp });
+  const prog = sm.getProgress();
+  window.__overlay.renderer.updateXP(prog.totalXP, prog.xpPercent, leveledUp);
+  return true;
+}
 
 btnBurpToggle.addEventListener('click', () => {
   isProxyOn = !isProxyOn;
@@ -2513,32 +2845,69 @@ btnBurpToggle.addEventListener('click', () => {
   btnBurpToggle.className = 'btn btn-sm ' + (isProxyOn ? 'btn-secondary active' : 'btn-danger');
 });
 
-btnBurpForward.addEventListener('click', () => {
-  const modifiedData = burpEditor.value;
-  window.labAPI.forwardProxyRequest(modifiedData);
-  burpEditor.value = '';
-  
-  // Validation for Tutorial Progress
-  if (modifiedData.toLowerCase().includes('or 1=1') || modifiedData.toLowerCase().includes('union select')) {
-    if (window.__overlay && window.__overlay.stateManager) {
-      window.__overlay.renderer.showAchievementToast({
-        challenge: "Proxy Injection Successful",
-        xp: 300,
-        leveledUp: false
-      });
-      window.__overlay.stateManager.totalXP += 300;
-      const leveledUp = window.__overlay.stateManager.recalculateLevel();
-      window.__overlay.stateManager.persist();
-      const prog = window.__overlay.stateManager.getProgress();
-      window.__overlay.renderer.updateXP(prog.totalXP, prog.xpPercent, leveledUp);
-    }
-  }
-});
-
 btnBurpDrop.addEventListener('click', () => {
+  if (isBurpSimulatorActive) {
+    if (isCyberMartMode && currentProxyId && cyberMartView) {
+      cyberMartView.contentWindow.dispatchEvent(new CustomEvent('proxy-response', {
+        detail: { id: currentProxyId, action: 'drop' }
+      }));
+    }
+    burpEditor.value = '';
+    isBurpSimulatorActive = false;
+    currentProxyId = null;
+    return;
+  }
   window.labAPI.dropProxyRequest();
   burpEditor.value = '';
 });
+
+btnBurpForward.addEventListener('click', () => {
+  const modifiedData = burpEditor.value;
+  
+  if (isBurpSimulatorActive) {
+    let email = '';
+    let password = '';
+    try {
+      // Split on literal \n\n (escaped newlines in the raw HTTP string)
+      const parts = modifiedData.split(/\r?\n\r?\n/);
+      if (parts.length > 1) {
+        const bodyJson = JSON.parse(parts[parts.length - 1].trim());
+        email = bodyJson.email || '';
+        password = bodyJson.password || '';
+      }
+    } catch(e) {}
+    
+    // Check if they successfully injected SQL syntax — award XP (once).
+    if (email.includes("'") || email.toLowerCase().includes('or 1=1') || password.includes("'")) {
+      awardProxyXp('sqli-via-proxy', 'SQL Injection via Proxy', 500);
+    }
+
+    if (isCyberMartMode && currentProxyId && cyberMartView) {
+      cyberMartView.contentWindow.dispatchEvent(new CustomEvent('proxy-response', {
+        detail: { 
+          id: currentProxyId, 
+          action: 'forward', 
+          modifiedBody: `${modifiedData}` 
+        }
+      }));
+    }
+    
+    burpEditor.value = '';
+    isBurpSimulatorActive = false;
+    currentProxyId = null;
+    return;
+  }
+  
+  window.labAPI.forwardProxyRequest(modifiedData);
+  burpEditor.value = '';
+  
+  // Validation for Tutorial Progress (awarded once).
+  if (modifiedData.toLowerCase().includes('or 1=1') || modifiedData.toLowerCase().includes('union select')) {
+    awardProxyXp('proxy-injection', 'Proxy Injection Successful', 300);
+  }
+});
+
+
 
 window.labAPI.onProxyIntercepted((data) => {
   // Switch to the proxy tab automatically
@@ -2547,13 +2916,16 @@ window.labAPI.onProxyIntercepted((data) => {
 });
 
 function toggleMiniBurp(show) {
-  // If show is true, switch to proxy tab
   if (show) {
+    // Switch to proxy tab
     window.__app.switchOverlayTab('proxy');
     isProxyOn = true;
     window.labAPI.toggleProxy(true);
     btnBurpToggle.textContent = 'Intercept is ON';
     btnBurpToggle.className = 'btn btn-sm btn-secondary active';
+  } else {
+    // Switch back to progress tab
+    window.__app.switchOverlayTab('mission');
   }
 }
 
@@ -2610,36 +2982,65 @@ function toggleSidebar() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   NMAP SIMULATOR
+   TERMINAL SIMULATOR — Shared scaffolding
+   Each handler calls simulateTerminalCommand() with its config; only the
+   command-specific result logic lives inside each handler.
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-function handleNmapCommand(cmd) {
-  const outputEl = document.getElementById('nmapSimOutput');
-  const terminalEl = document.getElementById('nmapSimTerminal');
-  if (!outputEl) return;
+/**
+ * Shared runner for nmap / hydra / sqlmap simulator terminals.
+ * @param {object} cfg
+ *   outputId    — element ID for the output div
+ *   terminalId  — element ID for the scrollable terminal div
+ *   loadingId   — unique ID for the transient "loading" span
+ *   promptHtml  — the coloured prompt HTML (already escaped)
+ *   guardFn     — fn(cmd) → string|null  (returns error message or null if OK)
+ *   resolveFn   — fn(cmd) → { result: string, delay: number }
+ */
+function simulateTerminalCommand({ outputId, terminalId, loadingId, promptHtml, guardFn, resolveFn }) {
+  return function(cmd) {
+    const outputEl   = document.getElementById(outputId);
+    const terminalEl = document.getElementById(terminalId);
+    if (!outputEl) return;
 
-  // Print the user's command
-  outputEl.innerHTML += `\n<span style="color:var(--cyan);">[user@cyber-lab ~]$</span> ${escapeHtml(cmd)}\n`;
-  
-  if (!cmd.startsWith('nmap') && !cmd.startsWith('ping')) {
-    outputEl.innerHTML += `<span style="color:var(--danger);">Command not found or not supported in this simulator. Try 'nmap' or 'ping'.</span>\n`;
+    outputEl.innerHTML += `\n${promptHtml} ${escapeHtml(cmd)}\n`;
+
+    const guardMsg = guardFn(cmd);
+    if (guardMsg !== null) {
+      outputEl.innerHTML += guardMsg + '\n';
+      terminalEl.scrollTop = terminalEl.scrollHeight;
+      return;
+    }
+
+    const { result, delay } = resolveFn(cmd);
+    outputEl.innerHTML += `<span id="${loadingId}" style="color:var(--text-muted);">Executing...</span>`;
     terminalEl.scrollTop = terminalEl.scrollHeight;
-    return;
-  }
 
-  // Simulate processing delay
-  const isPing = cmd.startsWith('ping');
-  const delay = isPing ? 500 : 1500;
-  
-  outputEl.innerHTML += `<span id="nmapSimLoading" style="color:var(--text-muted);">Executing...</span>`;
-  terminalEl.scrollTop = terminalEl.scrollHeight;
+    setTimeout(() => {
+      const loading = document.getElementById(loadingId);
+      if (loading) loading.remove();
+      outputEl.innerHTML += result + '\n';
+      terminalEl.scrollTop = terminalEl.scrollHeight;
+    }, delay);
+  };
+}
 
-  setTimeout(() => {
-    const loading = document.getElementById('nmapSimLoading');
-    if (loading) loading.remove();
+/* ── NMAP SIMULATOR ─────────────────────────────────────────────────────────── */
 
+const handleNmapCommand = simulateTerminalCommand({
+  outputId:   'nmapSimOutput',
+  terminalId: 'nmapSimTerminal',
+  loadingId:  'nmapSimLoading',
+  promptHtml: `<span style="color:var(--cyan);">[user@cyber-lab ~]$</span>`,
+  guardFn: (cmd) => {
+    if (!cmd.startsWith('nmap') && !cmd.startsWith('ping'))
+      return `<span style="color:var(--danger);">Command not found or not supported in this simulator. Try 'nmap' or 'ping'.</span>`;
+    return null;
+  },
+  resolveFn: (cmd) => {
+    const isPing = cmd.startsWith('ping');
+    const delay  = isPing ? 500 : 1500;
     let result = '';
-    
     if (isPing) {
       result = `PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
 64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.032 ms
@@ -2683,7 +3084,6 @@ Nmap scan report for 192.168.1.105
 Host is up (0.0011s latency).
 Nmap done: 256 IP addresses (3 hosts up) scanned in 2.34 seconds`;
     } else {
-      // Basic nmap
       result = `Starting Nmap 7.93 ( https://nmap.org )
 Nmap scan report for localhost (127.0.0.1)
 Host is up (0.00014s latency).
@@ -2694,18 +3094,17 @@ PORT     STATE SERVICE
 
 Nmap done: 1 IP address (1 host up) scanned in 0.13 seconds`;
     }
+    return { result, delay };
+  }
+});
 
-    outputEl.innerHTML += result + '\n';
-    terminalEl.scrollTop = terminalEl.scrollHeight;
-  }, delay);
-}
+/* ── HYDRA SIMULATOR ────────────────────────────────────────────────────────── */
 
 function handleHydraCommand(cmd) {
-  const outputEl = document.getElementById('hydraSimOutput');
+  const outputEl   = document.getElementById('hydraSimOutput');
   const terminalEl = document.getElementById('hydraSimTerminal');
   if (!outputEl) return;
 
-  // Print the user's command
   outputEl.innerHTML += `\n<span style="color:#ec4899;">[user@cyber-lab ~]$</span> ${escapeHtml(cmd)}\n`;
 
   if (cmd === 'hydra' || cmd === 'hydra --help' || cmd === 'hydra -h') {
@@ -2762,8 +3161,8 @@ Example:
     const timestamp = new Date().toLocaleTimeString();
 
     if (cmd.includes('ssh://') || cmd.includes('ssh:')) {
-      const target = cmd.match(/ssh:\/\/([^\s]+)/)?.[1] || '192.168.1.1';
-      const user = cmd.match(/-l\s+(\S+)/)?.[1] || 'admin';
+      const target = escapeHtml(cmd.match(/ssh:\/\/([^\s]+)/)?.[1] || '192.168.1.1');
+      const user = escapeHtml(cmd.match(/-l\s+(\S+)/)?.[1] || 'admin');
       if (isVerbose) {
         result = `[DATA] max 4 tasks per 1 server, overall 4 tasks, 14344392 login tests
 [DATA] attacking ssh://${target}:22/
@@ -2788,16 +3187,16 @@ Hydra finished at ${timestamp}`;
 Hydra finished at ${timestamp}`;
       }
     } else if (cmd.includes('ftp://') || cmd.includes('ftp:')) {
-      const target = cmd.match(/ftp:\/\/([^\s]+)/)?.[1] || '192.168.1.1';
-      const user = cmd.match(/-l\s+(\S+)/)?.[1] || 'admin';
+      const target = escapeHtml(cmd.match(/ftp:\/\/([^\s]+)/)?.[1] || '192.168.1.1');
+      const user = escapeHtml(cmd.match(/-l\s+(\S+)/)?.[1] || 'admin');
       result = `[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344392 login tests
 [DATA] attacking ftp://${target}:21/
 <span style="color:var(--success);">[21][ftp] host: ${target}   login: ${user}   password: admin123</span>
 1 of 1 target successfully completed, 1 valid password found
 Hydra finished at ${timestamp}`;
     } else if (cmd.includes('http-post-form') || cmd.includes('http-get-form')) {
-      const user = cmd.match(/-l\s+(\S+)/)?.[1] || 'admin@juice-sh.op';
-      const target = cmd.match(/(?:localhost|(\d+\.\d+\.\d+\.\d+))/)?.[0] || 'localhost';
+      const user = escapeHtml(cmd.match(/-l\s+(\S+)/)?.[1] || 'admin@juice-sh.op');
+      const target = escapeHtml(cmd.match(/(?:localhost|(\d+\.\d+\.\d+\.\d+))/)?.[0] || 'localhost');
       if (isVerbose) {
         result = `[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344392 login tests
 [DATA] attacking http-post-form://${target}/
@@ -2863,7 +3262,7 @@ function handleSqlmapCommand(cmd) {
 
   const urlMatch = cmd.match(/-u\s+["']?(https?:\/\/[^\s"']+)["']?/i);
   const targetUrl = urlMatch ? urlMatch[1] : 'http://target.com/vuln?id=1';
-  const targetHost = targetUrl.split('/')[2] || 'target.com';
+  const targetHost = escapeHtml(targetUrl.split('/')[2] || 'target.com');
   const hasDbs = cmd.includes('--dbs');
   const hasTables = cmd.includes('--tables');
   const hasDump = cmd.includes('--dump');
@@ -2871,8 +3270,8 @@ function handleSqlmapCommand(cmd) {
   const hasBanner = cmd.includes('-b') || cmd.includes('--banner');
   const hasCurrentUser = cmd.includes('--current-user');
   const hasCurrentDb = cmd.includes('--current-db');
-  const dbFlag = cmd.match(/-D\s+(\S+)/)?.[1];
-  const tblFlag = cmd.match(/-T\s+(\S+)/)?.[1];
+  const dbFlag = cmd.match(/-D\s+(\S+)/)?.[1] ? escapeHtml(cmd.match(/-D\s+(\S+)/)[1]) : undefined;
+  const tblFlag = cmd.match(/-T\s+(\S+)/)?.[1] ? escapeHtml(cmd.match(/-T\s+(\S+)/)[1]) : undefined;
   const level = cmd.match(/--level=(\d)/)?.[1] || '1';
   const risk = cmd.match(/--risk=(\d)/)?.[1] || '1';
 
@@ -2945,6 +3344,7 @@ function initPacketLab() {
 
   let packetIndex = 0;
   let captureInterval = null;
+  if (window.__packetCaptureInterval) { clearInterval(window.__packetCaptureInterval); window.__packetCaptureInterval = null; }
   let allPackets = [];
 
   const normalPackets = [
@@ -2984,12 +3384,12 @@ function initPacketLab() {
           analysisEl.style.background = 'rgba(239,68,68,0.08)';
           analysisEl.style.border = '1px solid rgba(239,68,68,0.4)';
           analysisEl.style.color = '#f87171';
-          analysisEl.innerHTML = '🚨 <strong>THREAT DETECTED</strong><br><pre style="font-family:var(--font-mono);font-size:10px;color:#f87171;white-space:pre-wrap;">' + escapeHtml(pkt.detail) + '</pre>';
+          analysisEl.innerHTML = '<strong>THREAT DETECTED</strong><br><pre style="font-family:var(--font-mono);font-size:10px;color:#f87171;white-space:pre-wrap;">' + escapeHtml(pkt.detail) + '</pre>';
         } else {
           analysisEl.style.background = '';
           analysisEl.style.border = '1px solid var(--border)';
           analysisEl.style.color = 'var(--text-secondary)';
-          analysisEl.innerHTML = '✅ <strong>Benign traffic</strong> — No indicators of compromise detected in this packet.';
+          analysisEl.innerHTML = '<strong>Benign traffic</strong> — No indicators of compromise detected in this packet.';
         }
       }
     });
@@ -3000,6 +3400,8 @@ function initPacketLab() {
 
   function matchesFilter(pkt, filter) {
     if (!filter) return true;
+    if (/\s+or\s+/.test(filter)) return filter.split(/\s+or\s+/).some(part => matchesFilter(pkt, part.trim()));
+    if (/\s+and\s+/.test(filter)) return filter.split(/\s+and\s+/).every(part => matchesFilter(pkt, part.trim()));
     const f = filter;
     if (f === 'http') return pkt.proto === 'HTTP';
     if (f === 'dns') return pkt.proto === 'DNS';
@@ -3072,7 +3474,8 @@ function initPacketLab() {
     // Seed with one malicious packet randomly among the first 20
     const maliciousSlots = [5, 11, 16, 18];
     let malIdx = 0;
-    captureInterval = setInterval(() => {
+    captureInterval = window.__packetCaptureInterval = setInterval(() => {
+      if (!document.body.contains(listEl)) { clearInterval(captureInterval); captureInterval = null; return; }
       tick++;
       if (maliciousSlots.includes(tick) && malIdx < maliciousPackets.length) {
         addPacket(maliciousPackets[malIdx++]);
@@ -3132,8 +3535,8 @@ const TRANSLATIONS = {
     section_challenges: 'Interactive Challenges',
     challenge_intro: 'Put your skills to the test inside the live lab environment. You can follow an interactive step-by-step tutorial, or try to solve it on your own!',
     // Settings modal
-    settings_title: '⚙️ Global Settings',
-    settings_language_label: '🌐 Language / اللغة',
+    settings_title: 'Global Settings',
+    settings_language_label: 'Language / اللغة',
     settings_theme_label: 'Application Theme',
     theme_default: 'Default (Dark)',
     theme_hacker: 'Hacker Green',
@@ -3151,15 +3554,16 @@ const TRANSLATIONS = {
     mod_hydra: 'Hydra Brute-Force',
     mod_xss: 'Cross-Site Scripting (XSS)',
     mod_soc: 'SOC Analyst Simulator',
+    mod_net: 'Network Traffic Analyst',
     // SOC section
-    soc_title: '🛡️ Security Operations Center',
+    soc_title: 'Security Operations Center',
     soc_badge: 'ACTIVE AUDIT',
     soc_mission: 'Mission Objective',
     soc_ioc_title: 'Indicators of Compromise (IoCs)',
     soc_remediation_title: 'Remediation Action Required',
     soc_locked: 'Flag a valid threat to unlock Remediation',
     soc_intel_placeholder: 'Select a log entry to analyze IP reputation and threat score.',
-    soc_intel_title: '🌐 Threat Intel Feed',
+    soc_intel_title: 'Threat Intel Feed',
     soc_waf_status: 'WAF Status: Active',
     soc_threats_mitigated: '0 Threats Mitigated',
     soc_scenario_random: 'Random Attack (Recommended)',
@@ -3220,8 +3624,8 @@ const TRANSLATIONS = {
     section_challenges: 'التحديات التفاعلية',
     challenge_intro: 'اختبر مهاراتك داخل بيئة المختبر المباشرة. يمكنك اتباع برنامج تعليمي تفاعلي خطوة بخطوة، أو المحاولة بمفردك!',
     // Settings modal
-    settings_title: '⚙️ الإعدادات العامة',
-    settings_language_label: '🌐 Language / اللغة',
+    settings_title: 'الإعدادات العامة',
+    settings_language_label: 'Language / اللغة',
     settings_theme_label: 'مظهر التطبيق',
     theme_default: 'افتراضي (داكن)',
     theme_hacker: 'هاكر أخضر',
@@ -3239,15 +3643,16 @@ const TRANSLATIONS = {
     mod_hydra: 'هجوم القوة الغاشمة بـ Hydra',
     mod_xss: 'البرمجة النصية عبر المواقع (XSS)',
     mod_soc: 'محاكي محلل SOC',
+    mod_net: 'محلل حركة الشبكة',
     // SOC section
-    soc_title: '🛡️ مركز عمليات الأمن',
+    soc_title: 'مركز عمليات الأمن',
     soc_badge: 'تدقيق نشط',
     soc_mission: 'هدف المهمة',
     soc_ioc_title: 'مؤشرات الاختراق (IoCs)',
     soc_remediation_title: 'إجراء المعالجة المطلوب',
     soc_locked: 'حدد تهديدًا صحيحًا لفتح المعالجة',
     soc_intel_placeholder: 'اختر إدخال سجل لتحليل سمعة IP ودرجة التهديد.',
-    soc_intel_title: '🌐 موجز استخبارات التهديدات',
+    soc_intel_title: 'موجز استخبارات التهديدات',
     soc_waf_status: 'حالة WAF: نشط',
     soc_threats_mitigated: '0 تهديد تم التخفيف منه',
     soc_scenario_random: 'هجوم عشوائي (موصى به)',
@@ -3334,11 +3739,10 @@ function setLanguage(lang) {
     const idx = parseInt(item.dataset.index);
     if (!isNaN(idx) && MODULES[idx]) {
       const mod = MODULES[idx];
+      const label = item.querySelector('.nav-label');
+      const arMod = currentLanguage === 'ar' ? ARABIC_MODULES.find(m => m.id === mod.id) : null;
       const key = MODULE_TITLE_KEYS[mod.id];
-      if (key) {
-        const label = item.querySelector('.nav-label');
-        if (label) label.textContent = t(key.en);
-      }
+      if (label) label.textContent = arMod ? arMod.title : (key ? t(key.en) : mod.title);
     }
   });
 
@@ -3378,7 +3782,10 @@ function setLanguage(lang) {
   if (btnToggle && btnToggle.textContent.includes('ON')) btnToggle.textContent = t('proxy_intercept_on');
 
   // Update currently rendered module if any
-  if (activeModuleIndex >= 0) {
+  const contentVisible = contentAreaEl && contentAreaEl.style.display !== 'none';
+  if (activeModuleIndex >= 0 && contentVisible) {
+    selectModule(activeModuleIndex);
+  } else if (activeModuleIndex >= 0) {
     updateRenderedModuleSectionHeaders();
   }
 
@@ -3474,6 +3881,7 @@ function initTheme() {
 }
 
 async function factoryReset() {
+  if (socStreamInterval) { clearInterval(socStreamInterval); socStreamInterval = null; }
   localStorage.clear();
   const btn = document.querySelector('.btn-danger-outline');
   if (btn) {
@@ -3481,6 +3889,7 @@ async function factoryReset() {
     btn.disabled = true;
   }
   try {
+    if (window.labAPI.clearLabSession) await window.labAPI.clearLabSession();
     await window.labAPI.bootLab();
   } catch (e) {
     console.error('Reset error:', e);
@@ -3548,6 +3957,10 @@ window.__app = {
   startChallenge,
   startSocSimulator,
   resumeSocSimulator,
+  stopSocSimulator,
+  exitSoc,
+  selectModuleById,
+  isLabMode: () => isLabMode,
   submitRemediation,
   toggleSettings,
   toggleSidebar,
@@ -3557,15 +3970,33 @@ window.__app = {
   handleNmapCommand,
   handleHydraCommand,
   handleSqlmapCommand,
-  initPacketLab
+  initPacketLab,
+  triggerBurpSimIntercept: (id, reqStr) => {
+    isBurpSimulatorActive = true;
+    currentProxyId = id;
+    
+    if (overlayPanelCollapsed) {
+      window.__app.toggleOverlayPanel();
+    }
+    window.__app.switchOverlayTab('proxy');
+    
+    if (!isProxyOn) {
+      document.getElementById('btnBurpToggle').click();
+    }
+    
+    const editor = document.getElementById('burpPayloadEditor');
+    if (editor) {
+      editor.value = reqStr;
+    }
+  }
 };
 
 window.TUTORIALS = {};
 window.labAPI.getTutorials().then(data => {
-  window.TUTORIALS = data;
-  
-  // Refresh the current module to show newly loaded tutorials
-  if (typeof activeModuleIndex !== 'undefined') {
+  window.TUTORIALS = data || {};
+
+  // Refresh only if a module is actually open (activeModuleIndex starts at -1).
+  if (activeModuleIndex >= 0 && activeModuleIndex < MODULES.length) {
     selectModule(activeModuleIndex);
   }
 }).catch(err => console.error("Failed to load tutorials via IPC:", err));

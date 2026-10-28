@@ -78,8 +78,8 @@
     "description": "Learn how to intercept and modify API parameters to manipulate server logic (e.g., getting items for free).",
     "steps": [
       {
-        "text": "Parameter tampering is a classic exploit where you change data sent to the server. Let's try to get a laptop for free! Click 'Checkout (Intercept ON)' in the Shopping Cart.",
-        "selector": "#burpLabCartSubmit",
+        "text": "Parameter tampering is a classic exploit where you change data sent to the server. Click Submit (Intercept ON) to capture a request.",
+        "selector": "#burpLabSubmit",
         "action": "click",
         "position": "bottom"
       },
@@ -111,8 +111,8 @@
     "description": "Learn how to bypass access controls by manipulating HTTP headers like X-Forwarded-For.",
     "steps": [
       {
-        "text": "Servers often use HTTP headers to restrict access. Let's try to access the Admin Portal. Click 'Access Portal (Intercept ON)'.",
-        "selector": "#burpLabAdminSubmit",
+        "text": "Servers often use HTTP headers to restrict access. Click Submit (Intercept ON) to capture a request.",
+        "selector": "#burpLabSubmit",
         "action": "click",
         "position": "bottom"
       },
@@ -134,105 +134,6 @@
         "selector": "#burpLabResponse",
         "action": "click",
         "position": "bottom"
-      }
-    ]
-  },
-  "sqli-login": {
-    "challengeKey": "loginAdminChallenge",
-    "name": "SQL Injection (Admin Login)",
-    "module": "sqli",
-    "description": "Learn how to bypass authentication using a simple SQL Injection vulnerability.",
-    "steps": [
-      {
-        "text": "Welcome to the SQL Injection tutorial! We will attack the simulated login form below. Click into the EMAIL field.",
-        "selector": "#sqliEmail",
-        "action": "click",
-        "position": "bottom"
-      },
-      {
-        "text": "We will try to log in as admin without knowing the password. Type exactly: admin'--",
-        "selector": "#sqliEmail",
-        "action": "input",
-        "waitForValue": "admin'--",
-        "position": "right"
-      },
-      {
-        "text": "The single quote (') closes the SQL string early, and the dashes (--) comment out the rest of the query (including the password check). Now click Submit Injection.",
-        "selector": "#sqliSubmit",
-        "action": "click",
-        "position": "bottom"
-      },
-      {
-        "text": "Authentication Bypassed! You are logged in as admin. Look at the Generated SQL below to see how your payload manipulated the query.",
-        "selector": "#sqliResponse",
-        "action": "click",
-        "position": "bottom"
-      }
-    ]
-  },
-  "sqli-bypass": {
-    "challengeKey": "loginBenderChallenge",
-    "name": "SQL Injection (Always True Bypass)",
-    "module": "sqli",
-    "description": "Use a Boolean 'Always True' technique to compromise the first account in the database.",
-    "steps": [
-      {
-        "text": "Let's try another classic payload. What if we don't know any usernames at all? We can use an OR condition that is always true. Click the EMAIL field.",
-        "selector": "#sqliEmail",
-        "action": "click",
-        "position": "bottom"
-      },
-      {
-        "text": "Type exactly: ' OR 1=1--",
-        "selector": "#sqliEmail",
-        "action": "input",
-        "waitForValue": "' OR 1=1--",
-        "position": "right"
-      },
-      {
-        "text": "This payload closes the string and adds an OR condition (1=1) which is universally true, bypassing the entire WHERE clause. Click Submit Injection.",
-        "selector": "#sqliSubmit",
-        "action": "click",
-        "position": "bottom"
-      },
-      {
-        "text": "Success! The query evaluated to true for every row in the database, usually logging you in as the very first user (often the admin). Click anywhere to finish.",
-        "selector": "#sqliResponse",
-        "action": "click",
-        "position": "bottom"
-      }
-    ]
-  },
-  "sqli-union": {
-    "challengeKey": "errorHandlingChallenge",
-    "name": "UNION-based SQL Injection",
-    "module": "sqli",
-    "description": "Use the UNION operator to combine the results of the original query with data from other tables.",
-    "steps": [
-      {
-        "text": "SQL Injection isn't just for bypassing logins. You can steal data from other tables using UNION SELECT! Click the EMAIL field.",
-        "selector": "#sqliEmail",
-        "action": "click",
-        "position": "bottom"
-      },
-      {
-        "text": "Let's assume we know there are 3 columns in the query. Type exactly: ' UNION SELECT 1,username,password FROM users--",
-        "selector": "#sqliEmail",
-        "action": "input",
-        "waitForValue": "' UNION SELECT 1,username,password FROM users--",
-        "position": "bottom"
-      },
-      {
-        "text": "This payload tells the database to fetch the username and password columns from the users table and append them to the results. Click Submit Injection.",
-        "selector": "#sqliSubmit",
-        "action": "click",
-        "position": "bottom"
-      },
-      {
-        "text": "Boom! The server returned the entire user database, including hashed passwords! Click anywhere to finish.",
-        "selector": "#sqliResponse",
-        "action": "click",
-        "position": "center"
       }
     ]
   },
@@ -713,5 +614,76 @@
         "position": "center"
       }
     ]
+  },
+  "cybermart-intercept": {
+    "challengeKey": "cyberMartInterceptChallenge",
+    "name": "CyberMart: Intercept a Login Request",
+    "module": "burp-proxy",
+    "description": "Launch CyberMart, navigate to the login page, and intercept the HTTP POST request in real-time.",
+    "requiresCyberMart": true,
+    "steps": [
+      {
+        "text": "Welcome to CyberMart! The full store is loaded and the Burp proxy panel is open on the right. First, click the Account button in the navbar.",
+        "selector": "iframe:#navbarAccount",
+        "action": "click",
+        "position": "bottom"
+      },
+      {
+        "text": "A dropdown appeared. Click Login.",
+        "selector": "iframe:#navbarLoginButton",
+        "action": "click",
+        "position": "bottom"
+      },
+      {
+        "text": "You are now on the Login page. Type any email address into the field.",
+        "selector": "iframe:#email",
+        "action": "input",
+        "waitForValue": "test@test.com",
+        "position": "right"
+      },
+      {
+        "text": "Now type any password.",
+        "selector": "iframe:#password",
+        "action": "input",
+        "waitForValue": "password",
+        "position": "right"
+      },
+      {
+        "text": "Click Log in — the request will be intercepted by Burp on the right!",
+        "selector": "iframe:#loginButton",
+        "action": "click",
+        "position": "bottom"
+      },
+      {
+        "text": "The request is paused! Look at the raw HTTP POST request in the Burp panel. You can see exactly what the browser was about to send. Click Forward to let it through.",
+        "selector": "#btnBurpForward",
+        "action": "click",
+        "position": "left"
+      }
+    ]
+  },
+  "price-tampering": {
+    "name": "Logic Flaws: Price Tampering",
+    "module": "burp-proxy",
+    "description": "Interactive lab simulating an e-commerce price tampering vulnerability.",
+    "requiresPriceTampering": true
+  },
+  "cookie-manipulation": {
+    "name": "Broken Access Control: Cookie Manipulation",
+    "module": "burp-proxy",
+    "description": "Interactive lab simulating an insecure session cookie privilege escalation vulnerability.",
+    "requiresCookieManipulation": true
+  },
+  "header-manipulation": {
+    "name": "Proxy Intercept: Header Manipulation",
+    "module": "burp-proxy",
+    "description": "Bypass IP-based access controls by injecting a spoofed X-Forwarded-For header.",
+    "requiresHeaderManipulation": true
+  },
+  "sqli-basics": {
+    "name": "SQL Injection Basics",
+    "module": "sqli",
+    "description": "Master Authentication Bypass and UNION-based data extraction via hands-on SQLi labs with a live SQL debug panel.",
+    "requiresSQLiLab": true
   }
 }

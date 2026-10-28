@@ -206,7 +206,28 @@ if (document.readyState !== 'loading') {
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 6. Tutorial Engine — INJECTED AT RUNTIME
+// 6. CyberMart Proxy Bridge
+// ═══════════════════════════════════════════════════════════════════════════════
+// When the embedded page fires a 'proxy-request' CustomEvent, forward it to the
+// host renderer via IPC so the Mini Burp panel can show it.
+// When the host sends back 'cybermart:proxy-response', dispatch it into the
+// page so the pending promise resolves and the action continues.
+
+window.addEventListener('proxy-request', (e) => {
+  try {
+    ipcRenderer.sendToHost('cybermart:proxy-request', e.detail);
+  } catch (err) {}
+});
+
+ipcRenderer.on('cybermart:proxy-response', (_event, detail) => {
+  try {
+    window.dispatchEvent(new CustomEvent('proxy-response', { detail }));
+  } catch (err) {}
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 7. Tutorial Engine — INJECTED AT RUNTIME
 // ═══════════════════════════════════════════════════════════════════════════════
 // The interactive tutorial engine is injected directly into the page's main
 // world via webview.executeJavaScript() from renderer.js. This is necessary
