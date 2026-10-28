@@ -215,21 +215,21 @@
 
       <!-- Overlay Panel -->
       <aside id="overlayPanel" class="overlay-panel">
-        <div class="overlay-header" style="flex-direction: column; align-items: stretch; padding: 10px 15px 0;">
-          <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
+        <div class="overlay-header">
+          <div class="overlay-header-row">
             <div class="overlay-header-left">
               <span class="overlay-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></span>
               <span class="overlay-header-title">Lab Dashboard</span>
             </div>
             <button id="btnDevTools" class="btn btn-secondary btn-sm">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px; margin-right:4px;">
+              <svg class="overlay-devtools-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <polyline points="16 18 22 12 16 6"></polyline>
                 <polyline points="8 6 2 12 8 18"></polyline>
               </svg>
               DevTools
             </button>
           </div>
-          <div class="overlay-tabs" style="display:flex; border-bottom: 1px solid var(--border);">
+          <div class="overlay-tabs">
             <button id="tabMission" class="tab-btn active" onclick="window.__app.switchOverlayTab('mission')">Progress</button>
             <button id="tabProxy" class="tab-btn" onclick="window.__app.switchOverlayTab('proxy')">Mini Proxy</button>
           </div>

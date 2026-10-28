@@ -219,7 +219,7 @@ class OverlayRenderer {
           </div>
         </div>
         <div class="xp-bar-container">
-          <div class="xp-bar-fill" id="xpBarFill" style="width: ${progress.xpPercent}%"></div>
+          <div class="xp-bar-fill" id="xpBarFill" style="transform: scaleX(${progress.xpPercent / 100})"></div>
         </div>
         <div class="level-up-glow" id="levelUpGlow"></div>
       </div>
@@ -258,7 +258,8 @@ class OverlayRenderer {
     const xpSection = document.getElementById('xpSection');
     if (xpSection) {
       const fill = document.getElementById('xpBarFill');
-      if (fill) fill.style.width = `${percent}%`;
+      // scaleX instead of width: the bar animates on the compositor (see overlay.css).
+      if (fill) fill.style.transform = `scaleX(${percent / 100})`;
       
       const current = xpSection.querySelector('.xp-current');
       if (current) current.textContent = `${newXP} XP`;
@@ -283,19 +284,22 @@ class OverlayRenderer {
 
     const toast = document.createElement('div');
     toast.className = 'achievement-toast';
-    
-    // Add confetti
-    const confetti = document.createElement('div');
-    confetti.className = 'confetti-container';
-    for (let i = 0; i < 20; i++) {
-      const c = document.createElement('div');
-      c.className = 'confetti';
-      c.style.left = `${Math.random() * 100}%`;
-      c.style.animationDelay = `${Math.random() * 0.5}s`;
-      c.style.backgroundColor = ['#00f0ff', '#8b5cf6', '#22c55e', '#f59e0b'][Math.floor(Math.random() * 4)];
-      confetti.appendChild(c);
+    const leveledUp = !!result.leveledUp;
+    if (leveledUp) toast.classList.add('level-up');
+
+    // Confetti is reserved for level-ups: one short fall (cc-confetti in motion.css).
+    if (leveledUp) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti-container';
+      for (let i = 0; i < 16; i++) {
+        const c = document.createElement('div');
+        c.className = i % 3 === 0 ? 'confetti confetti-accent' : 'confetti';
+        c.style.left = `${Math.random() * 100}%`;
+        c.style.animationDelay = `${Math.round(Math.random() * 200)}ms`;
+        confetti.appendChild(c);
+      }
+      toast.appendChild(confetti);
     }
-    toast.appendChild(confetti);
 
     const challengeInfo = result.info || {};
     const challengeName = typeof result.challenge === 'string' 
@@ -307,12 +311,19 @@ class OverlayRenderer {
       ? `<div class="toast-link" onclick="window.__overlay.goToModule('${challengeInfo.module}')">Review Module</div>`
       : '';
 
+    let levelLine = '';
+    if (leveledUp && this.state && typeof this.state.getProgress === 'function') {
+      const p = this.state.getProgress();
+      levelLine = `<div class="toast-level">Level ${p.level} &middot; ${this.escapeHtml(p.levelName)}</div>`;
+    }
+
     toast.innerHTML += `
       <div class="toast-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg></div>
       <div class="toast-content">
         <div class="toast-title">Challenge Solved</div>
         <div class="toast-challenge">${this.escapeHtml(challengeName)}</div>
         <div class="toast-xp">+${xpAmount} XP</div>
+        ${levelLine}
         ${moduleLink}
       </div>
       <button class="toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 400)">✕</button>

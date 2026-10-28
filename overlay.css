@@ -1,101 +1,121 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
-   CyberCompanion — Overlay System Styles
+   CyberCompanion — Overlay system (lab dashboard panel, XP, toasts, page hints)
+   Terminal native: flat hairline panels, mono labels, sans prose, green accent,
+   amber for XP / success / level-up. Keyframes live in motion.css (cc-*).
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-/* ─── Overlay Panel (Right Side) ────────────────────────────────────────────── */
+/* ─── Overlay Panel (right side of lab mode) ───────────────────────────────── */
 .overlay-panel {
   width: 340px;
-  background: rgba(10, 14, 23, 0.85); /* var(--bg-base) with opacity */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-left: 1px solid var(--border-accent);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+  background: var(--bg-base);
+  border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s var(--ease), transform 0.3s var(--ease);
   position: relative;
   z-index: 20;
   overflow: hidden;
 }
 
+/* Collapse is instant: animating width would re-lay-out the webview every frame. */
 .overlay-panel.collapsed {
   width: 0;
   border-left: none;
-  overflow: visible; /* keep toggle button visible if outside, but we put it in header */
+  overflow: visible; /* the floating toggle stays reachable at the panel edge */
 }
 
 .overlay-header {
-  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 10px 16px 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-base);
+}
+
+/* Title row. Right padding reserves the floating toggle's slot (28px + gaps),
+   so DevTools never sits underneath it. */
+.overlay-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  background: rgba(26, 34, 52, 0.5); /* var(--bg-elevated) with opacity */
+  gap: 8px;
+  min-height: 28px;
+  margin-bottom: 10px;
+  padding-right: 36px;
 }
 
 .overlay-header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  min-width: 0;
 }
 
 .overlay-header-icon {
-  font-size: 18px;
+  display: inline-flex;
+  color: var(--accent);
+  flex-shrink: 0;
 }
+.overlay-header-icon svg { width: 16px; height: 16px; }
 
 .overlay-header-title {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-  background: linear-gradient(135deg, var(--cyan), var(--violet));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+#btnDevTools { flex-shrink: 0; }
+.overlay-devtools-icon { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* Tab strip; .tab-btn / .tab-btn.active are styled in styles.css (class-driven). */
+.overlay-tabs {
+  display: flex;
+  margin: 0 -16px;
+  padding: 0 8px;
+}
+
+/* ─── Floating toggle (open: in the header row; collapsed: at the panel edge) ─── */
 .floating-overlay-toggle {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-accent);
-  color: var(--cyan);
-  cursor: pointer;
+  top: 10px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  border-radius: var(--radius-sm);
-  transition: all 0.2s var(--ease);
-  z-index: 30; /* above the overlay panel */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  cursor: pointer;
+  z-index: 30; /* above the panel content */
+  transition: transform var(--dur-fast) var(--ease-out);
 }
-
-.floating-overlay-toggle:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-  box-shadow: 0 4px 15px var(--cyan-glow);
-}
-
-.floating-overlay-toggle svg {
-  width: 20px;
-  height: 20px;
-}
+.floating-overlay-toggle:hover { background: var(--bg-hover); color: var(--text-primary); }
+.floating-overlay-toggle:active { transform: translateY(1px); }
+.floating-overlay-toggle:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+.floating-overlay-toggle svg { width: 16px; height: 16px; }
 
 .overlay-content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 20px;
-  min-width: 340px; /* prevent squishing when collapsing */
+  padding: 20px 16px;
+  min-width: 340px; /* keep layout while the panel is collapsed */
 }
 
-/* ─── XP & Level Section ────────────────────────────────────────────────────── */
+/* ─── XP & Level ───────────────────────────────────────────────────────────── */
 .xp-section {
-  background: rgba(17, 24, 39, 0.6); /* var(--bg-surface) */
+  background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 24px;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 20px;
   position: relative;
   overflow: hidden;
 }
@@ -104,185 +124,174 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
 .level-badge {
   display: inline-flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .level-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: lowercase;
   color: var(--text-muted);
   margin-bottom: 2px;
 }
 
 .level-value {
+  font-family: var(--font-mono);
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 700;
+  line-height: 1.15;
   color: var(--text-primary);
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 .level-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
 }
 
 .xp-stats {
   text-align: right;
+  font-family: var(--font-mono);
 }
 
 .xp-current {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--amber);
 }
 
 .xp-next {
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .xp-bar-container {
-  height: 8px;
+  height: 4px;
   background: var(--bg-elevated);
-  border-radius: 4px;
+  border-radius: 2px;
   overflow: hidden;
   position: relative;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
+/* overlay.js writes the fill as an inline transform: scaleX(fraction), so the
+   bar animates on the compositor instead of animating width. */
 .xp-bar-fill {
+  width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, var(--cyan), var(--violet));
-  border-radius: 4px;
-  width: 0%;
-  transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-  position: relative;
+  background: var(--amber);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-reveal) var(--ease-out);
 }
 
-.xp-bar-fill::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
-  animation: shimmer 2s infinite linear;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
+/* Level-up: one amber wash over the XP card that settles (cc-flash, 600ms). */
 .level-up-glow {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, var(--cyan-glow), transparent 70%);
+  border-radius: inherit;
+  background: var(--amber-dim);
+  box-shadow: inset 0 0 0 1px var(--amber);
   opacity: 0;
   pointer-events: none;
 }
-
 .level-up-glow.active {
-  animation: pulseGlow 1s ease-out;
+  animation: cc-flash 600ms var(--ease-out) both;
 }
 
-@keyframes pulseGlow {
-  0% { opacity: 0; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.1); }
-  100% { opacity: 0; transform: scale(1); }
-}
-
-/* ─── Stats Grid ────────────────────────────────────────────────────────────── */
+/* ─── Stats Grid ───────────────────────────────────────────────────────────── */
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 24px;
 }
 
 .stat-card {
-  background: rgba(17, 24, 39, 0.6);
+  background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 16px;
+  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
 }
 
 .stat-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--bg-elevated);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  color: var(--accent);
+  flex-shrink: 0;
 }
+.stat-icon svg { width: 16px; height: 16px; }
 
 .stat-info {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .stat-value {
-  font-size: 18px;
+  font-family: var(--font-mono);
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .stat-label {
+  font-family: var(--font-mono);
   font-size: 11px;
+  text-transform: lowercase;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-/* ─── Category Progress ─────────────────────────────────────────────────────── */
+/* ─── Section headings ─────────────────────────────────────────────────────── */
 .section-heading {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: lowercase;
   color: var(--text-muted);
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
 }
+.section-heading::before { content: '# '; color: var(--accent); }
 
+/* ─── Category Progress ────────────────────────────────────────────────────── */
 .category-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 24px;
 }
 
 .progress-category {
   display: flex;
   align-items: center;
-  gap: 16px;
-  background: rgba(17, 24, 39, 0.4);
+  gap: 14px;
+  background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  transition: background 0.2s var(--ease);
+  padding: 10px 12px;
 }
-
-.progress-category:hover {
-  background: rgba(17, 24, 39, 0.8);
-}
+.progress-category:hover { background: var(--bg-elevated); }
 
 .progress-ring-container {
   position: relative;
   width: 44px;
   height: 44px;
+  flex-shrink: 0;
 }
 
 .progress-ring {
@@ -293,16 +302,14 @@
 
 .progress-ring circle {
   fill: transparent;
-  stroke-width: 4;
+  stroke-width: 3;
 }
 
-.progress-ring-bg {
-  stroke: var(--bg-elevated);
-}
+.progress-ring-bg { stroke: var(--bg-elevated); }
 
 .progress-ring-fill {
-  stroke-linecap: round;
-  transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+  stroke: var(--accent);
+  stroke-linecap: butt;
 }
 
 .progress-percentage {
@@ -311,146 +318,143 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.category-info {
-  flex: 1;
-}
-
-.category-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-}
-
-.category-stats {
+  font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--text-secondary);
-}
-
-/* ─── Recent Challenges ─────────────────────────────────────────────────────── */
-.recent-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.recent-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  background: rgba(17, 24, 39, 0.3);
-  border-left: 2px solid var(--success);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
-.recent-name {
-  font-size: 12.5px;
   font-weight: 500;
   color: var(--text-primary);
 }
 
+.category-info { flex: 1; min-width: 0; }
+
+.category-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.category-stats {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ─── Recent achievements (hairline-ruled log) ─────────────────────────────── */
+.recent-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.recent-name {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-primary);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.recent-name::before { content: '\2713  '; color: var(--success); font-family: var(--font-mono); }
+
 .recent-time {
-  font-size: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   color: var(--text-muted);
 }
 
 .recent-xp {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--success);
-  background: var(--success-dim);
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--amber);
+  flex-shrink: 0;
 }
 
 .empty-state {
-  text-align: center;
-  padding: 20px;
+  padding: 16px 2px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
   color: var(--text-muted);
-  font-size: 13px;
-  font-style: italic;
 }
+.empty-state::before { content: '> '; color: var(--accent); }
 
-/* ─── Context Hint Bubble ───────────────────────────────────────────────────── */
+/* ─── Context Hint (page hint while browsing the lab) ──────────────────────── */
+/* Centred with margins rather than translateX(-50%), so the entrance keyframes
+   only need translateY. */
 .context-hint {
   position: absolute;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 400px;
-  max-width: 90%;
-  background: rgba(10, 14, 23, 0.95);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  top: 20px;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: 420px;
+  max-width: calc(100% - 32px);
+  background: var(--bg-surface);
   border: 1px solid var(--border-accent);
-  border-radius: var(--radius);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px var(--cyan-dim);
-  padding: 16px 20px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  padding: 14px 16px;
   z-index: 50;
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  animation: slideDown 0.4s var(--ease) both;
+  gap: 12px;
+  animation: cc-drop-in var(--dur-base) var(--ease-out) both;
 }
 
 .context-hint.hiding {
-  animation: slideUp 0.3s var(--ease) both;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translate(-50%, -20px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
-}
-
-@keyframes slideUp {
-  from { opacity: 1; transform: translate(-50%, 0); }
-  to { opacity: 0; transform: translate(-50%, -20px); }
+  animation: cc-drop-out var(--dur-base) var(--ease-out) both;
 }
 
 .context-hint-icon {
-  font-size: 24px;
-  margin-top: 2px;
+  font-size: 18px;
+  line-height: 1.2;
+  flex-shrink: 0;
 }
 
-.context-hint-content {
-  flex: 1;
-}
+.context-hint-content { flex: 1; min-width: 0; }
 
 .context-hint-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
   margin-bottom: 6px;
 }
 
 .context-hint-body {
+  font-family: var(--font-sans);
   font-size: 13px;
   color: var(--text-secondary);
-  line-height: 1.5;
-  margin-bottom: 12px;
+  line-height: 1.6;
+  margin-bottom: 10px;
 }
 
 .context-hint-modules {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .hint-module-badge {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--violet);
-  background: var(--violet-dim);
-  padding: 3px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: lowercase;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 2px 7px;
 }
 
 .context-hint-close {
@@ -458,147 +462,127 @@
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 4px;
-  margin: -4px -8px 0 0;
-  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  margin: -4px -6px 0 0;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  flex-shrink: 0;
 }
+.context-hint-close:hover { background: var(--bg-hover); color: var(--text-primary); }
 
-.context-hint-close:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-/* ─── Achievement Toasts ────────────────────────────────────────────────────── */
+/* ─── Achievement Toasts ───────────────────────────────────────────────────── */
+/* Bottom-right, over the panel's empty lower area: a toast never covers the
+   header controls or the XP card it is reporting on. */
 .achievement-toasts {
   position: absolute;
-  top: 24px;
-  right: 24px;
-  width: 320px;
+  bottom: 16px;
+  right: 16px;
+  width: 308px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   z-index: 100;
-  pointer-events: none; /* Let clicks pass through empty space */
+  pointer-events: none; /* clicks pass through the empty stack */
 }
 
 .achievement-toast {
-  pointer-events: auto; /* Catch clicks on the toast itself */
-  background: rgba(10, 14, 23, 0.95);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: var(--radius);
-  padding: 16px;
+  pointer-events: auto;
+  background: var(--bg-surface);
+  border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  padding: 12px 36px 12px 14px;
   display: flex;
-  gap: 14px;
+  gap: 12px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  isolation: isolate; /* confetti (z-index -1) paints above the toast background */
+  animation: cc-slide-in-right var(--dur-reveal) var(--ease-out) both;
 }
 
-.achievement-toast::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  border-radius: var(--radius);
-  background: linear-gradient(135deg, var(--cyan), var(--violet));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
+/* A level-up toast gets a full-strength amber frame. */
+.achievement-toast.level-up { border-color: var(--amber); }
 
+/* overlay.js removes the toast 400ms after adding .hiding. */
 .achievement-toast.hiding {
-  animation: slideOutRight 0.4s var(--ease) both;
-}
-
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(50px) scale(0.95); }
-  to { opacity: 1; transform: translateX(0) scale(1); }
-}
-
-@keyframes slideOutRight {
-  from { opacity: 1; transform: translateX(0) scale(1); max-height: 150px; margin-bottom: 12px; }
-  to { opacity: 0; transform: translateX(50px) scale(0.95); max-height: 0; margin-bottom: 0; padding: 0; border: none; }
+  animation: cc-slide-out-right var(--dur-base) var(--ease-out) both;
 }
 
 .toast-icon {
-  font-size: 28px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: bounce 2s infinite;
+  align-items: flex-start;
+  padding-top: 1px;
+  color: var(--amber);
+  flex-shrink: 0;
 }
+.toast-icon svg { width: 18px; height: 18px; }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.toast-content {
-  flex: 1;
-}
+.toast-content { flex: 1; min-width: 0; }
 
 .toast-title {
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--success);
+  font-weight: 500;
+  text-transform: lowercase;
+  color: var(--text-muted);
   margin-bottom: 4px;
 }
 
 .toast-challenge {
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
 }
 
 .toast-xp {
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
   font-weight: 700;
-  color: var(--cyan);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--cyan-dim);
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-bottom: 8px;
+  color: var(--amber);
 }
+
+/* Level-up line (only when the solve crossed a level boundary). */
+.toast-level {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-top: 4px;
+}
+.toast-level::before { content: '\2191\00a0'; color: var(--amber); }
 
 .toast-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--accent);
   text-decoration: underline;
+  text-underline-offset: 2px;
   cursor: pointer;
-  transition: color 0.2s var(--ease);
 }
-
-.toast-link:hover {
-  color: var(--text-primary);
-}
+.toast-link:hover { color: var(--accent-hover); }
 
 .toast-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
   background: none;
   border: none;
+  border-radius: var(--radius-xs);
   color: var(--text-muted);
+  font-size: 12px;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
 }
+.toast-close:hover { background: var(--bg-hover); color: var(--text-primary); }
 
-.toast-close:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-/* Confetti Effect */
+/* Confetti: level-up only, one short fall (transform/opacity), then gone. */
 .confetti-container {
   position: absolute;
   inset: 0;
@@ -609,56 +593,11 @@
 
 .confetti {
   position: absolute;
-  width: 6px;
-  height: 6px;
-  background: var(--cyan);
+  top: 0;
+  width: 4px;
+  height: 4px;
+  background: var(--amber);
   opacity: 0;
-  animation: confettiFall 1.5s ease-out forwards;
+  animation: cc-confetti 600ms var(--ease-out) both;
 }
-
-@keyframes confettiFall {
-  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════════
-   PROFESSIONAL REDESIGN OVERRIDES — flat, tool-like (loaded last)
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-.overlay-panel { background: var(--bg-base) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; border-left: 1px solid var(--border) !important; }
-.overlay-header { background: var(--bg-base) !important; }
-.overlay-header-title { background: none !important; -webkit-text-fill-color: currentColor !important; color: var(--text-primary) !important; font-weight: 650; }
-
-.xp-section, .stat-card, .progress-category, .recent-item { background: var(--bg-surface) !important; }
-.level-value { text-shadow: none !important; }
-.level-title { color: var(--accent, var(--cyan)) !important; }
-
-/* XP bar: solid fill, no moving shimmer */
-.xp-bar-fill { background: var(--accent, var(--cyan)) !important; }
-.xp-bar-fill::after { display: none !important; animation: none !important; }
-.level-up-glow { display: none !important; }
-
-/* Toasts: flat card with a thin accent left border, no gradient ring, no bounce */
-.achievement-toast { background: var(--bg-surface) !important; border: 1px solid var(--border-accent) !important; border-left: 3px solid var(--accent, var(--cyan)) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important; }
-.achievement-toast::before { display: none !important; }
-.toast-icon { animation: none !important; font-size: 20px; }
-.toast-title { color: var(--text-secondary) !important; }
-.toast-xp { background: var(--accent-dim, var(--cyan-dim)) !important; color: var(--accent, var(--cyan)) !important; }
-.confetti-container { display: none !important; }
-
-/* Context hint: flat, no colored shadow */
-.context-hint { background: var(--bg-surface) !important; border: 1px solid var(--border-accent) !important; box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important; backdrop-filter: none !important; }
-.context-hint-title { color: var(--accent, var(--cyan)) !important; }
-.hint-module-badge { background: var(--bg-elevated) !important; color: var(--text-secondary) !important; border: 1px solid var(--border) !important; }
-
-/* Floating toggle: flat */
-.floating-overlay-toggle { background: var(--bg-elevated) !important; border: 1px solid var(--border) !important; color: var(--text-secondary) !important; box-shadow: none !important; }
-.floating-overlay-toggle:hover { background: var(--bg-hover) !important; color: var(--text-primary) !important; box-shadow: none !important; }
-
-/* Icon colors for stat / overlay-header / toast line icons */
-.stat-icon { color: var(--text-secondary); }
-.stat-icon svg { width: 18px; height: 18px; }
-.overlay-header-icon { display: inline-flex; color: var(--accent, var(--cyan)); }
-.overlay-header-icon svg { width: 16px; height: 16px; }
-.toast-icon { color: var(--accent, var(--cyan)); }
-.toast-icon svg { width: 18px; height: 18px; }
+.confetti.confetti-accent { background: var(--accent); }
