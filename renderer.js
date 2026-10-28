@@ -1214,7 +1214,7 @@ Ready. Type 'hydra' for usage help.</div>
   // Setup copy buttons
   attachCopyHandlers();
   contentArea.scrollTop = 0;
-  window.CCMotion && window.CCMotion.openModule(contentArea, mod.id);
+  window.CCMotion && window.CCMotion.openModule(contentArea, 'open ' + mod.id);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
