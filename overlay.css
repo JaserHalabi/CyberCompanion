@@ -108,6 +108,7 @@
   padding: 20px 16px;
   min-width: 340px; /* keep layout while the panel is collapsed */
 }
+#proxyContent { padding: 16px; }
 
 /* ─── XP & Level ───────────────────────────────────────────────────────────── */
 .xp-section {

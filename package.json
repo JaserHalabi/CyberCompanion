@@ -27,7 +27,12 @@
       "!temp_asar/**",
       "!restored_from_exe/**",
       "!**/*.map",
-      "!**/*.log"
+      "!**/*.log",
+      "!.superpowers/**",
+      "!.impeccable/**",
+      "!docs/**",
+      "!tests/**",
+      "!scripts/**"
     ],
     "win": {
       "target": "nsis",

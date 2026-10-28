@@ -155,7 +155,7 @@ body { display: flex; }
 .footer-info { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 8px; }
 .version-badge {
   font-family: var(--font-mono); font-size: 11px; font-weight: 500;
-  color: var(--text-muted); padding: 2px 6px;
+  color: var(--text-muted); padding: 3px 8px;
   border: 1px solid var(--border); border-radius: var(--radius-xs);
 }
 .footer-text { font-size: 11px; color: var(--text-muted); }
@@ -453,15 +453,13 @@ body { display: flex; }
 .home-row::before {
   content: '›';
   position: absolute; left: 3px; top: 10px;
-  font-family: var(--font-mono); font-size: 14px; font-weight: 700; line-height: 20px;
+  font-family: var(--font-mono); font-size: 14px; font-weight: 700; line-height: 22px;
   color: var(--amber); opacity: 0;
 }
 .home-row:hover::before, .home-row:focus-visible::before { opacity: 1; }
 .home-row:hover { background: var(--bg-surface); }
 .home-row:hover .home-row-short, .home-row:focus-visible .home-row-short { color: var(--accent); }
 .home-row:hover .home-row-num, .home-row:focus-visible .home-row-num { color: var(--amber); }
-.home-row.fade-in { animation-duration: var(--dur-base); }
-.home-row-num { color: var(--amber); }
 .home-row.fade-in { animation-duration: var(--dur-base); }
 .home-row-num {
   font-family: var(--font-mono); font-size: 12px; font-weight: 500;
@@ -472,9 +470,9 @@ body { display: flex; }
   color: var(--text-primary); line-height: 20px;
 }
 .home-row-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.home-row-title { font-size: 14px; font-weight: 500; color: var(--text-primary); line-height: 20px; }
+.home-row-title { font-size: 15px; font-weight: 600; color: var(--text-primary); line-height: 22px; }
 .home-row-summary {
-  font-size: 13px; color: var(--text-secondary); line-height: 1.5; max-width: 72ch;
+  font-size: 12px; color: var(--text-secondary); line-height: 1.5; max-width: 72ch;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 
@@ -597,7 +595,7 @@ body { display: flex; }
 .code-lang-dot.default { background: var(--text-muted); }
 
 .btn-copy {
-  display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px;
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;
   border: 1px solid transparent; border-radius: var(--radius-xs);
   background: transparent; color: var(--text-muted);
   font-family: var(--font-mono); font-size: 11px; font-weight: 500;
@@ -817,7 +815,7 @@ webview { flex: 1; border: none; display: flex; }
 .mini-burp-body { padding: 14px; flex: 1; background: var(--bg-deep); }
 .proxy-editor-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 12px 0 8px; }
 .proxy-editor-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
-.btn.btn-xs { padding: 3px 8px; font-size: 11px; }
+.btn.btn-xs { padding: 4px 10px; font-size: 11px; }
 .burp-editor {
   flex: 1; width: 100%; min-height: 200px;
   background: var(--bg-deep); color: var(--text-primary);
@@ -1002,7 +1000,7 @@ textarea.sim-field { resize: vertical; line-height: 1.5; }
 .sim-result strong, .sim-out strong { color: inherit; }
 .sim-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .sim-chip {
-  padding: 3px 8px; cursor: pointer;
+  padding: 5px 10px; cursor: pointer;
   background: var(--bg-base); color: var(--text-primary);
   border: 1px solid var(--border); border-radius: var(--radius-xs);
   font-family: var(--font-mono); font-size: 11px; line-height: 1.5;
