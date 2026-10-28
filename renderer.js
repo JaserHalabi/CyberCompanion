@@ -1768,7 +1768,7 @@ function startTutorial(tutorialKey) {
       background: linear-gradient(135deg, rgba(10, 14, 23, 0.97), rgba(17, 24, 39, 0.97));
       border: 2px solid rgba(0, 240, 255, 0.5);
       border-radius: 12px; padding: 20px 24px;
-      color: #e2e8f0; font-family: 'Inter', 'Segoe UI', sans-serif;
+      color: #e2e8f0; font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
       font-size: 14px;
       box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px rgba(0,240,255,0.15);
       max-width: 340px; min-width: 240px;
