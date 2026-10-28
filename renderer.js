@@ -624,7 +624,7 @@ function renderModule(mod) {
             <thead>
               <tr>
                 ${mod.payloads.headers.map(h => `<th>${h}</th>`).join('')}
-                <th style="width:40px;"></th>
+                <th class="col-copy"></th>
               </tr>
             </thead>
             <tbody>
@@ -648,13 +648,13 @@ function renderModule(mod) {
     
     <!-- Interactive Challenges -->
     <div class="section-card fade-in fade-in-delay-5" id="interactiveChallengesSection" style="display:none;">
-      <div class="section-header" style="background: rgba(0, 240, 255, 0.05); border-bottom: 1px solid var(--border-accent);">
+      <div class="section-header">
         <div class="section-icon concept">${LI.target}</div>
-        <h3 class="section-title" style="color: var(--cyan);">Interactive Challenges</h3>
+        <h3 class="section-title">Interactive Challenges</h3>
       </div>
       <div class="section-body">
         <p>Put your skills to the test inside the live lab environment. You can follow an interactive step-by-step tutorial, or try to solve it on your own!</p>
-        <div id="challengesList" class="challenges-list" style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+        <div id="challengesList" class="challenges-list">
           <!-- Populated dynamically if tutorials exist for this module -->
         </div>
       </div>
@@ -666,14 +666,14 @@ function renderModule(mod) {
     document.getElementById('interactiveChallengesSection').style.display = 'block';
     const list = document.getElementById('challengesList');
     list.innerHTML = `
-      <div style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-elevated); padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius-sm);">
-        <div>
-          <div style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">Blue Team: Active Audit</div>
-          <div style="font-size:12px; color:var(--text-secondary);">Enter the Security Operations Center to monitor live traffic and neutralize threats.</div>
+      <div class="challenge-row">
+        <div class="challenge-info">
+          <div class="challenge-name">Blue Team: Active Audit</div>
+          <div class="challenge-desc">Enter the Security Operations Center to monitor live traffic and neutralize threats.</div>
         </div>
-        <button class="btn btn-boot" onclick="window.__app.startSocSimulator()" style="background: linear-gradient(135deg, var(--cyan), var(--success)); box-shadow: 0 0 15px rgba(34,197,94,0.2);">
-          Start SOC Simulator
-        </button>
+        <div class="challenge-actions">
+          <button class="btn btn-boot" onclick="window.__app.startSocSimulator()">Start SOC Simulator</button>
+        </div>
       </div>
     `;
   } else if (window.TUTORIALS) {
@@ -685,32 +685,32 @@ function renderModule(mod) {
 
       // ── Lab button lookup table — add new labs here, never touch the template ──
       const LAB_BTN_MAP = [
-        { flag: 'requiresSQLiLab',            fn: 'openSQLiLab',               label: 'Launch SQLi Lab',               grad: '#ef4444,#b91c1c', glow: '239,68,68'   },
-        { flag: 'requiresHeaderManipulation',  fn: 'openHeaderManipulationLab', label: 'Launch Header Manipulation Lab', grad: '#f59e0b,#d97706', glow: '245,158,11'  },
-        { flag: 'requiresCookieManipulation',  fn: 'openCookieManipulationLab', label: 'Launch Cookie Manipulation Lab', grad: '#10b981,#059669', glow: '16,185,129'  },
-        { flag: 'requiresPriceTampering',      fn: 'openPriceTamperingLab',     label: 'Launch Price Tampering Lab',     grad: '#8b5cf6,#6366f1', glow: '139,92,246'  },
-        { flag: 'requiresCyberMart',           fn: 'openBurpLab',               label: 'Launch Burp Suite Lab',          grad: '#ff6633,#cc3300', glow: '255,102,51'  },
+        { flag: 'requiresSQLiLab',            fn: 'openSQLiLab',               label: 'Launch SQLi Lab' },
+        { flag: 'requiresHeaderManipulation',  fn: 'openHeaderManipulationLab', label: 'Launch Header Manipulation Lab' },
+        { flag: 'requiresCookieManipulation',  fn: 'openCookieManipulationLab', label: 'Launch Cookie Manipulation Lab' },
+        { flag: 'requiresPriceTampering',      fn: 'openPriceTamperingLab',     label: 'Launch Price Tampering Lab' },
+        { flag: 'requiresCyberMart',           fn: 'openBurpLab',               label: 'Launch Burp Suite Lab' },
       ];
 
       function resolveLabButton(key, tut) {
         const match = LAB_BTN_MAP.find(e => tut[e.flag]);
         if (match) {
-          return `<button class="btn btn-boot" onclick="window.labAPI.${match.fn}()" style="background:linear-gradient(135deg,${match.grad});box-shadow:0 0 15px rgba(${match.glow},0.4);letter-spacing:0.3px;">${match.label}</button>`;
+          return `<button class="btn btn-boot" onclick="window.labAPI.${match.fn}()">${match.label}</button>`;
         }
         if (tut.requiresWebview) {
-          return `<button class="btn btn-boot" onclick="window.__app.startTutorial('${key}')" style="background:linear-gradient(135deg,var(--cyan),var(--success));box-shadow:0 0 15px rgba(34,197,94,0.2);">Juice Shop Tutorial</button>
-                  <button class="btn btn-secondary" onclick="window.__app.startChallenge('${key}')" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-accent);">Open Sandbox</button>`;
+          return `<button class="btn btn-boot" onclick="window.__app.startTutorial('${key}')">Juice Shop Tutorial</button>
+                  <button class="btn btn-secondary" onclick="window.__app.startChallenge('${key}')">Open Sandbox</button>`;
         }
-        return `<button class="btn btn-boot" onclick="window.__app.startTutorial('${key}')" style="background:linear-gradient(135deg,var(--cyan),var(--violet));box-shadow:0 0 15px rgba(0,240,255,0.2);">Integrated Tutorial</button>`;
+        return `<button class="btn btn-boot" onclick="window.__app.startTutorial('${key}')">Integrated Tutorial</button>`;
       }
 
       list.innerHTML = modsTuts.map(([key, tut]) => `
-        <div style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-elevated); padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius-sm);">
-          <div>
-            <div style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">${escapeHtml(tut.name)}</div>
-            <div style="font-size:12px; color:var(--text-secondary);">${escapeHtml(tut.description)}</div>
+        <div class="challenge-row">
+          <div class="challenge-info">
+            <div class="challenge-name">${escapeHtml(tut.name)}</div>
+            <div class="challenge-desc">${escapeHtml(tut.description)}</div>
           </div>
-          <div style="display:flex; gap:8px;">
+          <div class="challenge-actions">
             ${resolveLabButton(key, tut)}
           </div>
         </div>
@@ -725,17 +725,17 @@ function renderModule(mod) {
   if (mod.id === 'nmap') {
     const terminalHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="nmapTerminalSection">
-        <div class="section-header" style="background: rgba(0, 240, 255, 0.05); border-bottom: 1px solid var(--border-accent);">
+        <div class="section-header">
           <div class="section-icon concept">${LI.terminal}</div>
-          <h3 class="section-title" style="color: var(--cyan);">Interactive Nmap Terminal</h3>
+          <h3 class="section-title">Interactive Nmap Terminal</h3>
         </div>
         <div class="section-body">
           <p>Practice running Nmap commands in this simulated environment. Try commands like <code>nmap 127.0.0.1</code> or <code>nmap -sV localhost</code>.</p>
-          <div id="nmapSimTerminal" class="terminal-window" style="height: 300px; display:flex; flex-direction:column; background:var(--bg-deep); padding:10px; border-radius:var(--radius); border:1px solid var(--border); font-family:var(--font-mono); font-size:13px; color:#a6accd; overflow-y:auto; margin-top:15px; position:relative;">
-            <div id="nmapSimOutput" style="white-space:pre-wrap; margin-bottom:10px; line-height:1.5;">CyberCompanion Nmap Simulator v1.0.0<br>Ready.</div>
-            <div style="display:flex; align-items:center;">
-              <span style="color:var(--cyan); margin-right:8px;">[user@cyber-lab ~]$</span>
-              <input type="text" id="nmapSimInput" class="nmap-tut-target" autocomplete="off" spellcheck="false" style="flex:1; background:transparent; border:none; color:#a6accd; font-family:var(--font-mono); font-size:13px; outline:none;" placeholder="Type an nmap command here...">
+          <div id="nmapSimTerminal" class="terminal-window sim-terminal">
+            <div id="nmapSimOutput" class="sim-output">CyberCompanion Nmap Simulator v1.0.0<br>Ready.</div>
+            <div class="sim-input-row">
+              <span class="sim-prompt">[user@cyber-lab ~]$</span>
+              <input type="text" id="nmapSimInput" class="nmap-tut-target sim-input" autocomplete="off" spellcheck="false" placeholder="Type an nmap command here...">
             </div>
           </div>
         </div>
@@ -767,19 +767,19 @@ function renderModule(mod) {
   if (mod.id === 'hydra') {
     const terminalHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="hydraTerminalSection">
-        <div class="section-header" style="background: rgba(236, 72, 153, 0.05); border-bottom: 1px solid rgba(236, 72, 153, 0.3);">
+        <div class="section-header">
           <div class="section-icon concept">${LI.terminal}</div>
-          <h3 class="section-title" style="color: #ec4899;">Interactive Hydra Terminal</h3>
+          <h3 class="section-title">Interactive Hydra Terminal</h3>
         </div>
         <div class="section-body">
           <p>Practice running Hydra brute force commands in this simulated environment. Try commands like <code>hydra -l admin -P rockyou.txt ssh://192.168.1.1</code>.</p>
-          <div id="hydraSimTerminal" class="terminal-window" style="height: 300px; display:flex; flex-direction:column; background:var(--bg-deep); padding:10px; border-radius:var(--radius); border:1px solid var(--border); font-family:var(--font-mono); font-size:13px; color:#a6accd; overflow-y:auto; margin-top:15px; position:relative;">
-            <div id="hydraSimOutput" style="white-space:pre-wrap; margin-bottom:10px; line-height:1.5;">CyberCompanion Hydra Simulator v1.0.0
+          <div id="hydraSimTerminal" class="terminal-window sim-terminal">
+            <div id="hydraSimOutput" class="sim-output">CyberCompanion Hydra Simulator v1.0.0
 Hydra (THC) — Network Login Cracker
 Ready. Type 'hydra' for usage help.</div>
-            <div style="display:flex; align-items:center;">
-              <span style="color:#ec4899; margin-right:8px;">[user@cyber-lab ~]$</span>
-              <input type="text" id="hydraSimInput" class="hydra-tut-target" autocomplete="off" spellcheck="false" style="flex:1; background:transparent; border:none; color:#a6accd; font-family:var(--font-mono); font-size:13px; outline:none;" placeholder="Type a hydra command here...">
+            <div class="sim-input-row">
+              <span class="sim-prompt">[user@cyber-lab ~]$</span>
+              <input type="text" id="hydraSimInput" class="hydra-tut-target sim-input" autocomplete="off" spellcheck="false" placeholder="Type a hydra command here...">
             </div>
           </div>
         </div>
@@ -812,19 +812,19 @@ Ready. Type 'hydra' for usage help.</div>
   if (mod.id === 'sqlmap') {
     const terminalHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="sqlmapTerminalSection">
-        <div class="section-header" style="background: rgba(251, 146, 60, 0.06); border-bottom: 1px solid rgba(251, 146, 60, 0.3);">
+        <div class="section-header">
           <div class="section-icon concept">${LI.terminal}</div>
-          <h3 class="section-title" style="color: #fb923c;">Interactive SQLmap Terminal</h3>
+          <h3 class="section-title">Interactive SQLmap Terminal</h3>
         </div>
         <div class="section-body">
           <p>Practice SQLmap commands in this simulated environment. Try <code>sqlmap -u "http://target.com/vuln?id=1" --dbs</code> or type <code>sqlmap --help</code> for a full reference.</p>
-          <div id="sqlmapSimTerminal" class="terminal-window" style="height:340px; display:flex; flex-direction:column; background:var(--bg-deep); padding:10px; border-radius:var(--radius); border:1px solid rgba(251,146,60,0.3); font-family:var(--font-mono); font-size:12px; color:#a6accd; overflow-y:auto; margin-top:15px;">
-            <div id="sqlmapSimOutput" style="white-space:pre-wrap; margin-bottom:10px; line-height:1.55; flex:1;">
-<span style="color:#fb923c;">        ___\n       __H__\n ___ ___[)]_____ ___ ___  {1.7.12#stable}</span>\n|_ -| . [,]     | .'| . |\n|___|_  [.]_|_|_|__,|  _|\n      |_|V...       |_|   https://sqlmap.org\n\nCyberCompanion SQLmap Simulator v1.7\nType 'sqlmap --help' for usage, or start scanning.
+          <div id="sqlmapSimTerminal" class="terminal-window sim-terminal is-tall">
+            <div id="sqlmapSimOutput" class="sim-output">
+<span class="sim-prompt">        ___\n       __H__\n ___ ___[)]_____ ___ ___  {1.7.12#stable}</span>\n|_ -| . [,]     | .'| . |\n|___|_  [.]_|_|_|__,|  _|\n      |_|V...       |_|   https://sqlmap.org\n\nCyberCompanion SQLmap Simulator v1.7\nType 'sqlmap --help' for usage, or start scanning.
             </div>
-            <div style="display:flex; align-items:center; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; margin-top:4px;">
-              <span style="color:#fb923c; margin-right:8px; white-space:nowrap;">[sqlmap]$</span>
-              <input type="text" id="sqlmapSimInput" autocomplete="off" spellcheck="false" style="flex:1; background:transparent; border:none; color:#a6accd; font-family:var(--font-mono); font-size:12px; outline:none;" placeholder="Type a sqlmap command...">
+            <div class="sim-input-row">
+              <span class="sim-prompt">[sqlmap]$</span>
+              <input type="text" id="sqlmapSimInput" class="sim-input" autocomplete="off" spellcheck="false" placeholder="Type a sqlmap command...">
             </div>
           </div>
         </div>
@@ -855,41 +855,39 @@ Ready. Type 'hydra' for usage help.</div>
   if (mod.id === 'xss') {
     const xssHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="xssLabSection">
-        <div class="section-header" style="background: rgba(139, 92, 246, 0.06); border-bottom: 1px solid rgba(139, 92, 246, 0.3);">
+        <div class="section-header">
           <div class="section-icon concept">${LI.flask}</div>
-          <h3 class="section-title" style="color: #8b5cf6;">XSS Injection Sandbox</h3>
+          <h3 class="section-title">XSS Injection Sandbox</h3>
         </div>
         <div class="section-body">
           <p>A <strong>safe, isolated</strong> practice environment. Type an XSS payload below and click <strong>Inject</strong> to see it execute inside the simulated page. No Docker or lab required.</p>
-          <div style="display:flex; gap:10px; margin-top:16px; align-items:stretch;">
-            <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
-              <div style="background:var(--bg-deep); border:1px solid rgba(139,92,246,0.3); border-radius:var(--radius-sm); padding:12px;">
-                <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Quick Payloads</div>
-                <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                  <button class="xss-payload-btn" data-payload="&lt;script&gt;alert('XSS')&lt;/script&gt;" style="padding:4px 10px; font-size:11px; font-family:var(--font-mono); background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.4); color:#a78bfa; border-radius:4px; cursor:pointer;">&lt;script&gt;alert()&lt;/script&gt;</button>
-                  <button class="xss-payload-btn" data-payload="&lt;img src=x onerror=alert('IMG XSS')&gt;" style="padding:4px 10px; font-size:11px; font-family:var(--font-mono); background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.4); color:#a78bfa; border-radius:4px; cursor:pointer;">&lt;img onerror&gt;</button>
-                  <button class="xss-payload-btn" data-payload="&lt;svg onload=alert('SVG XSS')&gt;" style="padding:4px 10px; font-size:11px; font-family:var(--font-mono); background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.4); color:#a78bfa; border-radius:4px; cursor:pointer;">&lt;svg onload&gt;</button>
-                  <button class="xss-payload-btn" data-payload="&lt;iframe src=javascript:alert('iframe XSS')&gt;" style="padding:4px 10px; font-size:11px; font-family:var(--font-mono); background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.4); color:#a78bfa; border-radius:4px; cursor:pointer;">&lt;iframe src=js:&gt;</button>
-                  <button class="xss-payload-btn" data-payload="&lt;body onload=alert('Body XSS')&gt;" style="padding:4px 10px; font-size:11px; font-family:var(--font-mono); background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.4); color:#a78bfa; border-radius:4px; cursor:pointer;">&lt;body onload&gt;</button>
-                  <button class="xss-payload-btn" data-payload="&lt;script&gt;document.body.style.background='red'&lt;/script&gt;" style="padding:4px 10px; font-size:11px; font-family:var(--font-mono); background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.4); color:#a78bfa; border-radius:4px; cursor:pointer;">Defacement</button>
-                </div>
+          <div class="sim-stack sim-block">
+            <div class="sim-out">
+              <div class="sim-label">quick payloads</div>
+              <div class="sim-chips">
+                <button class="xss-payload-btn sim-chip" data-payload="&lt;script&gt;alert('XSS')&lt;/script&gt;">&lt;script&gt;alert()&lt;/script&gt;</button>
+                <button class="xss-payload-btn sim-chip" data-payload="&lt;img src=x onerror=alert('IMG XSS')&gt;">&lt;img onerror&gt;</button>
+                <button class="xss-payload-btn sim-chip" data-payload="&lt;svg onload=alert('SVG XSS')&gt;">&lt;svg onload&gt;</button>
+                <button class="xss-payload-btn sim-chip" data-payload="&lt;iframe src=javascript:alert('iframe XSS')&gt;">&lt;iframe src=js:&gt;</button>
+                <button class="xss-payload-btn sim-chip" data-payload="&lt;body onload=alert('Body XSS')&gt;">&lt;body onload&gt;</button>
+                <button class="xss-payload-btn sim-chip" data-payload="&lt;script&gt;document.body.style.background='red'&lt;/script&gt;">Defacement</button>
               </div>
-              <div style="display:flex; gap:8px;">
-                <input type="text" id="xssPayloadInput" placeholder="Type or paste your XSS payload here..." autocomplete="off" style="flex:1; background:var(--bg-deep); border:1px solid rgba(139,92,246,0.4); color:var(--text-primary); font-family:var(--font-mono); font-size:12px; padding:8px 12px; border-radius:var(--radius-sm); outline:none;">
-                <button id="xssInjectBtn" style="padding:8px 20px; background:linear-gradient(135deg,#8b5cf6,#6d28d9); color:#fff; border:none; border-radius:var(--radius-sm); cursor:pointer; font-weight:700; font-size:13px; white-space:nowrap;">💉 Inject</button>
-                <button id="xssClearBtn" style="padding:8px 14px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-secondary); border-radius:var(--radius-sm); cursor:pointer; font-size:12px;">Clear</button>
-              </div>
-              <div id="xssResult" style="font-size:12px; padding:8px 12px; border-radius:var(--radius-sm); display:none;"></div>
             </div>
-          </div>
-          <div style="margin-top:12px; border:2px solid rgba(139,92,246,0.4); border-radius:var(--radius); overflow:hidden;">
-            <div style="background:rgba(139,92,246,0.08); padding:8px 14px; display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(139,92,246,0.2);">
-              <div style="display:flex;gap:6px;"><span style="width:12px;height:12px;background:#ff5f56;border-radius:50%;display:inline-block;"></span><span style="width:12px;height:12px;background:#ffbd2e;border-radius:50%;display:inline-block;"></span><span style="width:12px;height:12px;background:#27c93f;border-radius:50%;display:inline-block;"></span></div>
-              <span style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">VULNERABLE PAGE — http://simulated-target.local/search</span>
+            <div class="sim-row">
+              <input type="text" id="xssPayloadInput" class="sim-field" placeholder="Type or paste your XSS payload here..." autocomplete="off">
+              <button id="xssInjectBtn" class="btn btn-primary">Inject</button>
+              <button id="xssClearBtn" class="btn btn-secondary">Clear</button>
             </div>
-            <iframe id="xssSandboxFrame" sandbox="allow-scripts allow-modals" style="width:100%; height:260px; border:none; background:#fff;" srcdoc="&lt;html&gt;&lt;body style='font-family:Arial,sans-serif; padding:20px; background:#f8f8f8;'&gt;&lt;h3 style='color:#333;'&gt;🛍️ VulnShop — Product Search&lt;/h3&gt;&lt;div style='background:#fff; border:1px solid #ddd; padding:10px; border-radius:4px;'&gt;&lt;input type='text' placeholder='Search products...' style='width:80%;padding:6px;border:1px solid #ccc;border-radius:3px;'&gt; &lt;button style='padding:6px 14px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;'&gt;Search&lt;/button&gt;&lt;/div&gt;&lt;p style='color:#777;font-size:13px;margin-top:10px;'&gt;Showing results for: &lt;span id='search-result'&gt;(nothing yet)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+            <div id="xssResult" class="sim-result" style="display:none;"></div>
           </div>
-          <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">Note: this sandbox uses a restricted iframe. Real payloads that steal cookies or make network requests won't work here (by design), but injection execution will be visible.</p>
+          <div class="sim-browser">
+            <div class="sim-panel-bar">
+              <div class="sim-dots"><span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span></div>
+              <span>vulnerable page — http://simulated-target.local/search</span>
+            </div>
+            <iframe id="xssSandboxFrame" sandbox="allow-scripts allow-modals" srcdoc="&lt;html&gt;&lt;body style='font-family:Arial,sans-serif; padding:20px; background:#f8f8f8;'&gt;&lt;h3 style='color:#333;'&gt;🛍️ VulnShop — Product Search&lt;/h3&gt;&lt;div style='background:#fff; border:1px solid #ddd; padding:10px; border-radius:4px;'&gt;&lt;input type='text' placeholder='Search products...' style='width:80%;padding:6px;border:1px solid #ccc;border-radius:3px;'&gt; &lt;button style='padding:6px 14px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;'&gt;Search&lt;/button&gt;&lt;/div&gt;&lt;p style='color:#777;font-size:13px;margin-top:10px;'&gt;Showing results for: &lt;span id='search-result'&gt;(nothing yet)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+          </div>
+          <p class="sim-caption">Note: this sandbox uses a restricted iframe. Real payloads that steal cookies or make network requests won't work here (by design), but injection execution will be visible.</p>
         </div>
       </div>
     `;
@@ -925,14 +923,10 @@ Ready. Type 'hydra' for usage help.</div>
         const isPayload = /<script|onerror|onload|javascript:|<svg|<iframe|<img/i.test(raw);
         resultEl.style.display = 'block';
         if (isPayload) {
-          resultEl.style.background = 'rgba(239,68,68,0.1)';
-          resultEl.style.border = '1px solid rgba(239,68,68,0.4)';
-          resultEl.style.color = '#f87171';
+          resultEl.dataset.state = 'danger';
           resultEl.innerHTML = '<strong>XSS Payload Detected!</strong> The application reflected your input without sanitization. In a real site, this would execute in every visitor\'s browser.';
         } else {
-          resultEl.style.background = 'rgba(34,197,94,0.1)';
-          resultEl.style.border = '1px solid rgba(34,197,94,0.4)';
-          resultEl.style.color = '#4ade80';
+          resultEl.dataset.state = 'success';
           resultEl.innerHTML = 'Input reflected but <strong>no script injection detected</strong>. Try adding HTML tags like <code>&lt;script&gt;</code> or <code>onerror</code>.';
         }
       }
@@ -951,40 +945,38 @@ Ready. Type 'hydra' for usage help.</div>
   if (mod.id === 'burp-proxy') {
     const burpLabHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="burpLabSection">
-        <div class="section-header" style="background: rgba(0,240,255,0.05); border-bottom: 1px solid var(--border-accent);">
+        <div class="section-header">
           <div class="section-icon concept">${LI.shield}</div>
-          <h3 class="section-title" style="color: var(--cyan);">Proxy Intercept Practice Lab</h3>
+          <h3 class="section-title">Proxy Intercept Practice Lab</h3>
         </div>
         <div class="section-body">
           <p>Practice intercepting and modifying HTTP requests <strong>without needing Docker</strong>. Fill in the login form below and click Submit — the request will be intercepted by the Mini Proxy panel. Modify the payload and forward it to see the result.</p>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:16px;">
+          <div class="sim-grid-2">
             <!-- Simulated Login Page -->
-            <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;">
-              <div style="background:rgba(0,0,0,0.3); padding:8px 14px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border);">
-                <div style="display:flex;gap:5px;"><span style="width:10px;height:10px;background:#ff5f56;border-radius:50%;display:inline-block;"></span><span style="width:10px;height:10px;background:#ffbd2e;border-radius:50%;display:inline-block;"></span><span style="width:10px;height:10px;background:#27c93f;border-radius:50%;display:inline-block;"></span></div>
-                <span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);">http://simulated-target.local/login</span>
+            <div class="sim-panel">
+              <div class="sim-panel-bar">
+                <div class="sim-dots"><span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span></div>
+                <span>http://simulated-target.local/login</span>
               </div>
-              <div style="padding:24px;">
-                <h4 style="color:var(--text-primary); margin:0 0 16px 0;">Login</h4>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                  <input type="email" id="burpLabEmail" value="user@company.com" style="padding:8px 12px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-primary); border-radius:4px; font-size:13px; font-family:var(--font-mono);">
-                  <input type="password" id="burpLabPass" value="mypassword" style="padding:8px 12px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-primary); border-radius:4px; font-size:13px; font-family:var(--font-mono);">
-                  <button id="burpLabSubmit" style="padding:10px; background:linear-gradient(135deg,var(--cyan),var(--violet)); color:#000; font-weight:700; border:none; border-radius:4px; cursor:pointer; font-size:13px;">Submit (Intercept ON)</button>
-                </div>
+              <div class="sim-panel-body">
+                <h4>Login</h4>
+                <input type="email" id="burpLabEmail" class="sim-field" value="user@company.com">
+                <input type="password" id="burpLabPass" class="sim-field" value="mypassword">
+                <button id="burpLabSubmit" class="btn btn-primary">Submit (Intercept ON)</button>
               </div>
             </div>
             <!-- Intercepted Request Display -->
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Intercepted Request</div>
-              <textarea id="burpLabIntercepted" rows="8" spellcheck="false" style="width:100%; box-sizing:border-box; background:var(--bg-deep); border:1px solid var(--cyan); color:#a6accd; font-family:var(--font-mono); font-size:11px; padding:10px; border-radius:4px; resize:vertical; outline:none;">— Submit the form to intercept a request —</textarea>
-              <div style="display:flex; gap:8px;">
-                <button id="burpLabForward" style="flex:1; padding:8px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:#4ade80; border-radius:4px; cursor:pointer; font-weight:700;">▶ Forward</button>
-                <button id="burpLabDrop" style="flex:1; padding:8px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#f87171; border-radius:4px; cursor:pointer; font-weight:700;">✕ Drop</button>
+            <div class="sim-stack">
+              <div class="sim-label">intercepted request</div>
+              <textarea id="burpLabIntercepted" class="sim-field" rows="8" spellcheck="false">— Submit the form to intercept a request —</textarea>
+              <div class="sim-row">
+                <button id="burpLabForward" class="btn btn-secondary is-fill">▶ Forward</button>
+                <button id="burpLabDrop" class="btn btn-danger is-fill">✕ Drop</button>
               </div>
-              <div id="burpLabResponse" style="display:none; padding:10px; border-radius:4px; font-size:12px; font-family:var(--font-mono);"></div>
+              <div id="burpLabResponse" class="sim-result is-mono" style="display:none;"></div>
             </div>
           </div>
-          <div style="margin-top:14px; padding:10px 14px; background:rgba(0,240,255,0.05); border:1px solid rgba(0,240,255,0.2); border-radius:4px; font-size:12px; color:var(--text-secondary);">
+          <div class="sim-tip">
             <strong>Try it:</strong> After intercepting, change the email to <code>admin@company.com'--</code> and click Forward. This simulates SQL Injection via Burp!
           </div>
         </div>
@@ -1013,8 +1005,8 @@ Ready. Type 'hydra' for usage help.</div>
         if (interceptedArea) interceptedArea.value = raw;
         if (responseEl) responseEl.style.display = 'none';
         submitBtn.textContent = 'Request Intercepted!';
-        submitBtn.style.background = 'rgba(239,68,68,0.3)';
-        setTimeout(() => { submitBtn.textContent = 'Submit (Intercept ON)'; submitBtn.style.background = 'linear-gradient(135deg,var(--cyan),var(--violet))'; }, 3000);
+        submitBtn.classList.add('is-intercepted');
+        setTimeout(() => { submitBtn.textContent = 'Submit (Intercept ON)'; submitBtn.classList.remove('is-intercepted'); }, 3000);
       });
 
       if (forwardBtn) forwardBtn.addEventListener('click', () => {
@@ -1026,21 +1018,15 @@ Ready. Type 'hydra' for usage help.</div>
         const isXff = /^x-forwarded-for\s*:\s*127\.0\.0\.1\s*$/im.test(req);
         responseEl.style.display = 'block';
         if (isPriceTamper || isXff) {
-          responseEl.style.background = 'rgba(239,68,68,0.1)';
-          responseEl.style.border = '1px solid rgba(239,68,68,0.4)';
-          responseEl.style.color = '#f87171';
+          responseEl.dataset.state = 'danger';
           responseEl.innerHTML = isPriceTamper
             ? '<strong>HTTP/1.1 200 OK</strong><br>{ "order": "confirmed", "charged": ' + escapeHtml(priceMatch[1]) + ' }<br><br><em>The server trusted the client-supplied price.</em>'
             : '<strong>HTTP/1.1 200 OK</strong><br>{ "access": "granted", "ip_seen": "127.0.0.1" }<br><br><em>The server trusted the spoofed X-Forwarded-For header.</em>';
         } else if (isSQLi || isAdminEmail) {
-          responseEl.style.background = 'rgba(239,68,68,0.1)';
-          responseEl.style.border = '1px solid rgba(239,68,68,0.4)';
-          responseEl.style.color = '#f87171';
+          responseEl.dataset.state = 'danger';
           responseEl.innerHTML = '<strong>HTTP/1.1 200 OK</strong><br>{ "authentication": { "token": "eyJhbGciOiJSUzI1NiJ9...", "umail": "admin@company.com" } }<br><br><em>SQLi payload or admin account bypass accepted! You\'re in as admin.</em>';
         } else {
-          responseEl.style.background = 'rgba(34,197,94,0.1)';
-          responseEl.style.border = '1px solid rgba(34,197,94,0.4)';
-          responseEl.style.color = '#4ade80';
+          responseEl.dataset.state = 'success';
           responseEl.innerHTML = '<strong>HTTP/1.1 401 Unauthorized</strong><br>{ "error": "Invalid email or password" }<br><br>Request forwarded normally. Try modifying the email with a SQLi payload!';
         }
       });
@@ -1056,68 +1042,68 @@ Ready. Type 'hydra' for usage help.</div>
   if (mod.id === 'sqli') {
     const sqliLabHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="sqliLabSection">
-        <div class="section-header" style="background: rgba(239,68,68,0.06); border-bottom: 1px solid rgba(239,68,68,0.3);">
+        <div class="section-header">
           <div class="section-icon concept">${LI.target}</div>
-          <h3 class="section-title" style="color: #ef4444;">SQLi Practice Lab — No Docker Required</h3>
+          <h3 class="section-title">SQLi Practice Lab — No Docker Required</h3>
         </div>
         <div class="section-body">
           <p>Test SQL injection payloads against a simulated login form. This lab works <strong>instantly</strong> — no lab setup needed. Observe how different payloads bypass or fail authentication.</p>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:16px;">
-            <div style="background:var(--bg-deep); border:1px solid rgba(239,68,68,0.3); border-radius:var(--radius); overflow:hidden;">
-              <div style="background:rgba(0,0,0,0.3); padding:8px 14px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                <span style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono);">SELECT * FROM users WHERE email='?' AND password='?'</span>
+          <div class="sim-grid-2">
+            <div class="sim-panel">
+              <div class="sim-panel-bar">
+                <span>SELECT * FROM users WHERE email='?' AND password='?'</span>
               </div>
-              <div style="padding:20px; display:flex; flex-direction:column; gap:10px;">
+              <div class="sim-panel-body">
                 <div>
-                  <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">EMAIL / USERNAME</label>
-                  <input type="text" id="sqliEmail" value="' OR 1=1--" style="width:100%;box-sizing:border-box;padding:8px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(239,68,68,0.4);color:var(--text-primary);border-radius:4px;font-family:var(--font-mono);font-size:12px;outline:none;">
+                  <label class="sim-label" for="sqliEmail">email / username</label>
+                  <input type="text" id="sqliEmail" class="sim-field" value="' OR 1=1--">
                 </div>
                 <div>
-                  <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">PASSWORD</label>
-                  <input type="text" id="sqliPass" value="anything" style="width:100%;box-sizing:border-box;padding:8px 10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text-primary);border-radius:4px;font-family:var(--font-mono);font-size:12px;outline:none;">
+                  <label class="sim-label" for="sqliPass">password</label>
+                  <input type="text" id="sqliPass" class="sim-field" value="anything">
                 </div>
-                <button id="sqliSubmit" style="padding:10px; background:linear-gradient(135deg,#ef4444,#b91c1c); color:#fff; font-weight:700; border:none; border-radius:4px; cursor:pointer;">Submit Injection</button>
+                <button id="sqliSubmit" class="btn btn-primary">Submit Injection</button>
               </div>
             </div>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Server Response</div>
-              <div id="sqliResponse" style="flex:1; background:var(--bg-deep); border:1px solid var(--border); border-radius:4px; padding:14px; font-family:var(--font-mono); font-size:12px; color:var(--text-secondary); min-height:120px;">Submit a payload to see the server's response...</div>
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Generated SQL</div>
-              <div id="sqliGeneratedSQL" style="background:var(--bg-deep); border:1px solid var(--border); border-radius:4px; padding:10px; font-family:var(--font-mono); font-size:11px; color:#64748b; white-space:pre-wrap;">SELECT * FROM users WHERE email='?' AND password='?'</div>
+            <div class="sim-stack">
+              <div class="sim-label">server response</div>
+              <div id="sqliResponse" class="sim-out is-grow">Submit a payload to see the server's response...</div>
+              <div class="sim-label">generated sql</div>
+              <div id="sqliGeneratedSQL" class="sim-out is-code">SELECT * FROM users WHERE email='?' AND password='?'</div>
             </div>
           </div>
-          <div style="margin-top:14px; background:var(--bg-deep); border:1px solid var(--border); border-radius:4px; padding:12px;">
-            <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">COMMON PAYLOADS — Click to load:</div>
-            <div style="display:flex; flex-wrap:wrap; gap:6px;">
-              <button class="sqli-payload-btn" data-email="' OR 1=1--" data-pass="anything" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:4px;cursor:pointer;">' OR 1=1--</button>
-              <button class="sqli-payload-btn" data-email="admin@site.com'--" data-pass="anything" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:4px;cursor:pointer;">admin'--</button>
-              <button class="sqli-payload-btn" data-email="' UNION SELECT 1,username,password FROM users--" data-pass="x" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:4px;cursor:pointer;">UNION SELECT</button>
-              <button class="sqli-payload-btn" data-email="' OR 'a'='a" data-pass="' OR 'a'='a" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:4px;cursor:pointer;">'OR'a'='a</button>
-              <button class="sqli-payload-btn" data-email="normal@user.com" data-pass="correctpassword" style="padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#4ade80;border-radius:4px;cursor:pointer;">Valid Login</button>
+          <div class="sim-out sim-block">
+            <div class="sim-label">common payloads — click to load</div>
+            <div class="sim-chips">
+              <button class="sqli-payload-btn sim-chip" data-email="' OR 1=1--" data-pass="anything">' OR 1=1--</button>
+              <button class="sqli-payload-btn sim-chip" data-email="admin@site.com'--" data-pass="anything">admin'--</button>
+              <button class="sqli-payload-btn sim-chip" data-email="' UNION SELECT 1,username,password FROM users--" data-pass="x">UNION SELECT</button>
+              <button class="sqli-payload-btn sim-chip" data-email="' OR 'a'='a" data-pass="' OR 'a'='a">'OR'a'='a</button>
+              <button class="sqli-payload-btn sim-chip is-safe" data-email="normal@user.com" data-pass="correctpassword">Valid Login</button>
             </div>
           </div>
-          
-          <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:4px; padding:16px; border-left:3px solid #ef4444;">
-              <h4 style="color:#e2e8f0; font-size:13px; margin-bottom:8px;">Step 1: Authentication Bypass</h4>
-              <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px; line-height:1.5;"><strong>Goal:</strong> Log in without knowing the password.</p>
-              <ul style="font-size:12px; color:var(--text-secondary); padding-left:20px; line-height:1.5; margin-bottom:8px;">
-                <li>Click the <span style="color:#ef4444; font-family:var(--font-mono);">' OR 1=1--</span> payload button above.</li>
+
+          <div class="sim-grid-2">
+            <div class="sim-step">
+              <h4>Step 1: Authentication Bypass</h4>
+              <p><strong>Goal:</strong> Log in without knowing the password.</p>
+              <ul>
+                <li>Click the <code>' OR 1=1--</code> payload button above.</li>
                 <li>Click <strong>Submit Injection</strong>.</li>
               </ul>
-              <div style="background:rgba(239,68,68,0.05); padding:8px; border-radius:4px; font-size:11px; color:#f87171;">
-                <strong>Why it works:</strong> The database evaluates <code style="font-family:var(--font-mono);">1=1</code> as TRUE, and the <code style="font-family:var(--font-mono);">--</code> comments out the password check!
+              <div class="sim-why">
+                <strong>Why it works:</strong> The database evaluates <code>1=1</code> as TRUE, and the <code>--</code> comments out the password check!
               </div>
             </div>
-            
-            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:4px; padding:16px; border-left:3px solid #f59e0b;">
-              <h4 style="color:#e2e8f0; font-size:13px; margin-bottom:8px;">Step 2: UNION Data Extraction</h4>
-              <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px; line-height:1.5;"><strong>Goal:</strong> Steal hidden data from the database.</p>
-              <ul style="font-size:12px; color:var(--text-secondary); padding-left:20px; line-height:1.5; margin-bottom:8px;">
-                <li>Click the <span style="color:#f59e0b; font-family:var(--font-mono);">UNION SELECT</span> payload button above.</li>
+
+            <div class="sim-step">
+              <h4>Step 2: UNION Data Extraction</h4>
+              <p><strong>Goal:</strong> Steal hidden data from the database.</p>
+              <ul>
+                <li>Click the <code>UNION SELECT</code> payload button above.</li>
                 <li>Click <strong>Submit Injection</strong>.</li>
               </ul>
-              <div style="background:rgba(245,158,11,0.05); padding:8px; border-radius:4px; font-size:11px; color:#fbbf24;">
+              <div class="sim-why">
                 <strong>Why it works:</strong> This appends a second query result to the first, pulling sensitive user data right into the server response.
               </div>
             </div>
@@ -1160,24 +1146,16 @@ Ready. Type 'hydra' for usage help.</div>
         const isValid = email === 'normal@user.com' && pass === 'correctpassword';
 
         if (isUnion) {
-          responseEl.style.background = 'rgba(251,146,60,0.1)';
-          responseEl.style.border = '1px solid rgba(251,146,60,0.4)';
-          responseEl.style.color = '#fb923c';
+          responseEl.dataset.state = 'warning';
           responseEl.innerHTML = '<strong>UNION-based Injection Detected</strong><br><br>Database dump:<br>admin@site.com : $2b$12$hash1...<br>user@site.com : $2b$12$hash2...<br><br><em>All user records extracted!</em>';
         } else if (isBypass) {
-          responseEl.style.background = 'rgba(239,68,68,0.1)';
-          responseEl.style.border = '1px solid rgba(239,68,68,0.4)';
-          responseEl.style.color = '#f87171';
+          responseEl.dataset.state = 'danger';
           responseEl.innerHTML = '<strong>Authentication Bypassed!</strong><br><br>Logged in as: <strong>admin@site.com</strong><br>Role: <strong>Administrator</strong><br>Token: eyJhbGciOiJSUzI1NiJ9...<br><br><em>The WHERE clause was broken by your injection.</em>';
         } else if (isValid) {
-          responseEl.style.background = 'rgba(34,197,94,0.1)';
-          responseEl.style.border = '1px solid rgba(34,197,94,0.4)';
-          responseEl.style.color = '#4ade80';
+          responseEl.dataset.state = 'success';
           responseEl.innerHTML = '<strong>Login Successful</strong><br><br>Welcome back, normal@user.com<br>Role: user<br><br><em>This is a legitimate authentication — no injection.</em>';
         } else {
-          responseEl.style.background = 'rgba(255,255,255,0.03)';
-          responseEl.style.border = '1px solid var(--border)';
-          responseEl.style.color = 'var(--text-secondary)';
+          delete responseEl.dataset.state;
           responseEl.innerHTML = '<strong>401 Unauthorized</strong><br><br>Invalid email or password.<br><br><em>Payload did not bypass authentication. Try a different injection.</em>';
         }
       }
@@ -1192,32 +1170,32 @@ Ready. Type 'hydra' for usage help.</div>
   if (mod.id === 'net-analyst') {
     const packetLabHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="packetLabSection">
-        <div class="section-header" style="background: rgba(34,211,238,0.05); border-bottom: 1px solid rgba(34,211,238,0.3);">
+        <div class="section-header">
           <div class="section-icon concept">${LI.signal}</div>
-          <h3 class="section-title" style="color: #22d3ee;">Live Packet Capture Simulator</h3>
+          <h3 class="section-title">Live Packet Capture Simulator</h3>
         </div>
         <div class="section-body">
           <p>Analyze a simulated packet stream. Use the filter bar to isolate suspicious traffic. Click any packet to inspect it. <strong>Find the malicious beacon hidden in the traffic!</strong></p>
-          <div style="display:flex; gap:10px; margin-top:16px; align-items:center; flex-wrap:wrap;">
-            <input type="text" id="packetFilter" placeholder="Display filter (e.g.: http, dns, ip.dst==13.37.13.37, tcp.dstport==4444)" style="flex:1;min-width:200px;padding:7px 12px;background:var(--bg-deep);border:1px solid rgba(34,211,238,0.4);color:var(--text-primary);font-family:var(--font-mono);font-size:12px;border-radius:4px;outline:none;">
-            <button id="packetFilterBtn" style="padding:7px 16px;background:rgba(34,211,238,0.15);border:1px solid rgba(34,211,238,0.4);color:#22d3ee;border-radius:4px;cursor:pointer;font-weight:700;">Apply</button>
-            <button id="packetClearFilter" style="padding:7px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text-secondary);border-radius:4px;cursor:pointer;">Clear</button>
-            <button id="packetStartCapture" style="padding:7px 16px;background:linear-gradient(135deg,#22d3ee,#0ea5e9);color:#000;border:none;border-radius:4px;cursor:pointer;font-weight:700;">▶ Start Capture</button>
+          <div class="sim-row sim-block">
+            <input type="text" id="packetFilter" class="sim-field" placeholder="Display filter (e.g.: http, dns, ip.dst==13.37.13.37, tcp.dstport==4444)">
+            <button id="packetFilterBtn" class="btn btn-secondary">Apply</button>
+            <button id="packetClearFilter" class="btn btn-secondary">Clear</button>
+            <button id="packetStartCapture" class="btn btn-primary">▶ Start Capture</button>
           </div>
-          <div style="margin-top:12px; border:1px solid rgba(34,211,238,0.2); border-radius:var(--radius); overflow:hidden;">
-            <div style="background:rgba(0,0,0,0.4); padding:6px 12px; display:grid; grid-template-columns:50px 90px 1fr 1fr 80px 60px; gap:8px; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.05);">
-              <span>No.</span><span>Time</span><span>Source</span><span>Destination</span><span>Protocol</span><span>Length</span>
+          <div class="pkt-frame">
+            <div class="pkt-head">
+              <span>no.</span><span>time</span><span>source</span><span>destination</span><span>protocol</span><span>length</span>
             </div>
-            <div id="packetList" style="height:240px; overflow-y:auto; background:var(--bg-deep);"></div>
+            <div id="packetList" class="pkt-list"></div>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;">
+          <div class="sim-grid-2">
             <div>
-              <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase;">Packet Detail</div>
-              <div id="packetDetail" style="background:var(--bg-deep); border:1px solid var(--border); border-radius:4px; padding:12px; font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); height:130px; overflow-y:auto;">Click a packet to inspect it...</div>
+              <div class="sim-label">packet detail</div>
+              <div id="packetDetail" class="sim-out pkt-out pkt-detail">Click a packet to inspect it...</div>
             </div>
             <div>
-              <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase;">Analysis Result</div>
-              <div id="packetAnalysis" style="background:var(--bg-deep); border:1px solid var(--border); border-radius:4px; padding:12px; font-size:12px; color:var(--text-secondary); height:130px; overflow-y:auto;">Select a suspicious packet to trigger analysis...</div>
+              <div class="sim-label">analysis result</div>
+              <div id="packetAnalysis" class="sim-out pkt-out">Select a suspicious packet to trigger analysis...</div>
             </div>
           </div>
         </div>
@@ -1757,52 +1735,54 @@ function startTutorial(tutorialKey) {
     }
   }, 100);
   
+  // Injected into the app document AND into the Juice Shop webview, where the
+  // app's tokens do not exist, so every token carries its palette value as a fallback.
   const tutorialCSS = `
     #cyber-tut-backdrop {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(0, 0, 0, 0.65); z-index: 999990;
       pointer-events: none;
-      display: block; transition: clip-path 0.4s ease;
+      display: block; transition: clip-path var(--dur-base, 200ms) cubic-bezier(.2, .8, .2, 1);
     }
     #cyber-tut-bubble {
       position: fixed; z-index: 999999;
-      background: linear-gradient(135deg, rgba(10, 14, 23, 0.97), rgba(17, 24, 39, 0.97));
-      border: 2px solid rgba(0, 240, 255, 0.5);
-      border-radius: 12px; padding: 20px 24px;
-      color: #e2e8f0; font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+      background: var(--bg-surface, #0e1311);
+      border: 1px solid var(--border-accent, rgba(95, 214, 140, 0.28));
+      border-radius: 8px; padding: 16px 18px;
+      color: var(--text-primary, #e6e9e4); font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
       font-size: 14px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px rgba(0,240,255,0.15);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
       max-width: 340px; min-width: 240px;
       pointer-events: auto;
     }
     #cyber-tut-bubble .tut-step-badge {
-      display: inline-block; font-weight: 700; color: #00f0ff;
-      font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
-      margin-bottom: 10px; padding: 3px 8px;
-      background: rgba(0,240,255,0.1); border-radius: 4px;
+      display: block; font-family: 'JetBrains Mono', Consolas, monospace;
+      font-weight: 500; font-size: 11px; letter-spacing: 0.04em; text-transform: lowercase;
+      color: var(--accent, #5fd68c);
+      margin-bottom: 8px;
     }
     #cyber-tut-bubble .tut-text {
-      line-height: 1.6; font-size: 14px; color: #cbd5e1;
+      line-height: 1.6; font-size: 14px; color: var(--text-secondary, #a6b0a9);
     }
     #cyber-tut-bubble .tut-skip-btn {
       margin-top: 14px; display: flex; gap: 8px;
     }
     #cyber-tut-bubble .tut-btn {
-      flex: 1; padding: 8px 12px; border-radius: 6px; cursor: pointer;
-      font-size: 12px; font-weight: 600; text-align: center; border: none;
-      transition: all 0.15s ease;
+      flex: 1; padding: 7px 12px; border-radius: 4px; cursor: pointer;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 12px; font-weight: 500; text-align: center; border: 1px solid transparent;
     }
     #cyber-tut-bubble .tut-btn-primary {
-      background: rgba(0,240,255,0.15); border: 1px solid #00f0ff; color: #00f0ff;
+      background: var(--accent, #5fd68c); border-color: var(--accent, #5fd68c); color: var(--on-accent, #07090a); font-weight: 700;
     }
-    #cyber-tut-bubble .tut-btn-primary:hover { background: rgba(0,240,255,0.25); }
+    #cyber-tut-bubble .tut-btn-primary:hover { background: var(--accent-hover, #80e3a5); border-color: var(--accent-hover, #80e3a5); }
     #cyber-tut-bubble .tut-btn-secondary {
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8;
+      background: transparent; border-color: var(--border, rgba(230, 233, 228, 0.08)); color: var(--text-secondary, #a6b0a9);
     }
-    #cyber-tut-bubble .tut-btn-secondary:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+    #cyber-tut-bubble .tut-btn-secondary:hover { background: var(--bg-hover, #1b2420); color: var(--text-primary, #e6e9e4); }
     .cyber-tut-highlight {
       position: relative !important; z-index: 999995 !important;
-      box-shadow: 0 0 0 4px rgba(0,240,255,0.4), 0 0 20px rgba(0,240,255,0.2) !important;
+      box-shadow: 0 0 0 2px var(--amber, #ffb000) !important;
       border-radius: 4px;
     }
     #cyber-tut-arrow {
@@ -1912,7 +1892,7 @@ function startTutorial(tutorialKey) {
             if (target && !frame.contentWindow.document.getElementById('cyber-tut-styles-iframe')) {
               var s = frame.contentWindow.document.createElement('style');
               s.id = 'cyber-tut-styles-iframe';
-              s.textContent = '.cyber-tut-highlight { position: relative !important; z-index: 999995 !important; box-shadow: 0 0 0 4px rgba(0,240,255,0.4), 0 0 20px rgba(0,240,255,0.2) !important; border-radius: 4px; }';
+              s.textContent = '.cyber-tut-highlight { position: relative !important; z-index: 999995 !important; box-shadow: 0 0 0 2px #ffb000 !important; border-radius: 4px; }';
               frame.contentWindow.document.head.appendChild(s);
             }
           }
@@ -2235,7 +2215,7 @@ function startSocSimulator() {
     logLine.id = lineId;
     
     const escapedPath = escapeHtml(actualPath);
-    logLine.innerHTML = `<span class="timestamp">[${time}]</span> <span class="ip">${actualIp}</span> <span class="method">${actualMethod}</span> ${escapedPath} HTTP/1.1" <span style="color:${actualStatus === '500' || actualStatus === '401' ? '#ff5f56' : '#27c93f'}">${actualStatus}</span>`;
+    logLine.innerHTML = `<span class="timestamp">[${time}]</span> <span class="ip">${actualIp}</span> <span class="method">${actualMethod}</span> ${escapedPath} HTTP/1.1" <span class="log-status${actualStatus === '500' || actualStatus === '401' ? ' is-error' : ''}">${actualStatus}</span>`;
     
     const lineScenario = isMalicious ? activeScenario : null;
 
@@ -2249,14 +2229,14 @@ function startSocSimulator() {
       if (intelPanel) {
         let riskScore = isMalicious ? Math.floor(Math.random() * 20 + 80) : Math.floor(Math.random() * 20 + 10);
         let geo = isMalicious ? 'Unknown/Tor' : 'US-EAST';
-        let rep = isMalicious ? '<span style="color:var(--danger)">High Risk</span>' : '<span style="color:var(--success)">Clean</span>';
+        let rep = isMalicious ? '<span class="intel-risk">High Risk</span>' : '<span class="intel-clean">Clean</span>';
         let sourcePort = Math.floor(Math.random() * 50000 + 1024);
         let userAgent = isMalicious ? 'curl/7.68.0' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
         intelPanel.innerHTML = `
-          <div class="intel-item" style="background:var(--bg-deep); padding:8px; border-radius:4px; margin-bottom:12px; border-left:3px solid var(--cyan);">
-            <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Captured Request</div>
-            <div style="color:var(--cyan); word-break:break-all;"><strong>${escapeHtml(actualMethod)}</strong> ${escapeHtml(actualPath)}</div>
-            <div style="color:var(--text-secondary); margin-top:4px; font-size:11px;">Status: ${escapeHtml(actualStatus)}</div>
+          <div class="intel-item intel-capture">
+            <div class="intel-capture-label">captured request</div>
+            <div class="intel-capture-req"><strong>${escapeHtml(actualMethod)}</strong> ${escapeHtml(actualPath)}</div>
+            <div class="intel-capture-status">Status: ${escapeHtml(actualStatus)}</div>
           </div>
           <div class="intel-item"><strong>IP Address:</strong> <span>${escapeHtml(actualIp)}</span></div>
           <div class="intel-item"><strong>Source Port:</strong> <span>${sourcePort}</span></div>
@@ -2264,9 +2244,9 @@ function startSocSimulator() {
           <div class="intel-item"><strong>GeoLocation:</strong> <span>${geo}</span></div>
           <div class="intel-item"><strong>Threat Score:</strong> <span>${riskScore}/100</span></div>
           <div class="intel-item"><strong>Reputation:</strong> <span>${rep}</span></div>
-          <div style="margin-top:15px; padding-top:10px; border-top:1px solid var(--border-accent);">
-            <strong>Analysis:</strong><br>
-            <span style="color:var(--text-secondary); font-size:11px;">
+          <div class="intel-analysis">
+            <strong>Analysis:</strong>
+            <span class="intel-analysis-text">
               ${isMalicious ? 'Pattern matches known exploitation signatures. Immediate mitigation required.' : 'Traffic patterns appear nominal. No malicious signatures detected.'}
             </span>
           </div>
@@ -2278,19 +2258,14 @@ function startSocSimulator() {
         const wafIndicator = document.getElementById('wafStatusIndicator');
         const wafAction = document.getElementById('wafLastAction');
         if (wafIndicator && wafAction) {
-          wafIndicator.style.background = 'var(--danger)';
-          wafIndicator.style.boxShadow = '0 0 10px var(--danger)';
+          wafIndicator.dataset.state = 'alert';
           wafAction.textContent = 'Anomaly Detected. Awaiting Analyst Action.';
-          wafAction.style.color = 'var(--danger)';
+          wafAction.dataset.state = 'alert';
         }
       } else {
         document.getElementById('remediationPanel').classList.add('locked');
         // Briefly show error toast
-        const toast = document.createElement('div');
-        toast.style = 'position:fixed; bottom:20px; right:20px; background:var(--danger); color:white; padding:10px 20px; border-radius:4px; z-index:9999;';
-        toast.textContent = 'False Positive. Keep looking.';
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2000);
+        socToast('False Positive. Keep looking.');
       }
     };
     
@@ -2322,9 +2297,10 @@ const VALID_REMEDIATION = {
   idor:  ['RESET', 'ISOLATE']
 };
 
-function socToast(message, bg) {
+function socToast(message) {
   const toast = document.createElement('div');
-  toast.style = `position:fixed; bottom:20px; right:20px; background:${bg}; color:white; padding:10px 20px; border-radius:4px; z-index:9999;`;
+  toast.className = 'soc-toast';
+  toast.setAttribute('role', 'status');
   toast.textContent = message;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 2000);
@@ -2333,13 +2309,13 @@ function socToast(message, bg) {
 function submitRemediation(action) {
   // Must have flagged a real threat first.
   if (!socFlaggedScenario) {
-    socToast('Flag a valid threat in the log before applying remediation.', 'var(--danger)');
+    socToast('Flag a valid threat in the log before applying remediation.');
     return;
   }
 
   const valid = VALID_REMEDIATION[socFlaggedScenario] || [];
   if (!valid.includes(action)) {
-    socToast('Incorrect remediation for this threat vector. Try again.', 'var(--danger)');
+    socToast('Incorrect remediation for this threat vector. Try again.');
     return;
   }
 
@@ -2347,22 +2323,23 @@ function submitRemediation(action) {
   const wafIndicator = document.getElementById('wafStatusIndicator');
   const wafAction = document.getElementById('wafLastAction');
   if (wafIndicator && wafAction) {
-    wafIndicator.style.background = 'var(--success)';
-    wafIndicator.style.boxShadow = '0 0 10px var(--success)';
+    delete wafIndicator.dataset.state;
     wafAction.textContent = 'Threat Mitigated: ' + action;
-    wafAction.style.color = 'var(--success)';
+    wafAction.dataset.state = 'ok';
   }
 
   if (socStreamInterval) { clearInterval(socStreamInterval); socStreamInterval = null; }
   socFlaggedScenario = null;
   const panel = document.getElementById('remediationPanel');
   panel.innerHTML = `
-    <div style="text-align:center; padding:20px;">
-      <div style="font-size:30px; line-height:1; margin-bottom:10px; color:var(--success);">&#10003;</div>
-      <h3 style="color:var(--success); margin:0 0 10px 0;">Threat Neutralized!</h3>
-      <p style="color:var(--text-secondary); font-size:13px;">Excellent work, Analyst. The ${escapeHtml(action)} policy has been applied and the network is secure.</p>
-      <button class="btn btn-boot" onclick="window.__app.resumeSocSimulator()" style="margin-top:20px;">Continue Monitoring</button>
-      <button class="btn btn-secondary" onclick="window.__app.exitSoc()" style="margin-top:20px; margin-left:10px;">Exit SOC</button>
+    <div class="soc-resolved">
+      <div class="soc-resolved-icon" aria-hidden="true">&#10003;</div>
+      <h3>Threat Neutralized!</h3>
+      <p>Excellent work, Analyst. The ${escapeHtml(action)} policy has been applied and the network is secure.</p>
+      <div class="soc-resolved-actions">
+        <button class="btn btn-boot" onclick="window.__app.resumeSocSimulator()">Continue Monitoring</button>
+        <button class="btn btn-secondary" onclick="window.__app.exitSoc()">Exit SOC</button>
+      </div>
     </div>
   `;
 
@@ -2563,10 +2540,9 @@ function resumeSocSimulator() {
   const wafIndicator = document.getElementById('wafStatusIndicator');
   const wafAction = document.getElementById('wafLastAction');
   if (wafIndicator && wafAction) {
-    wafIndicator.style.background = 'var(--success)';
-    wafIndicator.style.boxShadow = '0 0 10px var(--success)';
+    delete wafIndicator.dataset.state;
     wafAction.textContent = '0 Threats Mitigated';
-    wafAction.style.color = 'var(--text-secondary)';
+    delete wafAction.dataset.state;
   }
   
   const intelPanel = document.getElementById('threatIntelPanel');
@@ -2638,7 +2614,7 @@ function simulateTerminalCommand({ outputId, terminalId, loadingId, promptHtml, 
     }
 
     const { result, delay } = resolveFn(cmd);
-    outputEl.innerHTML += `<span id="${loadingId}" style="color:var(--text-muted);">Executing...</span>`;
+    outputEl.innerHTML += `<span id="${loadingId}" class="sim-muted">Executing...</span>`;
     terminalEl.scrollTop = terminalEl.scrollHeight;
 
     setTimeout(() => {
@@ -2656,10 +2632,10 @@ const handleNmapCommand = simulateTerminalCommand({
   outputId:   'nmapSimOutput',
   terminalId: 'nmapSimTerminal',
   loadingId:  'nmapSimLoading',
-  promptHtml: `<span style="color:var(--cyan);">[user@cyber-lab ~]$</span>`,
+  promptHtml: `<span class="sim-prompt">[user@cyber-lab ~]$</span>`,
   guardFn: (cmd) => {
     if (!cmd.startsWith('nmap') && !cmd.startsWith('ping'))
-      return `<span style="color:var(--danger);">Command not found or not supported in this simulator. Try 'nmap' or 'ping'.</span>`;
+      return `<span class="sim-err">Command not found or not supported in this simulator. Try 'nmap' or 'ping'.</span>`;
     return null;
   },
   resolveFn: (cmd) => {
@@ -2730,7 +2706,7 @@ function handleHydraCommand(cmd) {
   const terminalEl = document.getElementById('hydraSimTerminal');
   if (!outputEl) return;
 
-  outputEl.innerHTML += `\n<span style="color:#ec4899;">[user@cyber-lab ~]$</span> ${escapeHtml(cmd)}\n`;
+  outputEl.innerHTML += `\n<span class="sim-prompt">[user@cyber-lab ~]$</span> ${escapeHtml(cmd)}\n`;
 
   if (cmd === 'hydra' || cmd === 'hydra --help' || cmd === 'hydra -h') {
     outputEl.innerHTML += `Hydra v9.5 (c) 2023 by van Hauser/THC & David Maciejak
@@ -2767,7 +2743,7 @@ Example:
   }
 
   if (!cmd.startsWith('hydra')) {
-    outputEl.innerHTML += `<span style="color:var(--danger);">Command not found. This simulator only supports 'hydra' commands. Type 'hydra' for help.</span>\n`;
+    outputEl.innerHTML += `<span class="sim-err">Command not found. This simulator only supports 'hydra' commands. Type 'hydra' for help.</span>\n`;
     terminalEl.scrollTop = terminalEl.scrollHeight;
     return;
   }
@@ -2775,7 +2751,7 @@ Example:
   const isVerbose = cmd.includes('-V');
   const delay = isVerbose ? 2500 : 1800;
 
-  outputEl.innerHTML += `<span id="hydraSimLoading" style="color:var(--text-muted);">Hydra starting at ${new Date().toLocaleTimeString()}...\n[DATA] Attacking target...</span>`;
+  outputEl.innerHTML += `<span id="hydraSimLoading" class="sim-muted">Hydra starting at ${new Date().toLocaleTimeString()}...\n[DATA] Attacking target...</span>`;
   terminalEl.scrollTop = terminalEl.scrollHeight;
 
   setTimeout(() => {
@@ -2791,23 +2767,23 @@ Example:
       if (isVerbose) {
         result = `[DATA] max 4 tasks per 1 server, overall 4 tasks, 14344392 login tests
 [DATA] attacking ssh://${target}:22/
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "123456" - 1 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "password" - 2 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "12345678" - 3 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "qwerty" - 4 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "abc123" - 5 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "monkey" - 6 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "1234567" - 7 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "letmein" - 8 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "trustno1" - 9 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "dragon" - 10 of 14344392</span>
-<span style="color:var(--success);">[22][ssh] host: ${target}   login: ${user}   password: dragon</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "123456" - 1 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "password" - 2 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "12345678" - 3 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "qwerty" - 4 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "abc123" - 5 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "monkey" - 6 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "1234567" - 7 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "letmein" - 8 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "trustno1" - 9 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "dragon" - 10 of 14344392</span>
+<span class="sim-ok">[22][ssh] host: ${target}   login: ${user}   password: dragon</span>
 1 of 1 target successfully completed, 1 valid password found
 Hydra finished at ${timestamp}`;
       } else {
         result = `[DATA] max 4 tasks per 1 server, overall 4 tasks, 14344392 login tests
 [DATA] attacking ssh://${target}:22/
-<span style="color:var(--success);">[22][ssh] host: ${target}   login: ${user}   password: dragon</span>
+<span class="sim-ok">[22][ssh] host: ${target}   login: ${user}   password: dragon</span>
 1 of 1 target successfully completed, 1 valid password found
 Hydra finished at ${timestamp}`;
       }
@@ -2816,7 +2792,7 @@ Hydra finished at ${timestamp}`;
       const user = escapeHtml(cmd.match(/-l\s+(\S+)/)?.[1] || 'admin');
       result = `[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344392 login tests
 [DATA] attacking ftp://${target}:21/
-<span style="color:var(--success);">[21][ftp] host: ${target}   login: ${user}   password: admin123</span>
+<span class="sim-ok">[21][ftp] host: ${target}   login: ${user}   password: admin123</span>
 1 of 1 target successfully completed, 1 valid password found
 Hydra finished at ${timestamp}`;
     } else if (cmd.includes('http-post-form') || cmd.includes('http-get-form')) {
@@ -2825,19 +2801,19 @@ Hydra finished at ${timestamp}`;
       if (isVerbose) {
         result = `[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344392 login tests
 [DATA] attacking http-post-form://${target}/
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "123456" - 1 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "password" - 2 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "admin123" - 3 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "iloveyou" - 4 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "princess" - 5 of 14344392</span>
-<span style="color:var(--text-muted);">[ATTEMPT] target ${target} - login "${user}" - pass "admin" - 6 of 14344392</span>
-<span style="color:var(--success);">[80][http-post-form] host: ${target}   login: ${user}   password: admin123</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "123456" - 1 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "password" - 2 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "admin123" - 3 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "iloveyou" - 4 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "princess" - 5 of 14344392</span>
+<span class="sim-muted">[ATTEMPT] target ${target} - login "${user}" - pass "admin" - 6 of 14344392</span>
+<span class="sim-ok">[80][http-post-form] host: ${target}   login: ${user}   password: admin123</span>
 1 of 1 target successfully completed, 1 valid password found
 Hydra finished at ${timestamp}`;
       } else {
         result = `[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344392 login tests
 [DATA] attacking http-post-form://${target}/
-<span style="color:var(--success);">[80][http-post-form] host: ${target}   login: ${user}   password: admin123</span>
+<span class="sim-ok">[80][http-post-form] host: ${target}   login: ${user}   password: admin123</span>
 1 of 1 target successfully completed, 1 valid password found
 Hydra finished at ${timestamp}`;
       }
@@ -2863,24 +2839,24 @@ function handleSqlmapCommand(cmd) {
   const terminalEl = document.getElementById('sqlmapSimTerminal');
   if (!outputEl) return;
 
-  outputEl.innerHTML += `\n<span style="color:#fb923c;">[sqlmap]$ </span>${escapeHtml(cmd)}\n`;
+  outputEl.innerHTML += `\n<span class="sim-prompt">[sqlmap]$ </span>${escapeHtml(cmd)}\n`;
   terminalEl.scrollTop = terminalEl.scrollHeight;
 
   if (cmd === 'sqlmap --help' || cmd === 'sqlmap -h') {
-    outputEl.innerHTML += `<span style="color:#fb923c;">Usage:</span> sqlmap [options]\n\n<span style="color:#fb923c;">Target:</span>\n  -u URL             Target URL (e.g. http://site.com/page?id=1)\n  -r FILE            Load HTTP request from file\n\n<span style="color:#fb923c;">Detection:</span>\n  --level=LEVEL      Detection level (1-5, default: 1)\n  --risk=RISK        Risk of tests (1-3, default: 1)\n\n<span style="color:#fb923c;">Techniques:</span>\n  --technique=TECH   SQL injection techniques (B/E/U/S/T/Q)\n                     B=Boolean, E=Error, U=Union, T=Time\n\n<span style="color:#fb923c;">Enumeration:</span>\n  --dbs              Enumerate DBMS databases\n  --tables           Enumerate tables\n  --columns          Enumerate columns\n  --dump             Dump table entries\n  -D DB              DBMS database to enumerate\n  -T TBL             Table to enumerate\n\n<span style="color:#fb923c;">Fingerprint:</span>\n  -b, --banner       Retrieve DBMS banner\n  --current-user     Retrieve current DB user\n  --current-db       Retrieve current DB\n\n<span style="color:#fb923c;">Examples:</span>\n  sqlmap -u "http://target.com/item?id=1" --dbs\n  sqlmap -u "http://target.com/item?id=1" -D shopdb --tables\n  sqlmap -u "http://target.com/item?id=1" -D shopdb -T users --dump\n`;
+    outputEl.innerHTML += `<span class="sim-key">Usage:</span> sqlmap [options]\n\n<span class="sim-key">Target:</span>\n  -u URL             Target URL (e.g. http://site.com/page?id=1)\n  -r FILE            Load HTTP request from file\n\n<span class="sim-key">Detection:</span>\n  --level=LEVEL      Detection level (1-5, default: 1)\n  --risk=RISK        Risk of tests (1-3, default: 1)\n\n<span class="sim-key">Techniques:</span>\n  --technique=TECH   SQL injection techniques (B/E/U/S/T/Q)\n                     B=Boolean, E=Error, U=Union, T=Time\n\n<span class="sim-key">Enumeration:</span>\n  --dbs              Enumerate DBMS databases\n  --tables           Enumerate tables\n  --columns          Enumerate columns\n  --dump             Dump table entries\n  -D DB              DBMS database to enumerate\n  -T TBL             Table to enumerate\n\n<span class="sim-key">Fingerprint:</span>\n  -b, --banner       Retrieve DBMS banner\n  --current-user     Retrieve current DB user\n  --current-db       Retrieve current DB\n\n<span class="sim-key">Examples:</span>\n  sqlmap -u "http://target.com/item?id=1" --dbs\n  sqlmap -u "http://target.com/item?id=1" -D shopdb --tables\n  sqlmap -u "http://target.com/item?id=1" -D shopdb -T users --dump\n`;
     terminalEl.scrollTop = terminalEl.scrollHeight;
     return;
   }
 
   if (!cmd.startsWith('sqlmap')) {
-    outputEl.innerHTML += `<span style="color:var(--danger);">Command not found. Type 'sqlmap --help' for usage.</span>\n`;
+    outputEl.innerHTML += `<span class="sim-err">Command not found. Type 'sqlmap --help' for usage.</span>\n`;
     terminalEl.scrollTop = terminalEl.scrollHeight;
     return;
   }
 
   const hasUrl = /-u\s+["']?https?:\/\//i.test(cmd);
   if (!hasUrl && !cmd.includes('-r ')) {
-    outputEl.innerHTML += `<span style="color:var(--danger);">No target URL specified. Use: sqlmap -u "http://target.com/page?id=1"</span>\n`;
+    outputEl.innerHTML += `<span class="sim-err">No target URL specified. Use: sqlmap -u "http://target.com/page?id=1"</span>\n`;
     terminalEl.scrollTop = terminalEl.scrollHeight;
     return;
   }
@@ -2900,41 +2876,41 @@ function handleSqlmapCommand(cmd) {
   const level = cmd.match(/--level=(\d)/)?.[1] || '1';
   const risk = cmd.match(/--risk=(\d)/)?.[1] || '1';
 
-  outputEl.innerHTML += `<span style="color:var(--text-muted);">        ___\n       __H__\n ___ ___[)]_____ ___ ___  {1.7.12#stable}</span>\n`;
+  outputEl.innerHTML += `<span class="sim-muted">        ___\n       __H__\n ___ ___[)]_____ ___ ___  {1.7.12#stable}</span>\n`;
   outputEl.innerHTML += `[*] starting @ ${new Date().toLocaleTimeString()}\n`;
   outputEl.innerHTML += `[*] testing connection to target URL...\n`;
   terminalEl.scrollTop = terminalEl.scrollHeight;
 
   const delay = hasDump ? 2200 : hasTables ? 1800 : 1400;
-  outputEl.innerHTML += `<span id="sqlmapLoading" style="color:var(--text-muted);">testing...</span>`;
+  outputEl.innerHTML += `<span id="sqlmapLoading" class="sim-muted">testing...</span>`;
 
   setTimeout(() => {
     const loading = document.getElementById('sqlmapLoading');
     if (loading) loading.remove();
 
-    outputEl.innerHTML += `[*] testing if the target URL content is stable... <span style="color:var(--success);">yes</span>\n`;
-    outputEl.innerHTML += `[*] testing if GET parameter 'id' is dynamic... <span style="color:var(--success);">yes</span>\n`;
+    outputEl.innerHTML += `[*] testing if the target URL content is stable... <span class="sim-ok">yes</span>\n`;
+    outputEl.innerHTML += `[*] testing if GET parameter 'id' is dynamic... <span class="sim-ok">yes</span>\n`;
     outputEl.innerHTML += `[*] heuristic (basic) test shows that GET parameter 'id' might be injectable\n`;
     outputEl.innerHTML += `[*] testing for SQL injection on GET parameter 'id'\n`;
     outputEl.innerHTML += `[*] testing 'AND boolean-based blind - WHERE or HAVING clause'\n`;
-    outputEl.innerHTML += `[*] GET parameter 'id' appears to be <span style="color:var(--success);">Boolean-based injectable</span>\n`;
+    outputEl.innerHTML += `[*] GET parameter 'id' appears to be <span class="sim-ok">Boolean-based injectable</span>\n`;
     outputEl.innerHTML += `[*] testing 'MySQL >= 5.0.12 AND time-based blind'\n`;
-    outputEl.innerHTML += `[*] GET parameter 'id' appears to be <span style="color:var(--success);">Time-based injectable (stacked queries)</span>\n`;
+    outputEl.innerHTML += `[*] GET parameter 'id' appears to be <span class="sim-ok">Time-based injectable (stacked queries)</span>\n`;
     outputEl.innerHTML += `[*] testing 'Generic UNION query (NULL) - 1 to 20 columns'\n`;
     outputEl.innerHTML += `[*] automatically extending ranges for UNION query injection technique\n`;
-    outputEl.innerHTML += `[*] <span style="color:var(--success);">target URL appears to be UNION injectable with 3 columns</span>\n\n`;
-    outputEl.innerHTML += `<span style="color:var(--success);">sqlmap identified the following injection point(s):</span>\n`;
+    outputEl.innerHTML += `[*] <span class="sim-ok">target URL appears to be UNION injectable with 3 columns</span>\n\n`;
+    outputEl.innerHTML += `<span class="sim-ok">sqlmap identified the following injection point(s):</span>\n`;
     outputEl.innerHTML += `---\nParameter: id (GET)\n    Type: boolean-based blind\n    Title: AND boolean-based blind - WHERE or HAVING clause\n    Payload: id=1 AND 1871=1871\n\n    Type: time-based blind\n    Title: MySQL >= 5.0.12 AND time-based blind (query SLEEP)\n    Payload: id=1 AND SLEEP(5)\n\n    Type: UNION query\n    Title: Generic UNION query (NULL) - 3 columns\n    Payload: id=NULL UNION ALL SELECT NULL,CONCAT(0x7162717071,...),NULL--\n---\n`;
 
     const dbms = 'MySQL >= 5.0 (MariaDB fork)';
-    outputEl.innerHTML += `[*] the back-end DBMS is <span style="color:#fb923c;">${dbms}</span>\n`;
+    outputEl.innerHTML += `[*] the back-end DBMS is <span class="sim-key">${dbms}</span>\n`;
 
     if (hasBanner) outputEl.innerHTML += `[*] fetching banner\nbanner: '5.7.40-0ubuntu0.22.04.1'\n`;
     if (hasCurrentUser) outputEl.innerHTML += `[*] fetching current user\ncurrent user: 'webapp@localhost'\n`;
     if (hasCurrentDb) outputEl.innerHTML += `[*] fetching current database\ncurrent database: 'shopdb'\n`;
 
     if (hasDbs) {
-      outputEl.innerHTML += `\n[*] fetching database names\n[*] retrieved: 3\navailable databases [3]:\n[*] information_schema\n[*] <span style="color:var(--success);">shopdb</span>\n[*] mysql\n`;
+      outputEl.innerHTML += `\n[*] fetching database names\n[*] retrieved: 3\navailable databases [3]:\n[*] information_schema\n[*] <span class="sim-ok">shopdb</span>\n[*] mysql\n`;
     }
     if (hasTables && dbFlag) {
       outputEl.innerHTML += `\n[*] fetching tables for database: '${dbFlag}'\n[*] retrieved: 4\nDatabase: ${dbFlag}\n[4 tables]\n+----------+\n| users    |\n| products |\n| orders   |\n| sessions |\n+----------+\n`;
@@ -2943,10 +2919,10 @@ function handleSqlmapCommand(cmd) {
       outputEl.innerHTML += `\n[*] fetching columns for table '${tblFlag}' in database '${dbFlag}'\nDatabase: ${dbFlag}\nTable: ${tblFlag}\n[4 columns]\n+----------+--------------+\n| Column   | Type         |\n+----------+--------------+\n| id       | int(11)      |\n| email    | varchar(200) |\n| password | varchar(300) |\n| role     | varchar(50)  |\n+----------+--------------+\n`;
     }
     if (hasDump && dbFlag && tblFlag) {
-      outputEl.innerHTML += `\n[*] fetching entries of column(s) 'email,password,role' for table '${tblFlag}' in database '${dbFlag}'\n[*] recognized possible password hashes in column 'password'\nDatabase: ${dbFlag}\nTable: ${tblFlag}\n[3 entries]\n+---------+-----------------------------+----------+\n| id      | email                       | role     |\n+---------+-----------------------------+----------+\n| 1       | <span style="color:var(--danger);">admin@company.com</span>           | <span style="color:#fb923c;">admin</span>    |\n| 2       | alice@company.com           | user     |\n| 3       | bob@company.com             | user     |\n+---------+-----------------------------+----------+\n\n<span style="color:var(--success);">table dumped to '/root/.local/share/sqlmap/output/${targetHost}/dump/${dbFlag}/${tblFlag}.csv'</span>\n`;
+      outputEl.innerHTML += `\n[*] fetching entries of column(s) 'email,password,role' for table '${tblFlag}' in database '${dbFlag}'\n[*] recognized possible password hashes in column 'password'\nDatabase: ${dbFlag}\nTable: ${tblFlag}\n[3 entries]\n+---------+-----------------------------+----------+\n| id      | email                       | role     |\n+---------+-----------------------------+----------+\n| 1       | <span class="sim-err">admin@company.com</span>           | <span class="sim-key">admin</span>    |\n| 2       | alice@company.com           | user     |\n| 3       | bob@company.com             | user     |\n+---------+-----------------------------+----------+\n\n<span class="sim-ok">table dumped to '/root/.local/share/sqlmap/output/${targetHost}/dump/${dbFlag}/${tblFlag}.csv'</span>\n`;
     }
     if (!hasDbs && !hasTables && !hasDump && !hasColumns && !hasBanner && !hasCurrentUser && !hasCurrentDb) {
-      outputEl.innerHTML += `\n[*] <span style="color:#fb923c;">Tip:</span> Vulnerability confirmed! Now enumerate with:\n    --dbs              (list databases)\n    -D shopdb --tables (list tables)\n    -D shopdb -T users --dump  (dump user table)\n`;
+      outputEl.innerHTML += `\n[*] <span class="sim-key">Tip:</span> Vulnerability confirmed! Now enumerate with:\n    --dbs              (list databases)\n    -D shopdb --tables (list tables)\n    -D shopdb -T users --dump  (dump user table)\n`;
     }
     outputEl.innerHTML += `\n[*] ending @ ${new Date().toLocaleTimeString()}\n`;
     terminalEl.scrollTop = terminalEl.scrollHeight;
@@ -2994,26 +2970,21 @@ function initPacketLab() {
 
   function renderPacket(pkt, num, ts) {
     const row = document.createElement('div');
-    const color = pkt.malicious ? '#ef4444' : '#a6accd';
-    row.style.cssText = `display:grid; grid-template-columns:50px 90px 1fr 1fr 80px 60px; gap:8px; padding:4px 12px; font-family:var(--font-mono); font-size:11px; color:${color}; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.03);`;
-    row.innerHTML = `<span>${num}</span><span>${ts}</span><span>${pkt.src}</span><span>${pkt.dst}</span><span style="color:${pkt.proto==='HTTP'?'#22d3ee':pkt.proto==='DNS'?'#a78bfa':pkt.proto==='TLS'?'#4ade80':color};">${pkt.proto}</span><span>${pkt.len}</span>`;
+    row.className = 'pkt-row' + (pkt.malicious ? ' is-malicious' : '');
+    row.innerHTML = `<span>${num}</span><span>${ts}</span><span>${pkt.src}</span><span>${pkt.dst}</span><span class="pkt-proto" data-proto="${pkt.proto}">${pkt.proto}</span><span>${pkt.len}</span>`;
     row.title = pkt.info;
     row.addEventListener('click', () => {
-      listEl.querySelectorAll('div').forEach(r => r.style.background = '');
-      row.style.background = pkt.malicious ? 'rgba(239,68,68,0.15)' : 'rgba(34,211,238,0.1)';
+      listEl.querySelectorAll('.pkt-row.is-selected').forEach(r => r.classList.remove('is-selected'));
+      row.classList.add('is-selected');
       if (detailEl) {
-        detailEl.innerHTML = `<span style="color:#22d3ee;">Frame ${num}: ${pkt.len} bytes captured</span>\nTime: ${ts}\nSrc: ${pkt.src}\nDst: ${pkt.dst}\nProtocol: ${pkt.proto}\nInfo: ${escapeHtml(pkt.info)}`;
+        detailEl.innerHTML = `<span class="pkt-frame-line">Frame ${num}: ${pkt.len} bytes captured</span>\nTime: ${ts}\nSrc: ${pkt.src}\nDst: ${pkt.dst}\nProtocol: ${pkt.proto}\nInfo: ${escapeHtml(pkt.info)}`;
       }
       if (analysisEl) {
         if (pkt.malicious) {
-          analysisEl.style.background = 'rgba(239,68,68,0.08)';
-          analysisEl.style.border = '1px solid rgba(239,68,68,0.4)';
-          analysisEl.style.color = '#f87171';
-          analysisEl.innerHTML = '<strong>THREAT DETECTED</strong><br><pre style="font-family:var(--font-mono);font-size:10px;color:#f87171;white-space:pre-wrap;">' + escapeHtml(pkt.detail) + '</pre>';
+          analysisEl.dataset.state = 'danger';
+          analysisEl.innerHTML = '<strong>THREAT DETECTED</strong><pre class="pkt-pre">' + escapeHtml(pkt.detail) + '</pre>';
         } else {
-          analysisEl.style.background = '';
-          analysisEl.style.border = '1px solid var(--border)';
-          analysisEl.style.color = 'var(--text-secondary)';
+          delete analysisEl.dataset.state;
           analysisEl.innerHTML = '<strong>Benign traffic</strong> — No indicators of compromise detected in this packet.';
         }
       }
@@ -3090,11 +3061,11 @@ function initPacketLab() {
       clearInterval(captureInterval);
       captureInterval = null;
       startBtn.textContent = '▶ Start Capture';
-      startBtn.style.background = 'linear-gradient(135deg,#22d3ee,#0ea5e9)';
+      startBtn.classList.replace('btn-danger', 'btn-primary');
       return;
     }
     startBtn.textContent = '⏹ Stop Capture';
-    startBtn.style.background = 'linear-gradient(135deg,#ef4444,#b91c1c)';
+    startBtn.classList.replace('btn-primary', 'btn-danger');
     let tick = 0;
     // Seed with one malicious packet randomly among the first 20
     const maliciousSlots = [5, 11, 16, 18];
@@ -3111,7 +3082,7 @@ function initPacketLab() {
         clearInterval(captureInterval);
         captureInterval = null;
         startBtn.textContent = '▶ Capture Complete (40 packets)';
-        startBtn.style.background = 'linear-gradient(135deg,#22d3ee,#0ea5e9)';
+        startBtn.classList.replace('btn-danger', 'btn-primary');
       }
     }, 500);
   });

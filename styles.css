@@ -584,8 +584,9 @@ body { display: flex; }
 /* ─── Payload Table ─── */
 .payload-table-wrap { overflow-x: auto; margin-top: 2px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .payload-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.payload-table thead th.col-copy { width: 40px; }
 .payload-table thead th {
-  text-align: left; padding: 9px 14px;
+  text-align: left; white-space: nowrap; padding: 9px 14px;
   font-family: var(--font-mono); font-weight: 500; font-size: 11px;
   text-transform: lowercase; letter-spacing: 0.04em; color: var(--text-muted);
   background: var(--bg-base); border-bottom: 1px solid var(--border);
@@ -665,9 +666,10 @@ webview { flex: 1; border: none; display: flex; }
 .soc-left { width: 360px; flex-shrink: 0; padding: 20px; gap: 14px; overflow-y: auto; }
 .soc-center { flex: 2; display: flex; flex-direction: column; padding: 14px; overflow: hidden; }
 .soc-right { flex: 1; padding: 20px; overflow-y: auto; }
-.soc-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+/* The badge drops under the title when both do not fit (the left panel is 360px). */
+.soc-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
 .soc-header h3 {
-  margin: 0; display: flex; align-items: center; gap: 8px;
+  margin: 0; display: flex; align-items: center; gap: 8px; white-space: nowrap;
   font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text-primary); line-height: 1.3;
 }
 .soc-header h3 svg { color: var(--accent); flex-shrink: 0; }
@@ -688,7 +690,7 @@ webview { flex: 1; border: none; display: flex; }
 .ioc-list li { color: var(--text-secondary); font-size: 13px; line-height: 1.5; margin-bottom: 6px; padding-left: 16px; position: relative; }
 .ioc-list li:last-child { margin-bottom: 0; }
 .ioc-list li::before { content: '›'; position: absolute; left: 2px; font-family: var(--font-mono); color: var(--accent); }
-.ioc-list li code { background: var(--bg-surface); padding: 1px 4px; border-radius: var(--radius-xs); font-family: var(--font-mono); color: var(--text-primary); }
+.ioc-list li code { white-space: nowrap; background: var(--bg-surface); padding: 1px 4px; border-radius: var(--radius-xs); font-family: var(--font-mono); color: var(--text-primary); }
 /* Red edge only once a threat is flagged and action is actually required. */
 .remediation-card { position: relative; border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
 .remediation-card.locked { border-color: var(--border); }
@@ -795,11 +797,212 @@ webview { flex: 1; border: none; display: flex; }
 /* ─── Threat intel ─── */
 .intel-card { margin-top: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
 .intel-card p { font-family: var(--font-mono); font-size: 12px; }
-.intel-item { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; font-size: 12px; }
-.intel-item strong { color: var(--text-muted); font-weight: 500; flex-shrink: 0; white-space: nowrap; }
+/* Label column is fixed so short values line up beside it; a value too long for the
+   remaining width drops onto its own full-width line, left-aligned (no ragged right edge). */
+.intel-item { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin-bottom: 8px; font-size: 12px; }
+.intel-item strong { flex: 0 0 13ch; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
 /* The "captured request" block (div children) stacks instead of splitting into columns. */
 .intel-item:has(> div) { display: block; }
-.intel-item span { color: var(--text-primary); text-align: right; }
+.intel-item span { flex: 1 0 auto; max-width: 100%; min-width: 0; color: var(--text-primary); text-align: left; overflow-wrap: anywhere; }
+.intel-item .intel-risk { color: var(--danger); }
+.intel-item .intel-clean { color: var(--success); }
+.intel-capture {
+  background: var(--bg-deep); padding: 10px 12px; margin-bottom: 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-xs);
+}
+.intel-capture-label {
+  font-size: 11px; font-weight: 500; color: var(--text-muted);
+  text-transform: lowercase; letter-spacing: 0.04em; margin-bottom: 4px;
+}
+.intel-capture-req { color: var(--text-primary); overflow-wrap: anywhere; }
+.intel-item .intel-capture-req strong { color: var(--text-primary); font-weight: 700; white-space: normal; }
+.intel-capture-status { color: var(--text-secondary); margin-top: 4px; font-size: 11px; }
+.intel-analysis { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+.intel-analysis strong { color: var(--text-primary); font-weight: 500; }
+.intel-analysis-text { display: block; margin-top: 2px; color: var(--text-secondary); font-size: 12px; }
+
+/* SOC log status code, WAF state, toasts and the resolved panel (renderer.js). */
+.terminal-line .log-status { color: var(--success); }
+.terminal-line .log-status.is-error { color: var(--danger); }
+#wafStatusIndicator[data-state="alert"] { background: var(--danger); }
+#wafLastAction[data-state="alert"] { color: var(--danger); }
+#wafLastAction[data-state="ok"] { color: var(--success); }
+.soc-toast {
+  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+  max-width: 360px; padding: 10px 14px;
+  background: var(--bg-surface); color: var(--text-primary);
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); border-radius: var(--radius-xs);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.5;
+  animation: cc-reveal var(--dur-base) var(--ease-out) both;
+}
+.soc-toast::before { content: '! '; color: var(--danger); font-weight: 700; }
+.soc-resolved { text-align: center; padding: 20px 8px; }
+.soc-resolved-icon { font-family: var(--font-mono); font-size: 24px; line-height: 1; margin-bottom: 10px; color: var(--amber); }
+.soc-card .soc-resolved h3 { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--amber); margin: 0 0 8px; }
+.soc-card .soc-resolved p { color: var(--text-secondary); font-size: 13px; }
+.soc-resolved-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PRACTICE LABS & SIMULATORS — markup generated by renderer.js renderModule
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Interactive challenges list */
+.challenges-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.challenge-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap;
+  background: var(--bg-base); padding: 12px 16px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.challenge-info { flex: 1 1 280px; min-width: 0; }
+.challenge-name { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.4; margin-bottom: 4px; }
+.challenge-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+.challenge-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+/* A list of launch buttons: outlined so eight rows do not read as eight solid green blocks. */
+.challenge-actions .btn-boot { background: transparent; color: var(--accent); border-color: var(--accent-line); }
+.challenge-actions .btn-boot:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent-hover); }
+/* Module-open prompt line ($ sqli) above the module header. */
+#contentArea > .cc-prompt { font-size: 13px; margin-bottom: 12px; }
+
+/* Simulator terminals (nmap / hydra / sqlmap) */
+.terminal-window.sim-terminal {
+  flex: none; position: relative;
+  display: flex; flex-direction: column;
+  height: 300px; margin-top: 16px; padding: 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--text-secondary);
+}
+.terminal-window.sim-terminal.is-tall { height: 340px; font-size: 12px; }
+.sim-output { white-space: pre-wrap; margin-bottom: 10px; line-height: 1.55; }
+.sim-terminal.is-tall .sim-output { flex: 1; }
+.sim-input-row { display: flex; align-items: center; gap: 8px; }
+.sim-terminal.is-tall .sim-input-row { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
+.sim-prompt { color: var(--accent); white-space: nowrap; }
+.sim-input {
+  flex: 1; min-width: 0;
+  background: transparent; border: none; outline: none;
+  color: var(--text-primary); caret-color: var(--accent);
+  font-family: var(--font-mono); font-size: inherit;
+}
+.sim-input::placeholder, .sim-field::placeholder { color: var(--text-muted); }
+/* Output spans written by the simulator handlers */
+.sim-muted { color: var(--text-muted); }
+.sim-ok { color: var(--success); }
+.sim-err { color: var(--danger); }
+.sim-key { color: var(--text-primary); font-weight: 700; }
+
+/* Practice-lab building blocks (XSS / proxy / SQLi / packet) */
+.sim-block { margin-top: 16px; }
+.sim-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 16px; margin-top: 16px; }
+.sim-stack { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.sim-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sim-row > .is-fill { flex: 1; justify-content: center; }
+.sim-panel { background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; min-width: 0; }
+.sim-panel-bar {
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+  padding: 8px 12px; background: var(--bg-elevated); border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);
+}
+.sim-panel-bar > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sim-dots { display: flex; gap: 5px; flex-shrink: 0; }
+.sim-panel-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.sim-panel-body h4 { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--text-primary); margin: 0 0 4px; }
+.sim-panel-body .btn { justify-content: center; }
+.sim-label {
+  display: block; margin-bottom: 4px;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  color: var(--text-muted); text-transform: lowercase; letter-spacing: 0.04em;
+}
+.sim-field {
+  width: 100%; box-sizing: border-box; padding: 7px 10px;
+  background: var(--bg-base); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: var(--radius-xs);
+  font-family: var(--font-mono); font-size: 12px; outline: none;
+}
+.sim-field:focus { border-color: var(--accent); }
+.sim-row > .sim-field { flex: 1; min-width: 200px; width: auto; }
+textarea.sim-field { resize: vertical; line-height: 1.5; }
+.sim-out {
+  background: var(--bg-deep); color: var(--text-secondary);
+  border: 1px solid var(--border); border-radius: var(--radius-xs);
+  padding: 12px; font-family: var(--font-mono); font-size: 12px; line-height: 1.55;
+}
+.sim-out.is-grow { flex: 1; min-height: 120px; }
+.sim-out.is-code { font-size: 11px; color: var(--text-muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.sim-result { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-xs); font-size: 12px; line-height: 1.55; color: var(--text-secondary); }
+.sim-result.is-mono { padding: 10px; font-family: var(--font-mono); }
+/* Result state is set from JS as data-state; red is reserved for a successful attack. */
+.sim-result[data-state="danger"], .sim-out[data-state="danger"] {
+  background: var(--danger-dim); color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+.sim-result[data-state="success"], .sim-out[data-state="success"] {
+  background: var(--success-dim); color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
+}
+.sim-result[data-state="warning"], .sim-out[data-state="warning"] {
+  background: var(--warning-dim); color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+}
+.sim-result strong, .sim-out strong { color: inherit; }
+.sim-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.sim-chip {
+  padding: 3px 8px; cursor: pointer;
+  background: var(--bg-base); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: var(--radius-xs);
+  font-family: var(--font-mono); font-size: 11px; line-height: 1.5;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.sim-chip:hover { border-color: var(--accent); color: var(--accent); }
+.sim-chip:active { transform: translateY(1px); }
+.sim-chip.is-safe { color: var(--success); }
+.sim-tip {
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius-xs);
+  font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+}
+.section-body p.sim-caption { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+/* Intercept is a live state: amber, not red. */
+.btn.is-intercepted, .btn.is-intercepted:hover { background: var(--amber-dim); border-color: var(--amber); color: var(--amber); }
+
+/* XSS sandbox "browser" */
+.sim-browser { margin-top: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+/* White on purpose: the iframe is the simulated victim web page. */
+.sim-browser iframe { display: block; width: 100%; height: 260px; border: none; background: #fff; }
+
+/* SQLi walkthrough cards */
+.sim-step { background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; min-width: 0; }
+.sim-step h4 { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+.section-body .sim-step p { font-size: 13px; color: var(--text-muted); line-height: 1.55; margin-bottom: 8px; }
+.sim-step ul { font-size: 13px; color: var(--text-secondary); padding-left: 20px; line-height: 1.6; margin-bottom: 10px; }
+.sim-why { background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-xs); padding: 8px 10px; font-size: 12px; color: var(--text-secondary); line-height: 1.55; }
+
+/* Packet capture */
+.pkt-frame { margin-top: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.pkt-head, .pkt-row {
+  display: grid; grid-template-columns: 50px 96px minmax(0, 1fr) minmax(0, 1fr) 72px 56px; gap: 8px;
+  padding: 4px 12px; font-family: var(--font-mono);
+}
+.pkt-head {
+  padding: 7px 12px; background: var(--bg-elevated); border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: lowercase; letter-spacing: 0.04em;
+}
+.pkt-list { height: 240px; overflow-y: auto; background: var(--bg-deep); }
+.pkt-row { font-size: 12px; line-height: 1.5; color: var(--text-secondary); cursor: pointer; border-bottom: 1px solid var(--border); }
+.pkt-row > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkt-row:hover { background: var(--bg-hover); color: var(--text-primary); }
+.pkt-row.is-malicious { color: var(--danger); }
+/* Selection is amber; a selected malicious frame stays red. */
+.pkt-row.is-selected { background: var(--amber-dim); color: var(--text-primary); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--amber) 60%, transparent); }
+.pkt-row.is-malicious.is-selected { background: var(--danger-dim); color: var(--danger); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 60%, transparent); }
+.pkt-proto[data-proto="HTTP"] { color: var(--accent); }
+.pkt-proto[data-proto="DNS"]  { color: var(--mod-purple); }
+.pkt-proto[data-proto="TLS"]  { color: var(--text-primary); }
+.pkt-row.is-malicious .pkt-proto { color: inherit; }
+.pkt-out { height: 130px; overflow-y: auto; }
+.pkt-detail { white-space: pre-wrap; overflow-wrap: anywhere; }
+.pkt-frame-line { color: var(--text-primary); font-weight: 700; }
+.pkt-pre { margin: 6px 0 0; font-family: var(--font-mono); font-size: 11px; color: inherit; white-space: pre-wrap; }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    SETTINGS MODAL
