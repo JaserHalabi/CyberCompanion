@@ -190,3 +190,21 @@ test('flash clears stale data-flash', () => {
   assert.strictEqual(el.attrs['data-flash'], undefined);
   clearTimeout(el._ccFlash);
 });
+
+test('boot marks only the final row with is-last', async () => {
+  // Reduced motion so every row fills instantly. Restored only after boot resolves.
+  const prev = globalThis.matchMedia;
+  globalThis.matchMedia = () => ({ matches: true });
+  try {
+    const splash = fakeEl('div');
+    await CCMotion.boot(splash, ['> one', '> two', '> three', '> ready']);
+    const box = splash.querySelector('.splash-lines');
+    assert.strictEqual(box.children.length, 4);
+    const marked = box.children.filter((r) => r.classes.has('is-last'));
+    assert.strictEqual(marked.length, 1);
+    assert.strictEqual(marked[0], box.children[3]);
+    assert.strictEqual(marked[0].textContent, '> ready');
+  } finally {
+    if (prev === undefined) delete globalThis.matchMedia; else globalThis.matchMedia = prev;
+  }
+});

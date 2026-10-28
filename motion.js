@@ -139,9 +139,11 @@
     const total = lines.reduce((n, l) => n + String(l).length, 0) || 1;
     const cps = total / (BOOT_MS / 1000);
     let chain = Promise.resolve();
-    lines.forEach((line) => {
+    lines.forEach((line, i) => {
       chain = chain.then(() => {
         const row = box.ownerDocument.createElement('div');
+        // Mark the final row so CSS can tint it without counting lines.
+        if (i === lines.length - 1) row.className = 'is-last';
         box.appendChild(row);
         return typeLine(row, line, { cps }).done;
       });
