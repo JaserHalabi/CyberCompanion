@@ -384,10 +384,10 @@ const MODULES = [
 },
 
 {
-  id: 'soc-simulator', track: 'blue', num: '01', short: 'soc',
+  id: 'soc-simulator', track: 'blue', num: 'B1', short: 'soc',
   title: 'Blue Team SOC Analyst',
   subtitle: 'Defend the network! Monitor live traffic, spot the active exploit, and remediate the threat.',
-  tag: 'Blue 01 — Defensive Simulation',
+  tag: 'Blue B1 — Defensive Simulation',
 
   concept: [
     `A <strong>Security Operations Center (SOC)</strong> is the central command post for a blue team. Analysts monitor network traffic, system logs, and intrusion detection alerts to identify and neutralize active threats in real-time.`,
@@ -420,13 +420,13 @@ const MODULES = [
 },
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BLUE 02: Network Traffic Analysis
+// BLUE B2: Network Traffic Analysis
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'net-analyst', track: 'blue', num: '02', short: 'net',
+  id: 'net-analyst', track: 'blue', num: 'B2', short: 'net',
   title: 'Network Traffic Analysis',
   subtitle: 'Capture, decode, and analyze raw network packets to hunt for malware beacons, credential theft, and data exfiltration.',
-  tag: 'Blue 02 — Network Forensics',
+  tag: 'Blue B2 — Network Forensics',
 
   concept: [
     `Every byte that travels across a network can be captured and inspected. <strong>Packet analysis</strong> is the art of reading these raw captures to reconstruct what happened during a security incident — or to catch an attack <em>in progress</em>.`,
@@ -466,13 +466,13 @@ const MODULES = [
 },
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BLUE 03: Defenses & Remediation (shell — content arrives in a later task)
+// BLUE B3: Defenses & Remediation (shell — content arrives in a later task)
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'defenses', track: 'blue', num: '03', short: 'defend',
+  id: 'defenses', track: 'blue', num: 'B3', short: 'defend',
   title: 'Defenses & Remediation',
   subtitle: 'The defensive fixes for each attack in the red-team path, collected in one place.',
-  tag: 'Blue 03 — Hardening',
+  tag: 'Blue B3 — Hardening',
 
   concept: [
     `Every attack in the red-team path has a matching defence. This page will collect them so you can move from "how it breaks" to "how it is fixed".`

@@ -188,8 +188,7 @@ body { display: flex; }
 .sidebar.collapsed .nav-item { padding: 8px 0 8px 12px; justify-content: center; }
 .sidebar.collapsed .nav-item::before { left: 3px; }
 .sidebar.collapsed .nav-num { width: auto; font-size: 12px; }
-.sidebar.collapsed .nav-track-label { display: block; height: 1px; padding: 0; margin: 8px 10px; background: var(--border); font-size: 0; }
-.sidebar.collapsed .nav-track-label::before { content: none; }
+.sidebar.collapsed .nav-track-label { display: block; padding: 8px 0 4px; margin: 4px 10px 0; border-top: 1px solid var(--border); text-align: center; }.sidebar.collapsed .nav-track-label::before { content: 'B'; color: var(--text-muted); opacity: 1; }
 .sidebar.collapsed .nav-track-label:first-child { display: none; }
 .sidebar.collapsed .nav-icon-emoji { font-size: 16px; }
 .sidebar.collapsed .btn.btn-lab-mode { padding: 9px; justify-content: center; }

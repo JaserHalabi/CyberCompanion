@@ -9,9 +9,10 @@ const H = require('../home.js');
 function loadModules() {
   const src = fs.readFileSync(path.join(__dirname, '..', 'renderer.js'), 'utf8');
   const start = src.indexOf('const MODULES = [');
-  const end = src.indexOf(']; // end MODULES');
-  assert.ok(start >= 0 && end > start, 'MODULES literal found');
-  return JSON.parse(JSON.stringify(vm.runInNewContext('(' + src.slice(start + 'const MODULES = '.length, end + 1) + ')')));
+  const m = /\r?\n\];/.exec(src.slice(start));
+  assert.ok(start >= 0 && m, 'MODULES literal found');
+  const literal = src.slice(start + 'const MODULES = '.length, start + m.index + m[0].length - 1);
+  return JSON.parse(JSON.stringify(vm.runInNewContext('(' + literal + ')')));
 }
 
 const MODULES = loadModules();
@@ -33,7 +34,7 @@ test('tracks and nums match the binding table', () => {
   const got = MODULES.map((m) => `${m.track}-${m.num}-${m.short}`);
   assert.deepEqual(got, [
     'red-01-nmap', 'red-02-sqli', 'red-03-xss', 'red-04-sqlmap', 'red-05-burp', 'red-06-hydra',
-    'blue-01-soc', 'blue-02-net', 'blue-03-defend'
+    'blue-B1-soc', 'blue-B2-net', 'blue-B3-defend'
   ]);
 });
 
