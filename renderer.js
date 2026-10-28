@@ -3091,14 +3091,6 @@ function initPacketLab() {
   });
 }
 
-function setTheme(theme) {
-  document.body.classList.remove('theme-hacker', 'theme-light', 'theme-pink', 'theme-default');
-  if (theme !== 'theme-default' && theme !== 'default') {
-    document.body.classList.add(theme);
-  }
-  localStorage.setItem('cybercompanion_theme', theme);
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════════
    INTERNATIONALISATION (i18n)  —  English
    ═══════════════════════════════════════════════════════════════════════════════ */
@@ -3135,11 +3127,6 @@ const TRANSLATIONS = {
     challenge_intro: 'Put your skills to the test inside the live lab environment. You can follow an interactive step-by-step tutorial, or try to solve it on your own!',
     // Settings modal
     settings_title: 'Global Settings',
-    settings_theme_label: 'Application Theme',
-    theme_default: 'Default (Dark)',
-    theme_hacker: 'Hacker Green',
-    theme_light: 'Light Mode',
-    theme_pink: 'Neon Pink',
     settings_reset_title: 'Factory Reset',
     settings_reset_desc: 'This will permanently erase all XP, achievements, and unlocked challenges. It will also destroy and rebuild the Juice Shop Docker container.',
     settings_reset_btn: 'Wipe Everything',
@@ -3200,15 +3187,6 @@ function t(key) {
   return TRANSLATIONS.en[key] || key;
 }
 
-function initTheme() {
-  const savedTheme = localStorage.getItem('cybercompanion_theme');
-  if (savedTheme) {
-    const select = document.getElementById('themeSelect');
-    if (select) select.value = savedTheme;
-    setTheme(savedTheme);
-  }
-}
-
 async function factoryReset() {
   if (socStreamInterval) { clearInterval(socStreamInterval); socStreamInterval = null; }
   localStorage.clear();
@@ -3225,11 +3203,6 @@ async function factoryReset() {
   }
   window.location.reload();
 }
-
-// Init theme on load
-document.addEventListener('DOMContentLoaded', () => {
-  initTheme();
-});
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    EXPOSE & INITIALIZE
@@ -3284,7 +3257,6 @@ window.__app = {
   submitRemediation,
   toggleSettings,
   toggleSidebar,
-  setTheme,
   factoryReset,
   handleNmapCommand,
   handleHydraCommand,

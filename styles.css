@@ -785,14 +785,13 @@ webview { flex: 1; border: none; display: flex; }
 .tab-btn.active, .tab-btn.tab-btn-active { color: var(--text-primary); border-bottom-color: var(--amber); }
 
 /* ─── Scenario Select ─── */
-.scenario-select,
-.theme-select {
+.scenario-select {
   background: var(--bg-surface); color: var(--text-primary);
   border: 1px solid var(--border); border-radius: var(--radius-xs);
   font-family: var(--font-mono); font-size: 12px; outline: none; cursor: pointer;
 }
 .scenario-select { padding: 6px 8px; width: 100%; }
-.scenario-select:focus, .theme-select:focus { border-color: var(--accent); }
+.scenario-select:focus { border-color: var(--accent); }
 
 /* ─── Threat intel ─── */
 .intel-card { margin-top: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
@@ -1039,16 +1038,9 @@ textarea.sim-field { resize: vertical; line-height: 1.5; }
   color: var(--text-muted); font-size: 20px; line-height: 1; cursor: pointer;
 }
 .close-modal:hover { color: var(--text-primary); border-color: var(--border); }
-.setting-group { margin-bottom: 18px; }
-.setting-group label {
-  display: block; margin-bottom: 8px;
-  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
-  color: var(--text-muted); text-transform: lowercase; letter-spacing: 0.04em;
-}
-.theme-select { width: 100%; padding: 8px 10px; }
 .danger-zone {
   border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent); border-radius: var(--radius-sm);
-  padding: 14px; background: color-mix(in srgb, var(--danger) 4%, transparent); margin-top: 22px;
+  padding: 14px; background: color-mix(in srgb, var(--danger) 4%, transparent);
 }
 .danger-zone h4 { font-family: var(--font-mono); color: var(--danger); margin: 0 0 6px 0; font-size: 12.5px; font-weight: 700; }
 .danger-zone p { color: var(--text-secondary); font-size: 13px; margin-bottom: 14px; line-height: 1.55; }
@@ -1121,32 +1113,4 @@ textarea.sim-field { resize: vertical; line-height: 1.5; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
   .loading-dots::after { animation: none !important; content: "..."; }
   #splash.splash-exit { opacity: 0; }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════════
-   THEMES — temporary home; Task 7 re-expresses these on the new tokens.
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-body.theme-hacker {
-  --bg-deep:#0b0f0c; --bg-base:#0f140f; --bg-surface:#131a13; --bg-elevated:#182018; --bg-hover:#1f2a1f;
-  --cyan:#5fae6b; --cyan-dim:rgba(95,174,107,0.12); --cyan-glow:rgba(0,255,65,0.3);
-  --violet:#8b93a7; --violet-dim:rgba(139,147,167,0.12); --violet-glow:rgba(0,143,17,0.3);
-  --accent:#5fae6b; --accent-hover:#71c07d; --accent-dim:rgba(95,174,107,0.12); --accent-line:rgba(95,174,107,0.35);
-  --border:rgba(255,255,255,0.07); --border-accent:rgba(255,255,255,0.13);
-}
-body.theme-pink {
-  --bg-deep:#140f14; --bg-base:#191319; --bg-surface:#201620; --bg-elevated:#281c28; --bg-hover:#332433;
-  --cyan:#c87bb0; --cyan-dim:rgba(200,123,176,0.12); --cyan-glow:rgba(255,0,255,0.3);
-  --violet:#8b93a7; --violet-dim:rgba(139,147,167,0.12); --violet-glow:rgba(0,255,255,0.3);
-  --accent:#c87bb0; --accent-hover:#d48dbe; --accent-dim:rgba(200,123,176,0.12); --accent-line:rgba(200,123,176,0.35);
-  --border:rgba(255,255,255,0.07); --border-accent:rgba(255,255,255,0.13);
-}
-body.theme-light {
-  --bg-deep:#f4f6f9; --bg-base:#eef1f5; --bg-surface:#ffffff; --bg-elevated:#eef1f5; --bg-hover:#e2e7ee;
-  --cyan:#2f6fe0; --cyan-dim:rgba(47,111,224,0.1); --cyan-glow:rgba(2,132,199,0.3);
-  --violet:#5b6472; --violet-dim:rgba(91,100,114,0.1); --violet-glow:rgba(124,58,237,0.3);
-  --accent:#2f6fe0; --accent-hover:#2a63c8; --accent-dim:rgba(47,111,224,0.1); --accent-line:rgba(47,111,224,0.3);
-  --on-accent:#ffffff;
-  --text-primary:#111826; --text-secondary:#3c4654; --text-muted:#6b7685;
-  --border:rgba(0,0,0,0.1); --border-accent:rgba(0,0,0,0.16);
 }

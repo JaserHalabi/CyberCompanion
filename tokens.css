@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
    CyberCompanion — Design tokens (terminal native)
    Single source of truth for custom properties. Loaded first, before motion.css,
-   styles.css and overlay.css. body.theme-* rules in styles.css override these.
+   styles.css and overlay.css. There is one theme.
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 /* ─── Bundled fonts (offline; SIL OFL, see fonts/LICENSE-*.txt) ─── */
@@ -114,26 +114,6 @@
   --radius-sm:      6px;
   --radius-xs:      4px;
 
-  /* ─── Legacy names (mapped onto the new palette during migration) ─── */
-  --cyan:           var(--accent);
-  --cyan-dim:       var(--accent-dim);
-  --cyan-glow:      transparent;
-  --violet:         #9aa59e;
-  --violet-dim:     rgba(154, 165, 158, 0.12);
-  --violet-glow:    transparent;
-  --blue:           #6aa8ff;
-  --blue-dim:       rgba(106, 168, 255, 0.12);
-
-  --mod-cyan:       var(--accent);
-  --mod-red:        #e8655d;
-  --mod-orange:     #e0913f;
-  --mod-blue:       #6aa8ff;
-  --mod-purple:     #a48fdb;
-  --mod-pink:       #d47aa4;
-  --mod-green:      var(--success);
-  --mod-teal:       #4fb8a8;
-
-  --ease:           cubic-bezier(0.4, 0, 0.2, 1);
-  --spring:         cubic-bezier(0.16, 1, 0.3, 1);
-  --transition:     var(--dur-fast) var(--ease-out);
+  /* ─── Extras ─── */
+  --mod-purple:     #a48fdb;                    /* DNS frames in the packet lab */
 }
