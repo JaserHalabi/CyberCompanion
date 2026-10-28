@@ -7,6 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
+    "test": "node --test && node scripts/check-css.js",
     "dist": "electron-builder --win --x64"
   },
   "devDependencies": {
