@@ -651,7 +651,7 @@ function renderModule(mod) {
       </div>
     </div>
 
-    <!-- Step-by-Step Lab Exercise -->
+    <!-- Hands-on Tutorial -->
     <div class="section-card fade-in fade-in-delay-3">
       <div class="section-header">
         <div class="section-icon exercise">${ICONS.exercise}</div>
@@ -2559,7 +2559,7 @@ const TRANSLATIONS = {
     // Module section headers
     section_concept: 'Core Concept',
     section_analogy: 'Real-World Analogy',
-    section_steps: 'Step-by-Step Lab Exercise',
+    section_steps: 'Hands-on Tutorial',
     section_defense: 'Defense & Remediation',
     section_reference: 'Interactive Reference Table',
     section_challenges: 'Interactive Challenges',
