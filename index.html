@@ -19,18 +19,18 @@
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
     <defs>
       <linearGradient id="logo-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#00f0ff"/>
-        <stop offset="100%" stop-color="#8b5cf6"/>
+        <stop offset="0%"   stop-color="#5fd68c"/>
+        <stop offset="100%" stop-color="#ffb000"/>
       </linearGradient>
       <linearGradient id="logo-grad-h" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%"   stop-color="#00f0ff"/>
-        <stop offset="100%" stop-color="#8b5cf6"/>
+        <stop offset="0%"   stop-color="#5fd68c"/>
+        <stop offset="100%" stop-color="#ffb000"/>
       </linearGradient>
       <symbol id="cc-logo" viewBox="0 0 64 64" fill="none">
         <!-- Swirls behind/around -->
-        <path d="M 14 30 C 8 30, 6 24, 12 22 C 18 20, 20 26, 14 28 C 11 29, 9 28, 9 26" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <path d="M 50 26 C 56 26, 58 20, 52 18 C 46 16, 44 22, 50 24 C 53 25, 55 24, 55 22" stroke="rgba(139,92,246,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <path d="M 28 62 C 22 62, 20 56, 26 54 C 32 52, 34 58, 28 60 C 25 61, 23 60, 23 58" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M 14 30 C 8 30, 6 24, 12 22 C 18 20, 20 26, 14 28 C 11 29, 9 28, 9 26" stroke="rgba(95,214,140,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M 50 26 C 56 26, 58 20, 52 18 C 46 16, 44 22, 50 24 C 53 25, 55 24, 55 22" stroke="rgba(255,176,0,0.45)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M 28 62 C 22 62, 20 56, 26 54 C 32 52, 34 58, 28 60 C 25 61, 23 60, 23 58" stroke="rgba(95,214,140,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
 
         <!-- Ghost Body -->
         <path d="M 32 6 C 20 6, 16 18, 16 28 
@@ -40,18 +40,18 @@
                  C 44 46, 45 42, 48 44 C 51 46, 55 44, 52 40
                  C 49 36, 48 34, 48 28
                  C 48 18, 44 6, 32 6 Z"
-              fill="#f8fafc" opacity="0.95" filter="drop-shadow(0 0 10px rgba(0,240,255,0.6))"/>
+              fill="#e6e9e4" opacity="0.95"/>
               
         <!-- Eyes -->
         <ellipse cx="28" cy="25" rx="3" ry="4.5" fill="#111827" transform="rotate(-5 28 25)" />
         <ellipse cx="40" cy="25" rx="3" ry="4.5" fill="#111827" transform="rotate(-5 40 25)" />
         
         <!-- Stars / Sparkles -->
-        <path d="M 12 18 Q 12 14, 8 14 Q 12 14, 12 10 Q 12 14, 16 14 Q 12 14, 12 18 Z" fill="#fde047" opacity="0.9"/>
-        <path d="M 48 10 Q 48 8, 46 8 Q 48 8, 48 6 Q 48 8, 50 8 Q 48 8, 48 10 Z" fill="#fde047" opacity="0.9"/>
+        <path d="M 12 18 Q 12 14, 8 14 Q 12 14, 12 10 Q 12 14, 16 14 Q 12 14, 12 18 Z" fill="#ffb000" opacity="0.9"/>
+        <path d="M 48 10 Q 48 8, 46 8 Q 48 8, 48 6 Q 48 8, 50 8 Q 48 8, 48 10 Z" fill="#ffb000" opacity="0.9"/>
         <path d="M 54 38 Q 54 36, 52 36 Q 54 36, 54 34 Q 54 36, 56 36 Q 54 36, 54 38 Z" fill="#e2e8f0" opacity="0.9"/>
         <circle cx="20" cy="10" r="1" fill="#e2e8f0" opacity="0.8"/>
-        <circle cx="56" cy="18" r="1" fill="#fde047" opacity="0.8"/>
+        <circle cx="56" cy="18" r="1" fill="#ffb000" opacity="0.8"/>
       </symbol>
     </defs>
   </svg>
@@ -59,12 +59,16 @@
   <!-- ═══ SPLASH SCREEN — cold launch only ═══ -->
   <div id="splash" aria-hidden="true">
     <div class="splash-content">
-      <div class="splash-logo">
-        <svg viewBox="0 0 64 64"><use href="#cc-logo"/></svg>
-        <div class="splash-logo-glow"></div>
+      <div class="splash-head">
+        <div class="splash-logo">
+          <svg viewBox="0 0 64 64"><use href="#cc-logo"/></svg>
+        </div>
+        <div>
+          <div class="splash-wordmark">CyberCompanion</div>
+          <div class="splash-sub">web pentest lab guide</div>
+        </div>
       </div>
-      <div class="splash-wordmark">CyberCompanion</div>
-      <div class="splash-sub">Web Pentest Lab Guide</div>
+      <div class="splash-lines"></div>
       <div class="splash-bar"><div class="splash-bar-fill"></div></div>
     </div>
   </div>
@@ -79,8 +83,8 @@
         <h1>CyberCompanion</h1>
         <span class="brand-sub" data-i18n="brand_sub">Web Pentest Lab Guide</span>
       </div>
-      <button class="sidebar-toggle" onclick="window.__app.toggleSidebar()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; margin-left:auto; display:flex; align-items:center; padding:5px; transition:color 0.2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-muted)'">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      <button class="sidebar-toggle" onclick="window.__app.toggleSidebar()" title="Collapse sidebar" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </button>
     </div>
 
@@ -101,10 +105,10 @@
 
     <div class="sidebar-footer">
       <div class="sidebar-divider"></div>
-      <div class="footer-info" style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+      <div class="footer-info">
         <span class="version-badge">v1.1.4</span>
-        <button style="background:transparent; border:none; color:var(--text-muted); font-size:16px; cursor:pointer; transition:color 0.2s; display:flex; align-items:center; gap:5px;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-muted)'" onclick="window.__app.toggleSettings()">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> <span class="settings-text" data-i18n="btn_settings">Settings</span>
+        <button class="btn-settings" onclick="window.__app.toggleSettings()" title="Settings">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> <span class="settings-text" data-i18n="btn_settings">Settings</span>
         </button>
       </div>
     </div>
@@ -165,10 +169,7 @@
     <!-- ─── Study Mode: Dynamic Content Area ─── -->
     <section id="contentArea" class="content-area">
       <div class="welcome-hero" id="welcomeHero">
-        <div class="hero-glow"></div>
-        <div class="hero-icon">
-          <svg viewBox="0 0 64 64"><use href="#cc-logo"/></svg>
-        </div>
+        <p class="hero-prompt">cybercompanion --start</p>
         <h2 class="hero-title">Welcome to CyberCompanion</h2>
         <p class="hero-desc">Select a module from the sidebar to begin your Web Application Penetration Testing journey. Boot the lab environment to practice on real vulnerable applications.</p>
         <div class="hero-cards">

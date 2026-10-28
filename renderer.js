@@ -12,6 +12,7 @@
     return;
   }
   sessionStorage.setItem('cc_launched', '1');
+  window.CCMotion && CCMotion.boot(splash, ['> init lab modules', '> load tutorials', '> ready']);
 
   // Bar fill animation ends at ~1.4s, we exit at 1.45s and remove at 1.95s
   setTimeout(() => {
