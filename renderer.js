@@ -3160,7 +3160,6 @@ const TRANSLATIONS = {
     challenge_intro: 'Put your skills to the test inside the live lab environment. You can follow an interactive step-by-step tutorial, or try to solve it on your own!',
     // Settings modal
     settings_title: 'Global Settings',
-    settings_language_label: 'Language / اللغة',
     settings_theme_label: 'Application Theme',
     theme_default: 'Default (Dark)',
     theme_hacker: 'Hacker Green',
