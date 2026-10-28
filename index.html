@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="tokens.css" />
   <link rel="stylesheet" href="motion.css" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="overlay.css" />
 </head>
 <body>
 
@@ -68,15 +67,6 @@
     <nav class="sidebar-nav" id="sidebarNav">
     </nav>
 
-    <!-- Lab Mode Toggle in Sidebar -->
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-lab-toggle" id="sidebarLabToggle">
-      <button id="btnLabMode" class="btn btn-lab-mode" onclick="window.__app.toggleLabMode()">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        <span id="btnLabModeText" data-i18n="btn_enter_lab">Enter Lab Mode</span>
-      </button>
-    </div>
-
     <div class="sidebar-footer">
       <div class="sidebar-divider"></div>
       <div class="footer-info">
@@ -90,55 +80,6 @@
 
   <!-- ═══════════ MAIN CONTENT ═══════════ -->
   <main id="mainContent" class="main-content">
-
-    <!-- ─── Lab Control Panel ─── -->
-    <header id="labPanel" class="lab-panel">
-      <div class="lab-panel-inner">
-        <div class="lab-panel-left">
-          <div class="lab-panel-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-              <line x1="8" y1="21" x2="16" y2="21"/>
-              <line x1="12" y1="17" x2="12" y2="21"/>
-            </svg>
-          </div>
-          <div>
-            <h2 class="lab-panel-title" data-i18n="lab_panel_title">Lab Control Panel</h2>
-            <p class="lab-panel-desc" id="labMessage" data-i18n="lab_message">Manage your local vulnerable targets</p>
-          </div>
-        </div>
-        <div class="lab-panel-actions">
-          <button id="btnBoot" class="btn btn-boot" onclick="window.__app.handleBoot()">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            <span id="btnBootText" data-i18n="btn_boot">Boot Lab</span>
-          </button>
-          <button id="btnRestart" class="btn btn-secondary" onclick="window.__app.handleRestart()" style="display: none;">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-            <span data-i18n="btn_restart">Restart Lab</span>
-          </button>
-          <button id="btnStop" class="btn btn-stop" onclick="window.__app.handleStop()">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-            <span data-i18n="btn_stop">Stop Lab</span>
-          </button>
-          <button id="btnRefresh" class="btn btn-secondary" onclick="window.__app.handleRefresh()">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            <span data-i18n="btn_refresh">Refresh</span>
-          </button>
-        </div>
-      </div>
-      <div class="lab-status-row" id="labStatusRow">
-        <div class="status-chip" id="statusJuiceshop">
-          <span class="status-dot offline"></span>
-          <span class="status-label">Juice Shop :3000</span>
-        </div>
-        <div class="status-chip" id="statusDvwa">
-          <span class="status-dot offline"></span>
-          <span class="status-label">DVWA :8080</span>
-        </div>
-      </div>
-      <!-- Docker wizard injected here by renderer.js -->
-      <div id="dockerWizardMount"></div>
-    </header>
 
     <!-- ─── Study Mode: Dynamic Content Area ─── -->
     <section id="contentArea" class="content-area">
@@ -154,125 +95,6 @@
         <h3 class="welcome-section-title home-list-label">all modules</h3>
         <div class="home-list" id="homeModuleList"></div>
       </div>
-    </section>
-
-    <!-- ─── Lab Mode: Webview + Overlay ─── -->
-    <section id="labMode" class="lab-mode" style="display:none;">
-
-      <!-- Webview Container -->
-      <div id="webviewContainer" class="webview-container">
-        <webview id="juiceshopView"
-          src="about:blank">
-        </webview>
-        <iframe id="cyberMartView" class="lab-frame"
-          src="about:blank"
-          style="display: none;">
-        </iframe>
-
-        <!-- Loading Overlay -->
-        <div id="webviewLoading" class="webview-loading">
-          <div class="webview-loading-spinner"></div>
-          <p class="webview-loading-text">Loading Juice Shop...</p>
-        </div>
-      </div>
-
-      <!-- Overlay Panel -->
-      <aside id="overlayPanel" class="overlay-panel">
-        <div class="overlay-header">
-          <div class="overlay-header-row">
-            <div class="overlay-header-left">
-              <span class="overlay-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></span>
-              <span class="overlay-header-title">Lab Dashboard</span>
-            </div>
-            <button id="btnDevTools" class="btn btn-secondary btn-sm">
-              <svg class="overlay-devtools-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <polyline points="16 18 22 12 16 6"></polyline>
-                <polyline points="8 6 2 12 8 18"></polyline>
-              </svg>
-              DevTools
-            </button>
-          </div>
-          <div class="overlay-tabs">
-            <button id="tabMission" class="tab-btn active" onclick="window.__app.switchOverlayTab('mission')">Progress</button>
-            <button id="tabProxy" class="tab-btn" onclick="window.__app.switchOverlayTab('proxy')">Mini Proxy</button>
-          </div>
-        </div>
-        
-        <div id="overlayContent" class="overlay-content tab-content" style="display:block;">
-          <!-- Progress Dashboard -->
-          <div class="xp-section">
-            <div class="xp-header">
-              <div class="level-badge">
-                <span class="level-label">Current Level</span>
-                <span class="level-value" id="currentLevel">1</span>
-                <span class="level-title" id="levelTitle">Script Kiddie</span>
-              </div>
-              <div class="xp-stats">
-                <div class="xp-current" id="currentXP">0 XP</div>
-                <div class="xp-next" id="nextLevelXP">500 XP to next level</div>
-              </div>
-            </div>
-            <div class="xp-bar-container">
-              <div class="xp-bar-fill" id="xpBarFill"></div>
-              <div class="level-up-glow" id="levelUpGlow"></div>
-            </div>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg></div>
-              <div class="stat-info">
-                <span class="stat-value" id="challengesSolved">0/0</span>
-                <span class="stat-label">Challenges</span>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 11 14 11 22 21 10 13 10 13 2"/></svg></div>
-              <div class="stat-info">
-                <span class="stat-value" id="totalXP">0</span>
-                <span class="stat-label">Total XP</span>
-              </div>
-            </div>
-          </div>
-
-          <h3 class="section-heading">Module Mastery</h3>
-          <div class="category-list" id="categoryProgressList">
-            <!-- Dynamically populated -->
-          </div>
-
-          <h3 class="section-heading">Recent Activity</h3>
-          <div class="recent-list" id="recentActivityList">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-        
-        <div id="proxyContent" class="overlay-content tab-content" style="display:none; flex-direction:column;">
-          <div class="mini-burp-controls">
-            <button id="btnBurpForward" class="btn btn-sm btn-primary" title="Send request to server">Forward</button>
-            <button id="btnBurpDrop" class="btn btn-sm btn-danger" title="Drop the request">Drop</button>
-            <button id="btnBurpToggle" class="btn btn-sm btn-secondary active" title="Toggle Interception">Intercept ON</button>
-          </div>
-          <div class="proxy-editor-head">
-            <span class="proxy-editor-label">Raw HTTP Request</span>
-            <button id="btnFormatJson" class="btn btn-sm btn-xs btn-secondary" onclick="window.__app.formatProxyJson()" title="Pretty-print JSON body">{ } Format JSON</button>
-          </div>
-          <textarea id="burpPayloadEditor" class="burp-editor" spellcheck="false"></textarea>
-        </div>
-
-        <!-- Floating Toggle Button for Mission Control -->
-        <button id="overlayToggle" class="floating-overlay-toggle" onclick="window.__app.toggleOverlayPanel()" title="Toggle Mission Control">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
-      </aside>
-
-      <!-- Achievement Toast Container -->
-      <div id="achievementToasts" class="achievement-toasts"></div>
-
-      <!-- Contextual Hint Bubble -->
-      <div id="contextHint" class="context-hint" style="display:none;"></div>
-
     </section>
 
     <!-- ─── SOC Simulator Mode ─── -->
@@ -372,7 +194,7 @@
       </div>
       <div class="danger-zone">
         <h4 data-i18n="settings_reset_title">Factory Reset</h4>
-        <p data-i18n="settings_reset_desc">This will permanently erase all XP, achievements, and unlocked challenges. It will also destroy and rebuild the Juice Shop Docker container.</p>
+        <p data-i18n="settings_reset_desc">This will permanently erase your saved settings and progress on this device, then reload the app.</p>
         <button class="btn-danger-outline" data-i18n="settings_reset_btn" onclick="if(confirm(window.__i18n ? window.__i18n.confirm_wipe : 'Are you absolutely sure you want to wipe everything?')) window.__app.factoryReset()">Wipe Everything</button>
       </div>
       <div class="modal-credit">
@@ -384,7 +206,6 @@
   <script src="motion.js"></script>
   <script src="home.js"></script>
   <script src="renderer.js"></script>
-  <script src="overlay.js"></script>
 </body>
 </html>
 

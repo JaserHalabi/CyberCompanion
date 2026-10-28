@@ -12,7 +12,7 @@
     return;
   }
   sessionStorage.setItem('cc_launched', '1');
-  window.CCMotion && CCMotion.boot(splash, ['> init lab modules', '> load tutorials', '> ready']);
+  window.CCMotion && CCMotion.boot(splash, ['> load modules', '> load tutorials', '> ready']);
 
   // Bar fill animation ends at ~1.4s, we exit at 1.45s and remove at 1.95s
   setTimeout(() => {
@@ -23,7 +23,7 @@
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    CyberCompanion — Renderer v1.1
-   5 Modules · Docker Wizard · Defense Sections · Copy Buttons
+   Modules · Defense Sections · Copy Buttons
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 // ─── SVG Icons ──────────────────────────────────────────────────────────────────
@@ -35,8 +35,6 @@ const ICONS = {
   exercise: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
   reference:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
   defense:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
-  error:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
-  docker:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
   shield:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`
 };
 
@@ -492,16 +490,9 @@ const MODULES = [
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 let activeModuleIndex = -1;
-let isBooting = false;
-let dockerInstalled = null;
 
 const sidebarNav   = document.getElementById('sidebarNav');
 const contentArea  = document.getElementById('contentArea');
-const btnBoot      = document.getElementById('btnBoot');
-const btnBootText  = document.getElementById('btnBootText');
-const labMessage   = document.getElementById('labMessage');
-const labStatusRow = document.getElementById('labStatusRow');
-const dockerMount  = document.getElementById('dockerWizardMount');
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    SIDEBAR NAVIGATION
@@ -584,7 +575,6 @@ function renderHome() {
 }
 
 function showHome() {
-  if (isLabMode) toggleLabMode();
   stopSocSimulator();
   document.getElementById('socMode').style.display = 'none';
   contentArea.style.display = '';
@@ -609,7 +599,6 @@ function stopSocSimulator() {
 function exitSoc() {
   stopSocSimulator();
   document.getElementById('socMode').style.display = 'none';
-  document.getElementById('labMode').style.display = 'none';
   document.getElementById('contentArea').style.display = '';
 }
 
@@ -772,7 +761,7 @@ function renderModule(mod) {
       </div>
     `;
   } else if (window.TUTORIALS) {
-    const modsTuts = Object.entries(window.TUTORIALS).filter(([key, tut]) => tut.module === mod.id);
+    const modsTuts = Object.entries(window.TUTORIALS).filter(([key, tut]) => tut.module === mod.id && !tut.requiresWebview);
 
     if (modsTuts.length > 0) {
       document.getElementById('interactiveChallengesSection').style.display = 'block';
@@ -792,10 +781,6 @@ function renderModule(mod) {
         if (match) {
           return `<button class="btn btn-boot" onclick="window.labAPI.${match.fn}()">${match.label}</button>`;
         }
-        if (tut.requiresWebview) {
-          return `<button class="btn btn-boot" onclick="window.__app.startTutorial('${key}')">Juice Shop Tutorial</button>
-                  <button class="btn btn-secondary" onclick="window.__app.startChallenge('${key}')">Open Sandbox</button>`;
-        }
         return `<button class="btn btn-boot" onclick="window.__app.startTutorial('${key}')">Integrated Tutorial</button>`;
       }
 
@@ -813,10 +798,6 @@ function renderModule(mod) {
     }
   }
 
-  if (mod.id === 'burp-proxy') {
-    // CyberMart tutorials now launch via Lab Mode — no inline embed needed.
-  }
-  
   if (mod.id === 'nmap') {
     const terminalHtml = `
       <div class="section-card fade-in fade-in-delay-6" id="nmapTerminalSection">
@@ -1045,7 +1026,7 @@ Ready. Type 'hydra' for usage help.</div>
           <h3 class="section-title">Proxy Intercept Practice Lab</h3>
         </div>
         <div class="section-body">
-          <p>Practice intercepting and modifying HTTP requests <strong>without needing Docker</strong>. Fill in the login form below and click Submit — the request will be intercepted by the Mini Proxy panel. Modify the payload and forward it to see the result.</p>
+          <p>Practice intercepting and modifying HTTP requests in this built-in simulator. Fill in the login form below and click Submit — the request is intercepted and shown beside the form. Modify the payload and forward it to see the result.</p>
           <div class="sim-grid-2">
             <!-- Simulated Login Page -->
             <div class="sim-panel">
@@ -1389,391 +1370,6 @@ async function copyToClipboard(text, btnEl) {
   }, 1800);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════════
-   DOCKER WIZARD
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-async function checkDockerInstallation() {
-  try {
-    const result = await window.labAPI.checkDocker();
-    dockerInstalled = result.installed;
-
-    if (result.installed) {
-      dockerMount.innerHTML = `
-        <div class="docker-success">
-          ${ICONS.check}
-          <span>Docker detected — ${escapeHtml(result.version)}</span>
-        </div>
-      `;
-      setTimeout(() => { dockerMount.innerHTML = ''; }, 4000);
-    } else {
-      showDockerWizard(result.platform);
-    }
-  } catch (e) {
-    showDockerWizard('unknown');
-  }
-}
-
-function showDockerWizard(platform) {
-  const platformName =
-    platform === 'win32' ? 'Windows' :
-    platform === 'darwin' ? 'macOS' : 'Linux';
-
-  const platformSteps =
-    platform === 'win32' ? `
-      <li><div class="dw-num">1</div><span>Click <strong>"Download Docker Desktop"</strong> below — it opens the official installer download.</span></li>
-      <li><div class="dw-num">2</div><span>Run the downloaded <strong>Docker Desktop Installer.exe</strong> and follow the prompts.</span></li>
-      <li><div class="dw-num">3</div><span>Restart your computer when prompted.</span></li>
-      <li><div class="dw-num">4</div><span>Launch <strong>Docker Desktop</strong> from the Start menu and wait for it to start (whale icon in system tray turns steady).</span></li>
-      <li><div class="dw-num">5</div><span>Click <strong>"Re-check Docker"</strong> below to verify the installation.</span></li>
-    ` : platform === 'darwin' ? `
-      <li><div class="dw-num">1</div><span>Click <strong>"Download Docker Desktop"</strong> below — it downloads the DMG installer.</span></li>
-      <li><div class="dw-num">2</div><span>Open the DMG and drag Docker to your Applications folder.</span></li>
-      <li><div class="dw-num">3</div><span>Launch Docker from Applications and grant the necessary permissions.</span></li>
-      <li><div class="dw-num">4</div><span>Wait for the Docker icon in the menu bar to show "Docker Desktop is running".</span></li>
-      <li><div class="dw-num">5</div><span>Click <strong>"Re-check Docker"</strong> below to verify the installation.</span></li>
-    ` : `
-      <li><div class="dw-num">1</div><span>Click <strong>"Open Install Guide"</strong> — it opens the official Docker Engine install docs for your distro.</span></li>
-      <li><div class="dw-num">2</div><span>Follow the instructions for your Linux distribution (Ubuntu, Debian, Fedora, etc.).</span></li>
-      <li><div class="dw-num">3</div><span>Add your user to the docker group: <code>sudo usermod -aG docker $USER</code></span></li>
-      <li><div class="dw-num">4</div><span>Log out and back in for group changes to take effect.</span></li>
-      <li><div class="dw-num">5</div><span>Verify with <code>docker run hello-world</code>, then click <strong>"Re-check Docker"</strong> below.</span></li>
-    `;
-
-  const downloadLabel = platform === 'linux' ? 'Open Install Guide' : 'Download Docker Desktop';
-
-  dockerMount.innerHTML = `
-    <div class="docker-wizard">
-      <div class="docker-wizard-header">
-        <div class="docker-wizard-icon">${ICONS.docker}</div>
-        <h3 class="docker-wizard-title">Docker Not Found — Setup Required</h3>
-      </div>
-      <p class="docker-wizard-desc">
-        The Lab Control Panel requires <strong>Docker</strong> to run vulnerable target applications (Juice Shop & DVWA) locally.
-        Docker is free and takes about 5 minutes to install. Detected platform: <strong>${platformName}</strong>.
-      </p>
-      <ul class="docker-wizard-steps">${platformSteps}</ul>
-      <div class="docker-wizard-actions">
-        <button class="btn btn-docker-dl" onclick="window.__app.downloadDocker()">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>${downloadLabel}</span>
-        </button>
-        <button class="btn btn-docker-recheck" onclick="window.__app.recheckDocker()">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          <span>Re-check Docker</span>
-        </button>
-      </div>
-    </div>
-  `;
-}
-
-async function downloadDocker() {
-  try {
-    await window.labAPI.downloadDocker();
-    labMessage.textContent = 'Docker download opened in your browser. Install it, then click Re-check.';
-  } catch (e) {
-    console.error('Download Docker error:', e);
-  }
-}
-
-async function recheckDocker() {
-  labMessage.textContent = 'Checking for Docker installation...';
-  await checkDockerInstallation();
-  if (dockerInstalled) {
-    labMessage.textContent = 'Docker is installed and ready! You can now Boot the Lab.';
-  } else {
-    labMessage.textContent = 'Docker still not detected. Please complete the installation and try again.';
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════════
-   LAB CONTROL PANEL
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-async function handleBoot() {
-  if (isBooting) return;
-
-  if (dockerInstalled === false) {
-    showError('Docker is not installed. Please follow the setup wizard above to install Docker first.');
-    return;
-  }
-
-  isBooting = true;
-  btnBoot.classList.add('loading');
-  btnBootText.innerHTML = 'Downloading Lab Assets<span class="loading-dots"></span>';
-  labMessage.textContent = 'Pulling Docker images & starting containers — this may take a few minutes on first run...';
-  clearError();
-
-  try {
-    const results = await window.labAPI.bootLab();
-    handleLabResults(results, 'booted');
-  } catch (err) {
-    showError('Unexpected error while booting the lab: ' + err.message);
-  } finally {
-    isBooting = false;
-    btnBoot.classList.remove('loading');
-    btnBootText.textContent = 'Boot Lab';
-  }
-}
-
-async function handleStop() {
-  const btnRestart = document.getElementById('btnRestart');
-  if (btnRestart) btnRestart.style.display = 'none';
-
-  labMessage.textContent = 'Stopping lab containers...';
-  try {
-    const results = await window.labAPI.stopLab();
-    handleLabResults(results, 'stopped');
-  } catch (err) {
-    showError('Unexpected error while stopping the lab: ' + err.message);
-  }
-}
-
-async function handleRestart() {
-  const btnRestart = document.getElementById('btnRestart');
-  if (btnRestart) {
-    btnRestart.querySelector('span').textContent = 'Restarting...';
-    btnRestart.classList.add('loading');
-    btnRestart.disabled = true;
-  }
-  
-  // Reset overlay progress so Juice Shop and UI are completely fresh
-  localStorage.removeItem('cybercompanion_progress');
-  if (window.__overlay && window.__overlay.stateManager && window.__overlay.renderer) {
-    window.__overlay.stateManager.solvedChallenges.clear();
-    window.__overlay.stateManager.totalXP = 0;
-    window.__overlay.stateManager.recalculateLevel();
-    const overlayContentEl = document.getElementById('overlayContent');
-    if (overlayContentEl) {
-      window.__overlay.renderer.renderDashboard();
-    }
-  }
-
-  await handleStop();
-  await handleBoot();
-  
-  if (btnRestart) {
-    btnRestart.querySelector('span').textContent = 'Restart Lab';
-    btnRestart.classList.remove('loading');
-    btnRestart.disabled = false;
-  }
-}
-
-async function handleRefresh() {
-  labMessage.textContent = 'Checking container status...';
-  try {
-    const status = await window.labAPI.getStatus();
-    updateStatusChips(status);
-    labMessage.textContent = 'Status refreshed.';
-  } catch (err) {
-    showError('Could not check status: ' + err.message);
-  }
-}
-
-let juiceShopPoll = null;
-
-function handleLabResults(results, action) {
-  if (results && results.busy) {
-    labMessage.textContent = results.busy.error || 'A lab operation is already running.';
-    return;
-  }
-
-  const errors = [];
-  for (const [, result] of Object.entries(results || {})) {
-    if (result && !result.ok && result.error) {
-      if (result.error === 'DOCKER_NOT_FOUND') {
-        showDockerWizard('unknown');
-        dockerInstalled = false;
-        labMessage.textContent = 'Docker is not installed. Follow the setup wizard above.';
-        return;
-      }
-      errors.push(`${result.label}: ${result.error}`);
-    }
-  }
-
-  if (errors.length > 0) {
-    showError(errors.join('\n'));
-    labMessage.textContent = 'Lab encountered errors — see details below.';
-  } else {
-    labMessage.textContent = `Lab containers ${action} successfully.`;
-    clearError();
-    const btnRestart = document.getElementById('btnRestart');
-    if (action === 'booted') {
-      if (btnRestart) btnRestart.style.display = 'inline-flex';
-
-      if (isLabMode && webviewEl) {
-        labMessage.textContent = 'Waiting for Juice Shop to initialize...';
-        if (juiceShopPoll) clearInterval(juiceShopPoll);
-        let attempts = 0;
-        const MAX_ATTEMPTS = 40; // ~60s at 1.5s intervals
-        juiceShopPoll = setInterval(() => {
-          attempts++;
-          if (attempts > MAX_ATTEMPTS) {
-            clearInterval(juiceShopPoll);
-            juiceShopPoll = null;
-            labMessage.textContent = 'Juice Shop is taking longer than expected. Click Refresh once it is up.';
-            return;
-          }
-          fetch('http://localhost:3000', { mode: 'no-cors' })
-            .then(() => {
-              clearInterval(juiceShopPoll);
-              juiceShopPoll = null;
-              labMessage.textContent = 'Lab is ready!';
-              webviewEl.reload();
-            })
-            .catch(() => {});
-        }, 1500);
-      } else {
-        window.labAPI.openUrl('http://localhost:3000');
-        setTimeout(() => window.labAPI.openUrl('http://localhost:8080'), 500);
-      }
-    }
-  }
-  setTimeout(() => handleRefresh(), 2500);
-}
-
-function updateStatusChips(status) {
-  for (const [key, info] of Object.entries(status)) {
-    const chipId = key === 'juiceshop' ? 'statusJuiceshop' : 'statusDvwa';
-    const chip = document.getElementById(chipId);
-    if (!chip) continue;
-    const dot = chip.querySelector('.status-dot');
-    dot.className = 'status-dot';
-    if (info.error && info.error !== 'DOCKER_NOT_FOUND') dot.classList.add('error');
-    else if (info.running) dot.classList.add('online');
-    else dot.classList.add('offline');
-  }
-}
-
-function showError(message) {
-  clearError();
-  const banner = document.createElement('div');
-  banner.className = 'error-banner';
-  banner.id = 'labErrorBanner';
-  banner.innerHTML = `
-    <div class="error-banner-icon">${ICONS.error}</div>
-    <div class="error-banner-text">${escapeHtml(message)}</div>
-  `;
-  labStatusRow.after(banner);
-}
-
-function clearError() {
-  const el = document.getElementById('labErrorBanner');
-  if (el) el.remove();
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════════
-   LAB MODE — Webview + Overlay
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-let isLabMode = false;
-let labModeInitialized = false;
-let overlayPanelCollapsed = false;
-let isCyberMartMode = false;
-let pendingCyberMartProxyId = null;
-
-const labModeEl       = document.getElementById('labMode');
-const contentAreaEl   = document.getElementById('contentArea');
-const labPanelEl      = document.getElementById('labPanel');
-const webviewEl       = document.getElementById('juiceshopView');
-const cyberMartView   = document.getElementById('cyberMartView');
-const webviewLoading  = document.getElementById('webviewLoading');
-const btnLabModeText  = document.getElementById('btnLabModeText');
-const overlayPanel    = document.getElementById('overlayPanel');
-const overlayToggle   = document.getElementById('overlayToggle');
-
-function toggleLabMode() {
-  isLabMode = !isLabMode;
-
-  if (isLabMode) {
-    // Switch to Lab Mode
-    stopSocSimulator();
-    contentAreaEl.style.display = 'none';
-    document.getElementById('socMode').style.display = 'none';
-    labModeEl.style.display = 'flex';
-    btnLabModeText.textContent = 'Study Mode';
-    document.getElementById('btnLabMode').classList.add('active');
-
-    // Initialize webview on first entry
-    if (!labModeInitialized) {
-      initLabMode();
-      labModeInitialized = true;
-    }
-    
-    // Auto-boot if not online
-    const juiceStatus = document.getElementById('statusJuiceshop');
-    if (juiceStatus) {
-      const dot = juiceStatus.querySelector('.status-dot');
-      if (dot && !dot.classList.contains('online') && !isBooting && window.__app.handleBoot) {
-        window.__app.handleBoot();
-      }
-    }
-  } else {
-    // Switch back to Study Mode
-    labModeEl.style.display = 'none';
-    contentAreaEl.style.display = '';
-    btnLabModeText.textContent = 'Enter Lab Mode';
-    document.getElementById('btnLabMode').classList.remove('active');
-  }
-}
-
-function initLabMode(targetUrl) {
-  // Determine absolute path to the preload script
-  // The webview preload is assigned by main.js (will-attach-webview), not by the page.
-
-  // Load the target — defaults to Juice Shop, but can be CyberMart
-  webviewEl.src = targetUrl || 'http://localhost:3000';
-
-  // Show loading overlay
-  webviewLoading.style.display = 'flex';
-
-  let didFail = false;
-
-  webviewEl.addEventListener('did-fail-load', (_event) => {
-    didFail = true;
-    webviewLoading.style.display = 'flex';
-    webviewLoading.querySelector('.webview-loading-text').textContent =
-      'Failed to load Juice Shop. Booting the lab...';
-    webviewLoading.querySelector('.webview-loading-spinner').style.display = 'block';
-  });
-
-  // Hide loading when the page finishes loading
-  webviewEl.addEventListener('did-finish-load', () => {
-    if (!didFail) {
-      webviewLoading.style.display = 'none';
-    }
-    didFail = false;
-  });
-
-  // Initialize the overlay system if overlay.js is loaded
-  if (window.__overlay) {
-    window.__overlay.init(webviewEl);
-  }
-
-  const btnDevTools = document.getElementById('btnDevTools');
-  if (btnDevTools) {
-    btnDevTools.onclick = () => {
-      if (webviewEl.isDevToolsOpened()) {
-        webviewEl.closeDevTools();
-      } else {
-        webviewEl.openDevTools();
-      }
-    };
-  }
-}
-
-function toggleOverlayPanel() {
-  overlayPanelCollapsed = !overlayPanelCollapsed;
-
-  if (overlayPanelCollapsed) {
-    overlayPanel.classList.add('collapsed');
-    overlayToggle.querySelector('svg').innerHTML = '<polyline points="9 18 15 12 9 6"/>';
-  } else {
-    overlayPanel.classList.remove('collapsed');
-    overlayToggle.querySelector('svg').innerHTML = '<polyline points="15 18 9 12 15 6"/>';
-  }
-}
-
 function startTutorial(tutorialKey) {
   if (!window.TUTORIALS || !window.TUTORIALS[tutorialKey]) {
     alert("Tutorial not found!");
@@ -1808,19 +1404,9 @@ function startTutorial(tutorialKey) {
     return;
   }
 
-  isCyberMartMode = false;
-  webviewEl.style.display = 'block';
-  cyberMartView.style.display = 'none';
-  // ── Standard Lab / Study Mode toggling ────────────────────────────────────
-  // Integrated tutorials target built-in simulator elements inside contentArea.
-  // If currently in lab mode (Juice Shop), exit it so the user can interact with the integrated system.
-  if (!tut.requiresWebview && isLabMode) {
-    toggleLabMode();
-  }
-  // If a task specifically requires the Juice Shop webview, launch lab mode.
-  if (tut.requiresWebview && !isLabMode) {
-    toggleLabMode();
-  }
+  // The embedded Juice Shop webview no longer exists; tutorials that need it
+  // cannot run. (Task 3 removes them from tutorials.json.)
+  if (tut.requiresWebview) return;
 
   // Auto-scroll to integrated simulator section if available
   setTimeout(() => {
@@ -1832,8 +1418,7 @@ function startTutorial(tutorialKey) {
     }
   }, 100);
   
-  // Injected into the app document AND into the Juice Shop webview, where the
-  // app's tokens do not exist, so every token carries its palette value as a fallback.
+  // Injected into the app document; every token carries its palette value as a fallback.
   const tutorialCSS = `
     #cyber-tut-backdrop {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -2153,51 +1738,16 @@ function startTutorial(tutorialKey) {
 })();
 `;
 
-  const play = () => {
-    if (!tut.requiresWebview) {
-      if (!document.getElementById('cyber-tut-styles')) {
-        const styleEl = document.createElement('style');
-        styleEl.id = 'cyber-tut-styles';
-        styleEl.textContent = tutorialCSS;
-        document.head.appendChild(styleEl);
-      }
-      const scriptEl = document.createElement('script');
-      scriptEl.textContent = tutorialEngineCode;
-      document.body.appendChild(scriptEl);
-      scriptEl.remove();
-      return;
-    }
-
-    // If the first step has a hash, navigate there first
-    if (tut.steps[0] && tut.steps[0].hash) {
-      webviewEl.executeJavaScript(`window.location.hash = ${JSON.stringify(String(tut.steps[0].hash))};`);
-      // Give Juice Shop a moment to route, then inject
-      setTimeout(() => {
-        webviewEl.insertCSS(tutorialCSS)
-          .then(() => webviewEl.executeJavaScript(tutorialEngineCode))
-          .catch(err => alert("Tutorial injection error (delayed): " + err.message));
-      }, 1500);
-    } else {
-      webviewEl.insertCSS(tutorialCSS)
-        .then(() => webviewEl.executeJavaScript(tutorialEngineCode))
-        .catch(err => alert("Tutorial injection error: " + err.message));
-    }
-  };
-
-  if (!tut.requiresWebview) {
-    play();
-  } else if (webviewLoading.style.display === 'flex') {
-    webviewEl.addEventListener('did-finish-load', play, { once: true });
-  } else {
-    play();
+  if (!document.getElementById('cyber-tut-styles')) {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'cyber-tut-styles';
+    styleEl.textContent = tutorialCSS;
+    document.head.appendChild(styleEl);
   }
-
-  // Show Mini Burp Proxy if the module requires interception
-  if (tut.module === 'burp-proxy' || tut.module === 'sqli') {
-    toggleMiniBurp(true);
-  } else {
-    toggleMiniBurp(false);
-  }
+  const scriptEl = document.createElement('script');
+  scriptEl.textContent = tutorialEngineCode;
+  document.body.appendChild(scriptEl);
+  scriptEl.remove();
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -2212,9 +1762,8 @@ let currentSocScenario = 'sqli';
 let originalRemediationHTML = '';
 
 function startSocSimulator() {
-  // Hide normal content and lab mode
+  // Hide normal content
   document.getElementById('contentArea').style.display = 'none';
-  document.getElementById('labMode').style.display = 'none';
   document.getElementById('socMode').style.display = 'flex';
   
   const selectEl = document.getElementById('socScenarioSelect');
@@ -2447,45 +1996,6 @@ function submitRemediation(action) {
       </div>
     </div>
   `;
-
-  // Award XP once per neutralised threat (not repeatable by re-clicking).
-  if (window.__overlay && window.__overlay.stateManager) {
-    const xpGained = 750;
-    const sm = window.__overlay.stateManager;
-    const oldLevel = sm.level;
-    sm.totalXP += xpGained;
-    sm.recalculateLevel();
-    sm.persist();
-    const leveledUp = sm.level > oldLevel;
-
-    window.__overlay.renderer.showAchievementToast({
-      challenge: 'SOC Analyst Training Complete',
-      xp: xpGained,
-      leveledUp
-    });
-
-    const prog = sm.getProgress();
-    window.__overlay.renderer.updateXP(prog.totalXP, prog.xpPercent, leveledUp);
-  }
-}
-
-function startChallenge(tutorialKey) {
-  if (!isLabMode) toggleLabMode();
-  
-  if (!window.TUTORIALS || !window.TUTORIALS[tutorialKey]) return;
-  const tut = window.TUTORIALS[tutorialKey];
-  
-  // Navigate if the first step has a hash, but don't play tutorial
-  if (tut.steps && tut.steps[0] && tut.steps[0].hash) {
-    const go = () => {
-      webviewEl.executeJavaScript(`window.location.hash = ${JSON.stringify(String(tut.steps[0].hash))};`);
-    };
-    if (webviewLoading.style.display === 'flex') {
-      webviewEl.addEventListener('did-finish-load', go, { once: true });
-    } else {
-      go();
-    }
-  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -2509,132 +2019,6 @@ function formatRisk(risk) {
   if (c === 'medium') return `<span class="risk-medium">${risk}</span>`;
   if (c === 'low')    return `<span class="risk-low">${risk}</span>`;
   return risk;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════════
-   MINI BURP PROXY LOGIC
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-const burpEditor = document.getElementById('burpPayloadEditor');
-const btnBurpToggle = document.getElementById('btnBurpToggle');
-const btnBurpForward = document.getElementById('btnBurpForward');
-const btnBurpDrop = document.getElementById('btnBurpDrop');
-
-let isProxyOn = true;
-let isBurpSimulatorActive = false;
-
-let currentProxyId = null;
-
-// Each proxy achievement is awarded at most once per session so XP cannot be farmed.
-const awardedProxyAchievements = new Set();
-
-/** Awards XP for a proxy achievement once. Returns true if it was newly awarded. */
-function awardProxyXp(id, label, xp) {
-  if (awardedProxyAchievements.has(id)) return false;
-  if (!(window.__overlay && window.__overlay.stateManager)) return false;
-  awardedProxyAchievements.add(id);
-  const sm = window.__overlay.stateManager;
-  const oldLevel = sm.level;
-  sm.totalXP += xp;
-  sm.recalculateLevel();
-  sm.persist();
-  const leveledUp = sm.level > oldLevel;
-  window.__overlay.renderer.showAchievementToast({ challenge: label, xp, leveledUp });
-  window.CCMotion && window.CCMotion.flash(document.querySelector('#xpSection .xp-current'));
-  const prog = sm.getProgress();
-  window.__overlay.renderer.updateXP(prog.totalXP, prog.xpPercent, leveledUp);
-  return true;
-}
-
-btnBurpToggle.addEventListener('click', () => {
-  isProxyOn = !isProxyOn;
-  window.labAPI.toggleProxy(isProxyOn);
-  btnBurpToggle.textContent = isProxyOn ? 'Intercept is ON' : 'Intercept is OFF';
-  btnBurpToggle.className = 'btn btn-sm ' + (isProxyOn ? 'btn-secondary active' : 'btn-danger');
-});
-
-btnBurpDrop.addEventListener('click', () => {
-  if (isBurpSimulatorActive) {
-    if (isCyberMartMode && currentProxyId && cyberMartView) {
-      cyberMartView.contentWindow.dispatchEvent(new CustomEvent('proxy-response', {
-        detail: { id: currentProxyId, action: 'drop' }
-      }));
-    }
-    burpEditor.value = '';
-    isBurpSimulatorActive = false;
-    currentProxyId = null;
-    return;
-  }
-  window.labAPI.dropProxyRequest();
-  burpEditor.value = '';
-});
-
-btnBurpForward.addEventListener('click', () => {
-  const modifiedData = burpEditor.value;
-  
-  if (isBurpSimulatorActive) {
-    let email = '';
-    let password = '';
-    try {
-      // Split on literal \n\n (escaped newlines in the raw HTTP string)
-      const parts = modifiedData.split(/\r?\n\r?\n/);
-      if (parts.length > 1) {
-        const bodyJson = JSON.parse(parts[parts.length - 1].trim());
-        email = bodyJson.email || '';
-        password = bodyJson.password || '';
-      }
-    } catch(e) {}
-    
-    // Check if they successfully injected SQL syntax — award XP (once).
-    if (email.includes("'") || email.toLowerCase().includes('or 1=1') || password.includes("'")) {
-      awardProxyXp('sqli-via-proxy', 'SQL Injection via Proxy', 500);
-    }
-
-    if (isCyberMartMode && currentProxyId && cyberMartView) {
-      cyberMartView.contentWindow.dispatchEvent(new CustomEvent('proxy-response', {
-        detail: { 
-          id: currentProxyId, 
-          action: 'forward', 
-          modifiedBody: `${modifiedData}` 
-        }
-      }));
-    }
-    
-    burpEditor.value = '';
-    isBurpSimulatorActive = false;
-    currentProxyId = null;
-    return;
-  }
-  
-  window.labAPI.forwardProxyRequest(modifiedData);
-  burpEditor.value = '';
-  
-  // Validation for Tutorial Progress (awarded once).
-  if (modifiedData.toLowerCase().includes('or 1=1') || modifiedData.toLowerCase().includes('union select')) {
-    awardProxyXp('proxy-injection', 'Proxy Injection Successful', 300);
-  }
-});
-
-
-
-window.labAPI.onProxyIntercepted((data) => {
-  // Switch to the proxy tab automatically
-  window.__app.switchOverlayTab('proxy');
-  burpEditor.value = data.body;
-});
-
-function toggleMiniBurp(show) {
-  if (show) {
-    // Switch to proxy tab
-    window.__app.switchOverlayTab('proxy');
-    isProxyOn = true;
-    window.labAPI.toggleProxy(true);
-    btnBurpToggle.textContent = 'Intercept is ON';
-    btnBurpToggle.className = 'btn btn-sm btn-secondary active';
-  } else {
-    // Switch back to progress tab
-    window.__app.switchOverlayTab('mission');
-  }
 }
 
 function resumeSocSimulator() {
@@ -3202,21 +2586,12 @@ const TRANSLATIONS = {
   en: {
     // Sidebar
     brand_sub: 'Web Pentest Lab Guide',
-    btn_enter_lab: 'Enter Lab Mode',
-    btn_exit_lab: 'Exit Lab Mode',
     btn_settings: 'Settings',
-    // Lab Panel
-    lab_panel_title: 'Lab Control Panel',
-    lab_message: 'Manage your local vulnerable targets',
-    btn_boot: 'Boot Lab',
-    btn_restart: 'Restart Lab',
-    btn_stop: 'Stop Lab',
-    btn_refresh: 'Refresh',
     // Welcome hero
     hero_title: 'Welcome to CyberCompanion',
-    hero_desc: 'Select a module from the sidebar to begin your Web Application Penetration Testing journey. Boot the lab environment to practice on real vulnerable applications.',
+    hero_desc: 'Select a module from the sidebar to begin your Web Application Penetration Testing journey. Open a built-in lab to practice on real vulnerable applications.',
     hero_step1: 'Choose a module',
-    hero_step2: 'Boot lab targets',
+    hero_step2: 'Open a built-in lab',
     hero_step3: 'Follow step-by-step',
     hero_step4: 'Learn to defend',
     // Module section headers
@@ -3230,7 +2605,7 @@ const TRANSLATIONS = {
     // Settings modal
     settings_title: 'Global Settings',
     settings_reset_title: 'Factory Reset',
-    settings_reset_desc: 'This will permanently erase all XP, achievements, and unlocked challenges. It will also destroy and rebuild the Juice Shop Docker container.',
+    settings_reset_desc: 'This will permanently erase your saved settings and progress on this device, then reload the app.',
     settings_reset_btn: 'Wipe Everything',
     confirm_wipe: 'Are you absolutely sure you want to wipe everything?',
     // Module titles (sidebar)
@@ -3264,22 +2639,7 @@ const TRANSLATIONS = {
     soc_action_waf: 'Update WAF Signatures',
     soc_action_rate: 'Rate Limit IP / Subnet',
     soc_action_isolate: 'Isolate Host from Network',
-    soc_action_reset: 'Force Password Reset',
-    // Overlay
-    overlay_lab_dashboard: 'Lab Dashboard',
-    overlay_progress: 'Progress',
-    overlay_proxy: 'Mini Proxy',
-    overlay_level: 'Current Level',
-    overlay_challenges: 'Challenges',
-    overlay_total_xp: 'Total XP',
-    overlay_module_mastery: 'Module Mastery',
-    overlay_recent: 'Recent Activity',
-    overlay_loading: 'Loading Juice Shop...',
-    // Proxy panel
-    proxy_raw: 'Raw HTTP Request',
-    proxy_forward: 'Forward',
-    proxy_drop: 'Drop',
-    proxy_intercept_on: 'Intercept ON',
+    soc_action_reset: 'Force Password Reset'
   }
 };
 
@@ -3289,19 +2649,13 @@ function t(key) {
   return TRANSLATIONS.en[key] || key;
 }
 
-async function factoryReset() {
+function factoryReset() {
   if (socStreamInterval) { clearInterval(socStreamInterval); socStreamInterval = null; }
   localStorage.clear();
   const btn = document.querySelector('.btn-danger-outline');
   if (btn) {
-    btn.textContent = "Wiping Database & Restarting Container...";
+    btn.textContent = 'Wiping saved data...';
     btn.disabled = true;
-  }
-  try {
-    if (window.labAPI.clearLabSession) await window.labAPI.clearLabSession();
-    await window.labAPI.bootLab();
-  } catch (e) {
-    console.error('Reset error:', e);
   }
   window.location.reload();
 }
@@ -3311,52 +2665,13 @@ async function factoryReset() {
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 window.__app = {
-  handleBoot,
-  handleStop,
-  handleRestart,
-  handleRefresh,
-  downloadDocker,
-  recheckDocker,
-  toggleLabMode,
-  toggleOverlayPanel,
-  switchOverlayTab: (tabId) => {
-    // Switch active tabs
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-    
-    if (tabId === 'mission') {
-      document.getElementById('tabMission').classList.add('active');
-      document.getElementById('overlayContent').style.display = 'block';
-    } else {
-      document.getElementById('tabProxy').classList.add('active');
-      document.getElementById('proxyContent').style.display = 'flex';
-    }
-  },
-  formatProxyJson: () => {
-    try {
-      const rawRequest = burpEditor.value.replace(/\r\n/g, '\n');
-      const parts = rawRequest.split('\n\n');
-      if (parts.length >= 2) {
-        const headerSection = parts[0];
-        const bodySection = parts.slice(1).join('\n\n');
-        if (!bodySection.trim()) return;
-        const parsedJson = JSON.parse(bodySection);
-        const prettyJson = JSON.stringify(parsedJson, null, 2);
-        burpEditor.value = headerSection + '\n\n' + prettyJson;
-      }
-    } catch (e) {
-      console.warn("Could not format JSON body", e);
-    }
-  },
   startTutorial,
-  startChallenge,
   startSocSimulator,
   resumeSocSimulator,
   stopSocSimulator,
   exitSoc,
   selectModuleById,
   showHome,
-  isLabMode: () => isLabMode,
   submitRemediation,
   toggleSettings,
   toggleSidebar,
@@ -3364,25 +2679,7 @@ window.__app = {
   handleNmapCommand,
   handleHydraCommand,
   handleSqlmapCommand,
-  initPacketLab,
-  triggerBurpSimIntercept: (id, reqStr) => {
-    isBurpSimulatorActive = true;
-    currentProxyId = id;
-    
-    if (overlayPanelCollapsed) {
-      window.__app.toggleOverlayPanel();
-    }
-    window.__app.switchOverlayTab('proxy');
-    
-    if (!isProxyOn) {
-      document.getElementById('btnBurpToggle').click();
-    }
-    
-    const editor = document.getElementById('burpPayloadEditor');
-    if (editor) {
-      editor.value = reqStr;
-    }
-  }
+  initPacketLab
 };
 
 window.TUTORIALS = {};
@@ -3397,5 +2694,4 @@ window.labAPI.getTutorials().then(data => {
 
 buildSidebar();
 renderHome();
-checkDockerInstallation();
 
