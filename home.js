@@ -12,11 +12,19 @@
     return modules.map((m, index) => ({
       index,
       id: m.id,
+      track: m.track,
       num: m.num,
       short: m.short || m.id,
       title: m.title,
       summary: m.subtitle || ''
     }));
+  }
+
+  // Rows split by track, each keeping its array order (and its array index).
+  function trackGroups(modules) {
+    const groups = { red: [], blue: [] };
+    homeRows(modules).forEach((r) => { if (groups[r.track]) groups[r.track].push(r); });
+    return groups;
   }
 
   // The module to offer under "continue", or null when the stored id is unknown.
@@ -40,7 +48,7 @@
     return Array.from({ length: Math.max(0, count) }, (_, i) => Math.min(i * STEP_MS, max));
   }
 
-  const CCHome = { LAST_KEY, homeRows, pickContinue, readLast, writeLast, rowDelays };
+  const CCHome = { LAST_KEY, homeRows, trackGroups, pickContinue, readLast, writeLast, rowDelays };
 
   if (typeof window !== 'undefined') window.CCHome = CCHome;
   if (typeof module !== 'undefined' && module.exports) module.exports = CCHome;

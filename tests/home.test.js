@@ -31,7 +31,7 @@ test('homeRows maps every module in order, keeping index, num, short, title and 
   const rows = CCHome.homeRows(MODS);
   assert.strictEqual(rows.length, 3);
   assert.deepStrictEqual(rows[0], {
-    index: 0, id: 'burp-proxy', num: '01', short: 'burp',
+    index: 0, id: 'burp-proxy', track: undefined, num: '01', short: 'burp',
     title: 'Burp Suite Proxy Interception', summary: 'Proxy basics.'
   });
   assert.strictEqual(rows[1].index, 1);
