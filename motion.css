@@ -25,6 +25,32 @@
   to   { opacity: 0; }
 }
 
+/* Loading indicators: the only loops allowed, and only while something loads. */
+@keyframes cc-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Discrete "..." for .loading-dots: 4 content steps per cycle, only while a download runs.
+   The one deliberate exception to transform/opacity-only, kept for equivalent behavior. */
+@keyframes cc-dots {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+  100% { content: ''; }
+}
+
+/* Splash: amber progress line fills, then the splash fades away. */
+@keyframes cc-progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes cc-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
 /* ─── Staged reveal (existing class names, new behavior) ─── */
 .fade-in { animation: cc-reveal var(--dur-reveal) var(--ease-out) both; }
 .fade-in-delay-1 { animation-delay: 50ms; }
@@ -35,6 +61,10 @@
 .fade-in-delay-6 { animation-delay: 300ms; }
 .fade-in-delay-7 { animation-delay: 350ms; }
 .fade-in-delay-8 { animation-delay: 400ms; }
+
+/* CCMotion.openModule writes a per-child --i delay (0–240ms) inline on each
+   module child; when present it replaces the fixed fade-in-delay-N steps. */
+.fade-in[style*="--i"] { animation-delay: var(--i, 0ms); }
 
 /* ─── Prompt line ($ open sqli) ─── */
 .cc-prompt {
@@ -90,6 +120,11 @@
   .cc-cursor {
     animation: none !important;
     opacity: 1 !important;
+    transform: none !important;
+  }
+  #splash.splash-exit,
+  .splash-bar-fill {
+    animation: none !important;
     transform: none !important;
   }
   .cc-flash::after,

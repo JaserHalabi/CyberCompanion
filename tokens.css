@@ -80,6 +80,7 @@
   --accent-hover:   #80e3a5;
   --accent-dim:     rgba(95, 214, 140, 0.12);
   --accent-line:    rgba(95, 214, 140, 0.35);
+  --on-accent:      #07090a;   /* text on a solid accent fill (buttons) */
 
   /* ─── Amber — active / selected / success emphasis ─── */
   --amber:          #ffb000;
