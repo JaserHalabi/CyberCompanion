@@ -783,37 +783,6 @@ body.theme-light {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   RTL / ARABIC SUPPORT
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-[dir='rtl'] .sidebar { border-right: none; border-left: 1px solid var(--border); }
-[dir='rtl'] .sidebar-brand { flex-direction: row-reverse; }
-[dir='rtl'] .nav-item { flex-direction: row-reverse; border-left: none; border-right: 2px solid transparent; }
-[dir='rtl'] .nav-item.active { border-right-color: var(--nav-color, var(--cyan)); border-left: none; }
-[dir='rtl'] .footer-info { flex-direction: row-reverse; }
-[dir='rtl'] .section-header { flex-direction: row-reverse; }
-[dir='rtl'] .step-item { flex-direction: row-reverse; }
-[dir='rtl'] .step-content { text-align: right; }
-[dir='rtl'] .section-body { text-align: right; }
-[dir='rtl'] .hero-title, [dir='rtl'] .hero-desc { text-align: center; }
-[dir='rtl'] .module-header { text-align: right; }
-[dir='rtl'] .modal-content { text-align: right; }
-[dir='rtl'] .modal-header { flex-direction: row-reverse; }
-[dir='rtl'] .setting-group { text-align: right; }
-[dir='rtl'] .danger-zone { text-align: right; }
-[dir='rtl'] .lab-panel-inner { flex-direction: row-reverse; }
-[dir='rtl'] .lab-panel-actions { flex-direction: row-reverse; }
-[dir='rtl'] .brand-text h1, [dir='rtl'] .brand-sub { text-align: right; }
-[dir='rtl'] .soc-layout { flex-direction: row-reverse; }
-[dir='rtl'] .terminal-header { flex-direction: row-reverse; }
-[dir='rtl'] .section-card { border-left: none; border-right: 3px solid transparent; }
-[dir='rtl'] .section-card.card-concept   { border-right-color: var(--cyan); }
-[dir='rtl'] .section-card.card-analogy   { border-right-color: var(--violet); }
-[dir='rtl'] .section-card.card-exercise  { border-right-color: var(--success); }
-[dir='rtl'] .section-card.card-defense   { border-right-color: var(--blue); }
-[dir='rtl'] .section-card.card-reference { border-right-color: var(--warning); }
-
-/* ═══════════════════════════════════════════════════════════════════════════════
    UI/UX OVERHAUL v3.0 — Splash · Logo · Polish
    ═══════════════════════════════════════════════════════════════════════════════ */
 
