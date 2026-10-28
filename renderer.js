@@ -1744,7 +1744,9 @@ function startTutorial(tutorialKey) {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(0, 0, 0, 0.65); z-index: 999990;
       pointer-events: none;
-      display: block; transition: clip-path var(--dur-base, 200ms) cubic-bezier(.2, .8, .2, 1);
+      /* The cut-out (clip-path) jumps to the next target; animating a polygon
+         clip repaints the whole viewport every frame. */
+      display: block;
     }
     #cyber-tut-bubble {
       position: fixed; z-index: 999999;
@@ -1790,6 +1792,12 @@ function startTutorial(tutorialKey) {
     #cyber-tut-arrow {
       position: fixed; z-index: 999998;
       width: 0; height: 0; pointer-events: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto !important; }
+      #cyber-tut-backdrop, #cyber-tut-bubble, #cyber-tut-bubble *, #cyber-tut-arrow, .cyber-tut-highlight {
+        animation: none !important; transition: none !important;
+      }
     }
   `;
   
