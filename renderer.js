@@ -1214,6 +1214,7 @@ Ready. Type 'hydra' for usage help.</div>
   // Setup copy buttons
   attachCopyHandlers();
   contentArea.scrollTop = 0;
+  window.CCMotion && window.CCMotion.openModule(contentArea, mod.id);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -1281,6 +1282,7 @@ async function copyToClipboard(text, btnEl) {
   const orig = btnEl.dataset.origHtml || btnEl.innerHTML;
   btnEl.dataset.origHtml = orig;
   btnEl.classList.add('copied');
+  window.CCMotion && window.CCMotion.flash(btnEl);
   btnEl.innerHTML = btnEl.classList.contains('btn-copy')
     ? `${ICONS.check}<span>Copied!</span>`
     : ICONS.check;
@@ -2435,6 +2437,7 @@ function awardProxyXp(id, label, xp) {
   sm.persist();
   const leveledUp = sm.level > oldLevel;
   window.__overlay.renderer.showAchievementToast({ challenge: label, xp, leveledUp });
+  window.CCMotion && window.CCMotion.flash(document.querySelector('#xpSection .xp-current'));
   const prog = sm.getProgress();
   window.__overlay.renderer.updateXP(prog.totalXP, prog.xpPercent, leveledUp);
   return true;
@@ -3248,17 +3251,9 @@ window.__app = {
     
     if (tabId === 'mission') {
       document.getElementById('tabMission').classList.add('active');
-      document.getElementById('tabMission').style.color = 'var(--cyan)';
-      document.getElementById('tabMission').style.borderBottom = '2px solid var(--cyan)';
-      document.getElementById('tabProxy').style.color = 'var(--text-secondary)';
-      document.getElementById('tabProxy').style.borderBottom = '2px solid transparent';
       document.getElementById('overlayContent').style.display = 'block';
     } else {
       document.getElementById('tabProxy').classList.add('active');
-      document.getElementById('tabProxy').style.color = 'var(--cyan)';
-      document.getElementById('tabProxy').style.borderBottom = '2px solid var(--cyan)';
-      document.getElementById('tabMission').style.color = 'var(--text-secondary)';
-      document.getElementById('tabMission').style.borderBottom = '2px solid transparent';
       document.getElementById('proxyContent').style.display = 'flex';
     }
   },
