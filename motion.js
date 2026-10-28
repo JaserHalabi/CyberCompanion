@@ -78,6 +78,11 @@
     const doc = contentEl.ownerDocument || (typeof document !== 'undefined' ? document : null);
     if (!doc) return;
 
+    // A finished run no longer owns its prompt, so sweep any leftovers too.
+    Array.from(contentEl.children || []).forEach((c) => {
+      if (c.classList && c.classList.contains('cc-prompt')) c.remove();
+    });
+
     const kids = Array.from(contentEl.children || []);
     staggerDelays(kids.length, 60, 240).forEach((ms, i) => {
       if (kids[i].style) kids[i].style.setProperty('--i', ms + 'ms');
@@ -113,9 +118,13 @@
     el.classList.remove('cc-flash');
     void el.offsetWidth; // restart the animation
     if (kind && el.setAttribute) el.setAttribute('data-flash', kind);
+    else if (el.removeAttribute) el.removeAttribute('data-flash');
     el.classList.add('cc-flash');
     clearTimeout(el._ccFlash);
-    el._ccFlash = setTimeout(() => el.classList.remove('cc-flash'), FLASH_MS);
+    el._ccFlash = setTimeout(() => {
+      el.classList.remove('cc-flash');
+      if (el.removeAttribute) el.removeAttribute('data-flash');
+    }, FLASH_MS);
   }
 
   function boot(splashEl, lines) {

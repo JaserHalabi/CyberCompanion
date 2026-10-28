@@ -21,6 +21,7 @@ function fakeEl(tag) {
       contains(c) { return el.classes.has(c); }
     },
     setAttribute(k, v) { el.attrs[k] = v; if (k === 'class') el.classes = new Set(v.split(' ')); },
+    removeAttribute(k) { delete el.attrs[k]; },
     appendChild(c) { c.parent = el; el.children.push(c); return c; },
     prepend(c) { c.parent = el; el.children.unshift(c); },
     remove() { if (el.parent) el.parent.children = el.parent.children.filter((c) => c !== el); el.parent = null; },
@@ -137,4 +138,55 @@ test('openModule under reduced motion shows final text and no cursor', () => {
     assert.strictEqual(p.querySelector('.cc-text').textContent, 'open sqli');
     assert.strictEqual(p.querySelector('.cc-cursor'), null);
   });
+});
+
+const prompts = (el) => el.children.filter((c) => c.classes.has('cc-prompt'));
+
+test('openModule after a completed run leaves exactly one (new) prompt', async () => {
+  const content = fakeEl('div');
+  CCMotion.openModule(content, 'one');
+  await new Promise((r) => setTimeout(r, 450));
+  const first = prompts(content)[0];
+  CCMotion.openModule(content, 'two');
+  assert.strictEqual(prompts(content).length, 1);
+  assert.notStrictEqual(prompts(content)[0], first);
+  CCMotion.cancelAll();
+});
+
+test('openModule under reduced motion does not stack prompts', async () => {
+  const prev = globalThis.matchMedia;
+  globalThis.matchMedia = () => ({ matches: true });
+  try {
+    const content = fakeEl('div');
+    CCMotion.openModule(content, 'one');
+    await new Promise((r) => setTimeout(r, 5));
+    CCMotion.openModule(content, 'two');
+    assert.strictEqual(prompts(content).length, 1);
+    assert.strictEqual(prompts(content)[0].querySelector('.cc-text').textContent, 'two');
+  } finally {
+    if (prev === undefined) delete globalThis.matchMedia; else globalThis.matchMedia = prev;
+  }
+});
+
+test('openModule preserves other children and only staggers non-prompt ones', async () => {
+  const content = fakeEl('div');
+  const a = content.appendChild(fakeEl('section'));
+  const b = content.appendChild(fakeEl('section'));
+  CCMotion.openModule(content, 'one');
+  await Promise.resolve();
+  CCMotion.openModule(content, 'two');
+  assert.deepStrictEqual(content.children.slice(1), [a, b]);
+  assert.strictEqual(prompts(content)[0].vars['--i'], undefined);
+  assert.ok('--i' in a.vars && '--i' in b.vars);
+  CCMotion.cancelAll();
+});
+
+test('flash clears stale data-flash', () => {
+  const el = fakeEl('div');
+  el.offsetWidth = 0;
+  CCMotion.flash(el, 'warn');
+  assert.strictEqual(el.attrs['data-flash'], 'warn');
+  CCMotion.flash(el);
+  assert.strictEqual(el.attrs['data-flash'], undefined);
+  clearTimeout(el._ccFlash);
 });
