@@ -66,7 +66,7 @@ const MODULES = [
 // MODULE 1: Burp Suite Proxy Interception
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'burp-proxy', num: '01',
+  id: 'burp-proxy', num: '01', short: 'burp',
   title: 'Burp Suite Proxy Interception',
   subtitle: 'Learn how web proxies capture, inspect, and modify HTTP traffic between your browser and a target application.',
   tag: 'Module 1 — Proxy Fundamentals',
@@ -119,7 +119,7 @@ const MODULES = [
 // MODULE 2: SQL Injection (SQLi)
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'sqli', num: '02',
+  id: 'sqli', num: '02', short: 'sqli',
   title: 'SQL Injection (SQLi)',
   subtitle: 'Understand how unsanitized user input can manipulate backend database queries to leak data or bypass authentication.',
   tag: 'Module 2 — Database Exploitation',
@@ -172,7 +172,7 @@ const MODULES = [
 // MODULE 3: SQLmap — Automated SQL Injection
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'sqlmap', num: '03',
+  id: 'sqlmap', num: '03', short: 'sqlmap',
   title: 'SQLmap — Automated SQL Injection',
   subtitle: 'After understanding manual SQLi, learn how SQLmap automates detection, exploitation, and full database extraction.',
   tag: 'Module 3 — Automation & Tooling',
@@ -226,7 +226,7 @@ const MODULES = [
 // MODULE 4: Nmap — Network Scanning & Enumeration
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'nmap', num: '04',
+  id: 'nmap', num: '04', short: 'nmap',
   title: 'Nmap — Network Scanning & Enumeration',
   subtitle: 'Master the most widely-used network scanner. Learn every major flag and scan technique for discovering hosts, open ports, and running services.',
   tag: 'Module 4 — Reconnaissance',
@@ -285,7 +285,7 @@ const MODULES = [
 // MODULE 5: Brute Force with Hydra
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'hydra', num: '05',
+  id: 'hydra', num: '05', short: 'hydra',
   title: 'Brute Force Attacks with Hydra',
   subtitle: 'Learn how password guessing attacks work, how to use Hydra for HTTP, SSH, and FTP brute forcing, and how to defend against them.',
   tag: 'Module 5 — Credential Attacks',
@@ -343,7 +343,7 @@ const MODULES = [
 // MODULE 6: Cross-Site Scripting (XSS)
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'xss', num: '06',
+  id: 'xss', num: '06', short: 'xss',
   title: 'Cross-Site Scripting (XSS)',
   subtitle: 'Learn how injecting malicious client-side scripts can hijack user sessions and manipulate web pages.',
   tag: 'Module 6 \u2014 Client-Side Attacks',
@@ -384,7 +384,7 @@ const MODULES = [
 },
 
 {
-  id: 'soc-simulator', num: '07',
+  id: 'soc-simulator', num: '07', short: 'soc',
   title: 'Blue Team SOC Analyst',
   subtitle: 'Defend the network! Monitor live traffic, spot the active exploit, and remediate the threat.',
   tag: 'Module 7 — Defensive Simulation',
@@ -423,7 +423,7 @@ const MODULES = [
 // MODULE 8: Network Traffic Analysis
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  id: 'net-analyst', num: '08',
+  id: 'net-analyst', num: '08', short: 'net',
   title: 'Network Traffic Analysis',
   subtitle: 'Capture, decode, and analyze raw network packets to hunt for malware beacons, credential theft, and data exfiltration.',
   tag: 'Module 8 — Blue Team Forensics',
@@ -493,13 +493,69 @@ function buildSidebar() {
     item.className = 'nav-item';
     item.dataset.index = i;
     item.dataset.module = mod.id;
+    item.title = mod.title;
     item.innerHTML = `
       <div class="nav-num">${mod.num}</div>
-      <div class="nav-label">${escapeHtml(mod.title)}</div>
+      <div class="nav-label">${escapeHtml(mod.short || mod.title)}</div>
     `;
     item.addEventListener('click', () => selectModule(i));
     sidebarNav.appendChild(item);
   });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   HOME — module list + "continue" row, rendered from MODULES (pure helpers in home.js)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+// The static home markup from index.html; renderModule replaces it, showHome restores it.
+const HOME_HTML = contentArea.innerHTML;
+
+function lastModuleStorage() {
+  try { return window.localStorage; } catch (e) { return null; }
+}
+
+function renderHome() {
+  const H = window.CCHome;
+  const list = document.getElementById('homeModuleList');
+  const cont = document.getElementById('homeContinue');
+  if (!H || !list) return;
+
+  const rows = H.homeRows(MODULES);
+  const delays = H.rowDelays(rows.length + 1, 200);
+  list.innerHTML = rows.map((r, i) => `
+    <button type="button" class="home-row fade-in" style="--i:${delays[i + 1]}ms" data-index="${r.index}" data-module="${escapeAttr(r.id)}">
+      <span class="home-row-num">${escapeHtml(r.num)}</span>
+      <span class="home-row-short">${escapeHtml(r.short)}</span>
+      <span class="home-row-body">
+        <span class="home-row-title">${escapeHtml(r.title)}</span>
+        <span class="home-row-summary">${escapeHtml(r.summary)}</span>
+      </span>
+    </button>`).join('');
+  list.querySelectorAll('.home-row').forEach((btn) => {
+    btn.addEventListener('click', () => selectModule(Number(btn.dataset.index)));
+  });
+
+  if (!cont) return;
+  const pick = H.pickContinue(MODULES, H.readLast(lastModuleStorage()));
+  if (!pick) { cont.hidden = true; cont.onclick = null; return; }
+  cont.querySelector('.home-continue-short').textContent = pick.module.short || pick.module.id;
+  cont.querySelector('.home-continue-title').textContent = pick.module.title;
+  cont.title = 'Continue: ' + pick.module.title;
+  cont.onclick = () => selectModule(pick.index);
+  cont.hidden = false;
+}
+
+function showHome() {
+  if (isLabMode) toggleLabMode();
+  stopSocSimulator();
+  document.getElementById('socMode').style.display = 'none';
+  contentArea.style.display = '';
+  window.CCMotion && window.CCMotion.cancelAll();
+  activeModuleIndex = -1;
+  document.querySelectorAll('.nav-item').forEach((el) => el.classList.remove('active'));
+  contentArea.innerHTML = HOME_HTML;
+  contentArea.scrollTop = 0;
+  renderHome();
 }
 
 function selectModuleById(moduleId) {
@@ -524,6 +580,7 @@ function selectModule(index) {
   document.getElementById('socMode').style.display = 'none';
   document.getElementById('contentArea').style.display = '';
   activeModuleIndex = index;
+  window.CCHome && window.CCHome.writeLast(lastModuleStorage(), MODULES[index].id);
   document.querySelectorAll('.nav-item').forEach((el, i) => {
     el.classList.toggle('active', i === index);
   });
@@ -3261,6 +3318,7 @@ window.__app = {
   stopSocSimulator,
   exitSoc,
   selectModuleById,
+  showHome,
   isLabMode: () => isLabMode,
   submitRemediation,
   toggleSettings,
@@ -3301,5 +3359,6 @@ window.labAPI.getTutorials().then(data => {
 }).catch(err => console.error("Failed to load tutorials via IPC:", err));
 
 buildSidebar();
+renderHome();
 checkDockerInstallation();
 

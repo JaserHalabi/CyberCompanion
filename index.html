@@ -49,13 +49,15 @@
   <!-- ═══════════ SIDEBAR ═══════════ -->
   <aside id="sidebar" class="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 64 64"><use href="#cc-logo"/></svg>
-      </div>
-      <div class="brand-text">
-        <h1>CyberCompanion</h1>
-        <span class="brand-sub" data-i18n="brand_sub">Web Pentest Lab Guide</span>
-      </div>
+      <a class="brand-home" href="#" onclick="window.__app.showHome(); return false;" title="Home" aria-label="CyberCompanion home">
+        <div class="brand-icon">
+          <svg viewBox="0 0 64 64"><use href="#cc-logo"/></svg>
+        </div>
+        <div class="brand-text">
+          <h1>CyberCompanion</h1>
+          <span class="brand-sub" data-i18n="brand_sub">Web Pentest Lab Guide</span>
+        </div>
+      </a>
       <button class="sidebar-toggle" onclick="window.__app.toggleSidebar()" title="Toggle sidebar" aria-label="Toggle sidebar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </button>
@@ -143,26 +145,15 @@
     <section id="contentArea" class="content-area">
       <div class="welcome-hero" id="welcomeHero">
         <p class="hero-prompt">cybercompanion --start</p>
-        <h2 class="hero-title">Welcome to CyberCompanion</h2>
-        <p class="hero-desc">Select a module from the sidebar to begin your Web Application Penetration Testing journey. Boot the lab environment to practice on real vulnerable applications.</p>
-        <div class="hero-cards">
-          <div class="hero-card">
-            <div class="hero-card-num">01</div>
-            <div class="hero-card-text">Choose a module</div>
-          </div>
-          <div class="hero-card">
-            <div class="hero-card-num">02</div>
-            <div class="hero-card-text">Boot lab targets</div>
-          </div>
-          <div class="hero-card">
-            <div class="hero-card-num">03</div>
-            <div class="hero-card-text">Follow step-by-step</div>
-          </div>
-          <div class="hero-card">
-            <div class="hero-card-num">04</div>
-            <div class="hero-card-text">Learn to defend</div>
-          </div>
-        </div>
+        <h2 class="hero-title">CyberCompanion</h2>
+        <p class="hero-desc">Hands-on web pentesting, one tool at a time: learn the concept, try it in the built-in lab, then learn the defence.</p>
+        <button type="button" class="home-continue fade-in" id="homeContinue" hidden>
+          <span class="home-continue-label"><span class="home-continue-marker">&gt;</span> continue:</span>
+          <span class="home-continue-short"></span>
+          <span class="home-continue-title"></span>
+        </button>
+        <h3 class="welcome-section-title home-list-label">modules</h3>
+        <div class="home-list" id="homeModuleList"></div>
       </div>
     </section>
 
@@ -392,6 +383,7 @@
   </div>
 
   <script src="motion.js"></script>
+  <script src="home.js"></script>
   <script src="renderer.js"></script>
   <script src="overlay.js"></script>
 </body>
