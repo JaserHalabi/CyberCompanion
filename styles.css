@@ -173,7 +173,8 @@ body { display: flex; }
 .sidebar.collapsed .nav-item { padding: 8px 0 8px 12px; justify-content: center; }
 .sidebar.collapsed .nav-item::before { left: 3px; }
 .sidebar.collapsed .nav-num { width: auto; font-size: 12px; }
-.sidebar.collapsed .nav-track-label { display: block; padding: 8px 0 4px; margin: 4px 10px 0; border-top: 1px solid var(--border); text-align: center; }.sidebar.collapsed .nav-track-label::before { content: 'B'; color: var(--text-muted); opacity: 1; }
+.sidebar.collapsed .nav-track-label { display: block; padding: 8px 0 4px; margin: 4px 10px 0; border-top: 1px solid var(--border); text-align: center; }
+.sidebar.collapsed .nav-track-label::before { content: 'B'; color: var(--text-muted); opacity: 1; }
 .sidebar.collapsed .nav-track-label:first-child { display: none; }
 .sidebar.collapsed .nav-icon-emoji { font-size: 16px; }
 
@@ -213,24 +214,6 @@ body { display: flex; }
 .btn-secondary { background: var(--bg-surface); color: var(--text-secondary); border-color: var(--border); }
 .btn-secondary:hover { background: var(--bg-hover); color: var(--text-primary); border-color: color-mix(in srgb, var(--text-primary) 16%, transparent); }
 
-/* ─── Breadcrumb Bar ─── */
-.breadcrumb-bar {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 28px; background: var(--bg-base);
-  border-bottom: 1px solid var(--border);
-  font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); flex-shrink: 0;
-}
-.breadcrumb-bar.hidden { display: none; }
-.breadcrumb-sep { color: var(--text-muted); opacity: 0.6; font-size: 12px; line-height: 1; }
-.breadcrumb-home { cursor: pointer; font-weight: 500; }
-.breadcrumb-home:hover { color: var(--accent); }
-.breadcrumb-category { color: var(--text-secondary); }
-.breadcrumb-module { font-weight: 500; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
-.breadcrumb-module-dot {
-  width: 6px; height: 6px; border-radius: 1px;
-  background: var(--amber); display: inline-block; flex-shrink: 0;
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════════
    CONTENT AREA
    ═══════════════════════════════════════════════════════════════════════════════ */
@@ -264,44 +247,6 @@ body { display: flex; }
 }
 .welcome-section-title::before { content: '// '; color: var(--accent); opacity: 0.7; }
 .welcome-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-/* ─── Module Grid ─── */
-.module-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-  margin-bottom: 28px;
-}
-.module-grid-card {
-  position: relative; overflow: hidden;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 16px;
-  cursor: pointer;
-}
-.module-grid-card:hover { border-color: var(--border-accent); background: var(--bg-elevated); }
-.module-grid-card.active,
-.module-grid-card.selected { border-color: var(--amber); }
-/* Hover scan sweep: shared with .cc-scan in motion.css (one rule, one reduced-motion override). */
-.module-grid-card-icon { font-size: 22px; margin-bottom: 10px; }
-.module-grid-card-num {
-  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
-  color: var(--accent); letter-spacing: 0.02em; margin-bottom: 6px;
-}
-.module-grid-card-title {
-  font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--text-primary);
-  margin-bottom: 6px; line-height: 1.35;
-}
-.module-grid-card-desc {
-  font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-.module-grid-card-badge {
-  display: inline-block; font-family: var(--font-mono); font-size: 11px; font-weight: 500;
-  padding: 1px 6px; border-radius: var(--radius-xs);
-  margin-top: 10px; color: var(--text-muted); border: 1px solid var(--border);
-}
 
 /* ─── Home: "> continue" row + module run-list (rendered by renderHome) ─── */
 /* Shared row reset: native buttons, full width, left aligned, colour-only hover.
@@ -405,9 +350,6 @@ body { display: flex; }
   background: var(--bg-surface); border: 1px solid var(--border);
   border-radius: var(--radius); margin-bottom: 16px; overflow: hidden;
 }
-/* Kind modifiers kept as hooks; the kind reads from the icon and title, not a coloured edge. */
-.section-card.card-concept, .section-card.card-analogy, .section-card.card-exercise,
-.section-card.card-defense, .section-card.card-reference, .section-card.card-challenge { border-color: var(--border); }
 
 .section-header {
   display: flex; align-items: center; gap: 10px;
@@ -503,16 +445,6 @@ body { display: flex; }
   text-transform: lowercase; letter-spacing: 0.04em;
   display: flex; align-items: center; gap: 7px;
 }
-.code-lang-dot { width: 6px; height: 6px; border-radius: 1px; background: var(--text-muted); }
-.code-lang-dot.bash { background: var(--accent); }
-.code-lang-dot.sql  { background: var(--warning); }
-.code-lang-dot.http { background: var(--text-primary); }
-.code-lang-dot.html { background: var(--danger); }
-.code-lang-dot.json { background: var(--text-secondary); }
-.code-lang-dot.url  { background: var(--accent); }
-.code-lang-dot.text,
-.code-lang-dot.default { background: var(--text-muted); }
-
 .btn-copy {
   display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;
   border: 1px solid transparent; border-radius: var(--radius-xs);

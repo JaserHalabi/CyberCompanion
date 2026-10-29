@@ -34,7 +34,6 @@ const ICONS = {
   analogy:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
   exercise: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
   reference:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
-  defense:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
   shield:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`
 };
 
@@ -45,12 +44,6 @@ const LI = {
   flask:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><line x1="7.5" y1="15" x2="16.5" y2="15"/></svg>`,
   shield:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
   signal:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5a9 9 0 0 1 14 0"/><path d="M8.5 15.5a4.5 4.5 0 0 1 7 0"/><circle cx="12" cy="18.5" r="1"/></svg>`,
-  trophy:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg>`,
-  bolt:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 11 14 11 22 21 10 13 10 13 2"/></svg>`,
-  activity: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
-  lock:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
-  globe:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z"/></svg>`,
-  gear:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
 };
 
 
@@ -1159,7 +1152,7 @@ Ready. Type 'hydra' for usage help.</div>
           <div class="sim-browser">
             <div class="sim-panel-bar">
               <div class="sim-dots"><span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span></div>
-              <span>vulnerable page — http://simulated-target.local/search</span>
+              <span>vulnerable page — http://practice-site.local/search</span>
             </div>
             <iframe id="xssSandboxFrame" sandbox="allow-scripts allow-modals" srcdoc="&lt;html&gt;&lt;body style='font-family:Arial,sans-serif; padding:20px; background:#f8f8f8;'&gt;&lt;h3 style='color:#333;'&gt;🛍️ VulnShop — Product Search&lt;/h3&gt;&lt;div style='background:#fff; border:1px solid #ddd; padding:10px; border-radius:4px;'&gt;&lt;input type='text' placeholder='Search products...' style='width:80%;padding:6px;border:1px solid #ccc;border-radius:3px;'&gt; &lt;button style='padding:6px 14px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;'&gt;Search&lt;/button&gt;&lt;/div&gt;&lt;p style='color:#777;font-size:13px;margin-top:10px;'&gt;Showing results for: &lt;span id='search-result'&gt;(nothing yet)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
           </div>
@@ -2796,20 +2789,6 @@ function initPacketLab() {
   if (filterInput) filterInput.addEventListener('keydown', e => { if (e.key === 'Enter') redrawFiltered(); });
   if (clearFilterBtn) clearFilterBtn.addEventListener('click', () => { if (filterInput) filterInput.value = ''; redrawFiltered(); });
 
-  // Hook up Quick Filters
-  document.querySelectorAll('.quick-filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (filterInput) {
-        if (filterInput.value.trim() && !filterInput.value.trim().endsWith('or')) {
-          filterInput.value = filterInput.value.trim() + ' or ' + btn.innerText;
-        } else {
-          filterInput.value = btn.innerText;
-        }
-        redrawFiltered();
-      }
-    });
-  });
-
   function addPacket(pkt) {
     packetIndex++;
     const now = new Date();
@@ -2864,59 +2843,17 @@ const TRANSLATIONS = {
     // Sidebar
     brand_sub: 'Web Pentest Lab Guide',
     btn_settings: 'Settings',
-    // Welcome hero
-    hero_title: 'Welcome to CyberCompanion',
-    hero_desc: 'Select a module from the sidebar to begin your Web Application Penetration Testing journey. Open a built-in lab to practise against offline simulated labs.',
-    hero_step1: 'Choose a module',
-    hero_step2: 'Open a built-in lab',
-    hero_step3: 'Follow step-by-step',
-    hero_step4: 'Learn to defend',
     // Module section headers
     section_concept: 'Core Concept',
     section_analogy: 'Real-World Analogy',
     section_steps: 'Hands-on Tutorial',
-    section_defense: 'Defense & Remediation',
     section_reference: 'Interactive Reference Table',
-    section_challenges: 'Interactive Challenges',
-    challenge_intro: 'Put your skills to the test in the built-in offline labs and simulators. Follow an interactive step-by-step tutorial, or try to solve it on your own!',
     // Settings modal
     settings_title: 'Global Settings',
     settings_reset_title: 'Factory Reset',
     settings_reset_desc: 'This will permanently erase your saved settings and progress on this device, then reload the app.',
     settings_reset_btn: 'Wipe Everything',
-    confirm_wipe: 'Are you absolutely sure you want to wipe everything?',
-    // Module titles (sidebar)
-    mod_burp: 'Burp Suite Proxy Interception',
-    mod_sqli: 'SQL Injection (SQLi)',
-    mod_sqlmap: 'SQLmap Automation',
-    mod_nmap: 'Nmap Network Scanning',
-    mod_hydra: 'Hydra Brute-Force',
-    mod_xss: 'Cross-Site Scripting (XSS)',
-    mod_soc: 'SOC Analyst Simulator',
-    mod_net: 'Network Traffic Analyst',
-    // SOC section
-    soc_title: 'Security Operations Center',
-    soc_badge: 'ACTIVE AUDIT',
-    soc_mission: 'Mission Objective',
-    soc_ioc_title: 'Indicators of Compromise (IoCs)',
-    soc_remediation_title: 'Remediation Action Required',
-    soc_locked: 'Flag a valid threat to unlock Remediation',
-    soc_intel_placeholder: 'Select a log entry to analyze IP reputation and threat score.',
-    soc_intel_title: 'Threat Intel Feed',
-    soc_waf_status: 'WAF Status: Active',
-    soc_threats_mitigated: '0 Threats Mitigated',
-    soc_scenario_random: 'Random Attack (Recommended)',
-    soc_scenario_sqli: 'SQL Injection',
-    soc_scenario_xss: 'XSS Attack',
-    soc_scenario_brute: 'Brute Force',
-    soc_scenario_path: 'Path Traversal',
-    soc_scenario_cmdi: 'Command Injection',
-    soc_scenario_idor: 'IDOR (Broken Access Control)',
-    soc_scenario_ssrf: 'Server-Side Request Forgery',
-    soc_action_waf: 'Update WAF Signatures',
-    soc_action_rate: 'Rate Limit IP / Subnet',
-    soc_action_isolate: 'Isolate Host from Network',
-    soc_action_reset: 'Force Password Reset'
+    confirm_wipe: 'Are you absolutely sure you want to wipe everything?'
   }
 };
 

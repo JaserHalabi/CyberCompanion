@@ -93,10 +93,8 @@
 }
 
 /* ─── Scan line sweep (hover/loading only, never at rest) ─── */
-/* .module-grid-card shares the rule so the sweep is defined once. */
-.cc-scan, .module-grid-card { position: relative; overflow: hidden; }
-.cc-scan:hover::after,
-.module-grid-card:hover::after {
+.cc-scan { position: relative; overflow: hidden; }
+.cc-scan:hover::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -128,8 +126,7 @@
     transform: none !important;
   }
   .cc-flash::after,
-  .cc-scan:hover::after,
-  .module-grid-card:hover::after {
+  .cc-scan:hover::after {
     animation: none !important;
     opacity: 0 !important;
   }
