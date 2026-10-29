@@ -134,6 +134,16 @@ test('hydra http host parsing handles -s before and after the target', () => {
   assert.doesNotMatch(b, /host: 8000/);
 });
 
+test('sqlmap simulator: --batch is not mistaken for -b/--banner', () => {
+  const base = 'sqlmap -u "http://shop.local/item?id=1"';
+  const withBatch = runSim('handleSqlmapCommand', base + ' --batch');
+  assert.doesNotMatch(withBatch, /fetching banner/, '--batch must not trigger the banner branch');
+  const withBannerShort = runSim('handleSqlmapCommand', base + ' -b');
+  assert.match(withBannerShort, /fetching banner/, '-b must still trigger the banner branch');
+  const withBannerLong = runSim('handleSqlmapCommand', base + ' --banner');
+  assert.match(withBannerLong, /fetching banner/, '--banner must still trigger the banner branch');
+});
+
 test('hydra/sqlmap/nmap tutorial waitForValues are accepted by their simulators', () => {
   let checked = 0;
   for (const [key, tut] of Object.entries(tutorials)) {
