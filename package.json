@@ -28,8 +28,7 @@
       "!restored_from_exe/**",
       "!**/*.map",
       "!**/*.log",
-      "!.superpowers/**",
-      "!.impeccable/**",
+      "!.*/**",
       "!docs/**",
       "!tests/**",
       "!scripts/**"
