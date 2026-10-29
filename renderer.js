@@ -501,25 +501,135 @@ awk '$9 == 401 {print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn
 {
   id: 'net-analyst', track: 'blue', num: 'B2', short: 'net',
   title: 'Network Traffic Analysis',
-  subtitle: 'Capture, decode, and analyze raw network packets to hunt for malware beacons, credential theft, and data exfiltration.',
+  subtitle: 'Learn Wireshark and tcpdump: capture packets, filter the noise, follow conversations, and spot beacons, cleartext credentials, DNS exfiltration and SQL injection.',
   tag: 'Blue B2 — Network Forensics',
 
   concept: [
-    `Every byte that travels across a network can be captured and inspected. <strong>Packet analysis</strong> is the art of reading these raw captures to reconstruct what happened during a security incident — or to catch an attack <em>in progress</em>.`,
-    `<strong>Wireshark</strong> is the world's most popular network protocol analyzer. It decodes over 3,000 protocols from raw binary and presents them in a human-readable format. Security analysts use it to find plaintext credentials, malware C2 (command-and-control) beacons, DNS exfiltration, and unusual traffic patterns.`,
-    `A key skill is <strong>filtering</strong>. A typical packet capture contains thousands of packets per second. Using display filters (like <code>http.request.method == "POST"</code> or <code>dns contains "evil.com"</code>), you can isolate exactly the traffic you care about.`,
-    `On the command line, <strong>tcpdump</strong> is the lightweight alternative — perfect for capturing on headless servers or embedded devices where a GUI is unavailable.`
+    `<strong>Packet analysis</strong> means recording the packets that cross a network interface and reading them, layer by layer, to work out what really happened. Defenders reach for it when logs are not enough: to confirm an alert, to see exactly what an attacker sent and received, or to find malware talking to its controller.`,
+    `<strong>Wireshark</strong> is the standard graphical protocol analyser. It decodes thousands of protocols colours them, and lets you filter, search and rebuild whole conversations. <strong>tcpdump</strong> is its command-line cousin, ideal for servers with no desktop. Both read and write the same <code>.pcap</code> capture files (Wireshark also writes <code>.pcapng</code>), so you can capture with one and analyse with the other.`,
+    `Filtering is the core skill, and there are <strong>two different filter languages</strong>. A <strong>capture filter</strong> uses BPF syntax (the same as tcpdump, for example <code>host 10.0.0.5 and port 80</code>) and decides which packets are saved at all. A <strong>display filter</strong> uses Wireshark's own syntax (for example <code>ip.addr == 10.0.0.5 &amp;&amp; tcp.port == 80</code>) and hides packets you have already captured, but can look inside protocols such as HTTP, DNS and FTP.`,
+    `Packet captures only reveal what is not encrypted. HTTP, FTP, Telnet and plain DNS are readable; HTTPS (TLS) shows who talked to whom and how much, but not the content.`
   ],
 
-  analogy: { emoji: '🔬', text: `Think of packet analysis like reading every individual letter passing through a postal sorting facility. While most letters are birthday cards and bills (normal traffic), the analyst is looking for the one envelope containing a coded message to an overseas spy (a malware beacon). The key is filtering thousands of normal items to spot the one suspicious one.` },
+  analogy: { emoji: '🔬', text: `Think of packet analysis like reading every individual letter passing through a postal sorting facility. While most letters are birthday cards and bills (normal traffic), the analyst is looking for the one envelope containing a coded message to an overseas spy (a malware beacon). A capture filter is deciding at the loading dock which sacks you photograph; a display filter is searching through the photos afterwards.` },
 
   steps: [
-    { title: 'Capture Traffic with Wireshark', desc: 'Open Wireshark and select your active network interface. Click the blue shark-fin to start a capture. You will immediately see a flood of packets. Stop the capture after 30 seconds.', code: { lang: 'filter', text: '# Wireshark Display Filter: Show only HTTP traffic\nhttp\n\n# Show only DNS queries\ndns\n\n# Filter by IP address\nip.addr == 192.168.1.105' } },
-    { title: 'Hunt for Plaintext Credentials', desc: 'Many legacy protocols (FTP, Telnet, HTTP Basic Auth) transmit credentials in plain text. Use the filter below and then follow the TCP stream (Right-click → Follow → TCP Stream) to reconstruct the full session.', code: { lang: 'filter', text: '# Find FTP login attempts\nftp.request.command == "PASS"\n\n# Find HTTP Basic Auth\nhttp.authorization\n\n# Find POST form data (look for password= parameters)\nhttp.request.method == "POST"' } },
-    { title: 'Detect DNS Exfiltration', desc: 'Attackers encode stolen data in DNS queries to bypass firewalls (since most networks allow DNS out). Look for abnormally long subdomain names, which indicate data is being tunneled.', code: { lang: 'filter', text: '# Show all DNS queries\ndns.flags.response == 0\n\n# Look for unusually long names (>50 chars = suspicious)\ndns.qry.name.len > 50\n\n# Suspicious example:\n# 6d616c77617265.exfil.evil.com  ← hex-encoded data in subdomain' } },
-    { title: 'Identify Malware C2 Beacons', desc: 'Malware "phones home" to its command server at regular intervals (beaconing). Look for a host making connections to an external IP on unusual ports at perfectly regular intervals (e.g., exactly every 60 seconds).', code: { lang: 'filter', text: '# Filter traffic to a suspicious external IP\nip.dst == 13.37.13.37\n\n# Look for repeated connections to same port\ntcp.dstport == 4444 or tcp.dstport == 1337\n\n# Check for small, regular payloads (beacon pattern)\ntcp.len > 0 and tcp.len < 100' } },
-    { title: 'Reconstruct an Attack with Follow Stream', desc: 'When you find a suspicious packet, right-click it and select <strong>Follow → TCP Stream</strong>. Wireshark will reconstruct the entire two-way conversation in a readable format, showing you the exact request and response — critical for understanding what data was stolen.', code: null },
-    { title: 'Capture on the Command Line (tcpdump)', desc: 'When you cannot run Wireshark, use tcpdump. Always save to a .pcap file for later analysis in Wireshark.', code: { lang: 'bash', text: '# Capture all traffic on eth0, save to file\ntcpdump -i eth0 -w capture.pcap\n\n# Capture only HTTP traffic (port 80)\ntcpdump -i eth0 port 80 -w http_traffic.pcap\n\n# Read and display a saved capture\ntcpdump -r capture.pcap -n\n\n# Filter by host IP\ntcpdump -i eth0 host 192.168.1.105 -w suspect.pcap' } }
+    { title: 'Install Wireshark and tcpdump', desc: `<strong>Kali Linux</strong>: Wireshark and tcpdump are normally already installed; if not, use apt. On Debian-based systems the installer asks "Should non-superusers be able to capture packets?": answer <strong>Yes</strong>, then add your user to the <code>wireshark</code> group and log out and back in. Without that you can only open existing capture files, or must start Wireshark as root.<br><br><strong>Your own machine</strong>: Debian/Ubuntu use the same apt command. On macOS download the .dmg from wireshark.org or use Homebrew's Wireshark cask (tcpdump is already built in). On Windows download the installer from wireshark.org; it offers to install Npcap, the capture driver Wireshark needs there. tcpdump has no official Windows build, so use Wireshark, or WSL/a Kali VM for tcpdump.`, code: { lang: 'bash', text: `# Kali / Debian / Ubuntu
+sudo apt update
+sudo apt install wireshark tcpdump
+
+# Let a normal user capture (no sudo): add yourself to the wireshark group
+sudo usermod -aG wireshark $USER
+# then log out and back in; check with:  groups
+
+# macOS: download the .dmg from https://www.wireshark.org/download.html,
+# or use Homebrew's Wireshark cask (check the exact name with: brew search wireshark)
+# tcpdump already ships with macOS
+
+# Windows: download and run the installer from https://www.wireshark.org/download.html
+# (tick the Npcap option if asked)
+
+# Check the tools are available
+tcpdump --version
+wireshark --version` } },
+    { title: 'Capture Basics in Wireshark', desc: `Start Wireshark, pick the interface that shows a moving activity graph (<code>eth0</code>, <code>wlan0</code>, or your Wi-Fi/Ethernet adapter on Windows and macOS), and double-click it to start. Press the red square to stop. Use <strong>File → Save As</strong> to keep the capture as a <code>.pcapng</code> file.<br><br>To use a <strong>capture filter</strong>, type a BPF expression in the "Enter a capture filter" box on the start page <em>before</em> you double-click the interface (or set it under Capture → Options). Packets that do not match are never saved. The <strong>display filter</strong> bar sits above the packet list; type there and press Enter. A green bar means the filter is valid, red means a syntax error, yellow means a valid but suspicious filter.<br><br>The capture window has three panes: the <strong>packet list</strong> (one row per packet), the <strong>packet details</strong> (the selected packet's protocol layers, expandable), and the <strong>packet bytes</strong> (raw hex and ASCII).`, code: null },
+    { title: 'Capture Filters vs Display Filters', desc: `Same goal, different languages and different moments. Capture filters (BPF) are fast and keep files small, but you cannot undo them: a packet you did not capture is gone. Display filters are powerful and reversible, but need the data already captured. Beginners should usually capture broadly (or with a simple host filter) and filter on display.<br><br>Common pairs:`, code: { lang: 'text', text: `WHAT YOU WANT               CAPTURE FILTER (BPF)            DISPLAY FILTER (Wireshark)
+One host                    host 10.0.0.5                   ip.addr == 10.0.0.5
+Traffic from one host       src host 10.0.0.5               ip.src == 10.0.0.5
+A subnet                    net 192.168.1.0/24              ip.addr == 192.168.1.0/24
+Web traffic (port 80)       port 80                         tcp.port == 80
+FTP control channel         tcp port 21                     tcp.port == 21   (or:  ftp)
+DNS                         udp port 53                     dns
+Ping                        icmp                            icmp
+Host AND port               host 10.0.0.5 and port 80       ip.addr == 10.0.0.5 && tcp.port == 80
+HTTP POST requests          (not possible)                  http.request.method == "POST"
+Cleartext FTP password      (not possible)                  ftp.request.command == "PASS"
+
+# Notes
+# - In display filters, and / or / not are interchangeable with && / || / !.
+# - Display filters use == for equals; BPF has no ==, it uses keywords like host, port, src, dst.
+# - BPF cannot look inside application protocols, which is why http.* or ftp.* only exist as display filters.` } },
+    { title: 'Display Filters You Will Use Daily', desc: `Every expression below is a valid Wireshark display filter. <code>==</code> is equals, <code>!=</code> is not equals, <code>contains</code> is a case-sensitive substring test on a text or byte field, and <code>&amp;&amp;</code>/<code>and</code>, <code>||</code>/<code>or</code> combine tests.`, code: { lang: 'filter', text: `# By protocol (just the protocol name)
+http
+dns
+ftp
+icmp
+
+# By address
+ip.addr == 192.168.1.105
+ip.src == 192.168.1.105 && ip.dst == 203.0.113.99
+
+# By port
+tcp.port == 21
+tcp.dstport == 4444
+
+# Inside HTTP
+http.request.method == "POST"
+http.request.uri contains "UNION"
+http.authorization
+
+# Inside FTP and DNS
+ftp.request.command == "PASS"
+dns.qry.name contains "evil"
+dns.qry.name.len > 50
+
+# Raw search of the whole frame (any protocol)
+frame contains "password"
+
+# TCP details
+tcp.flags.syn == 1 && tcp.flags.ack == 0   # connection attempts (SYN only)` } },
+    { title: 'Follow a TCP Stream', desc: `Individual packets are tiny fragments. To read a whole conversation, right-click any packet of it and choose <strong>Follow → TCP Stream</strong> (shortcut Ctrl+Alt+Shift+T). Wireshark applies a filter such as <code>tcp.stream eq 4</code> and opens a window with the reassembled data: by default the client's bytes are shown in red and the server's in blue. You can read an HTTP request and response, an FTP login, or a Telnet session exactly as the two machines exchanged them.<br><br>Close the window and the main view keeps the <code>tcp.stream</code> filter; clear the display filter to return to all packets. <strong>Follow</strong> also works for UDP, TLS (only if you have the keys) and HTTP streams.`, code: null },
+    { title: 'Capture on the Command Line (tcpdump)', desc: `tcpdump needs root (or special capabilities) to capture. Flags used below:<br><br><strong>-D</strong>: list the interfaces tcpdump can capture on.<br><strong>-i eth0</strong>: capture on this interface (<code>-i any</code> on Linux means all interfaces).<br><strong>-n</strong>: do not resolve IP addresses to hostnames; <strong>-nn</strong> also stops port-number-to-name lookups (shows <code>21</code> not <code>ftp</code>). Faster, and no stray DNS traffic from tcpdump itself.<br><strong>-c 20</strong>: stop after 20 packets.<br><strong>-w file.pcap</strong>: write raw packets to a file instead of printing them (open it later in Wireshark).<br><strong>-r file.pcap</strong>: read packets from a saved file.<br><strong>-v</strong> (also <code>-vv</code>, <code>-vvv</code>): more detail per packet, such as TTL, IP ID and checksums.<br><strong>-A</strong>: print each packet's payload as ASCII, handy for cleartext protocols.<br><strong>-X</strong>: print the payload as both hex and ASCII.<br><strong>-s 0</strong>: snapshot length, the number of bytes saved per packet. <code>0</code> means the whole packet. Current tcpdump already defaults to a large value (262144 bytes), but old versions defaulted to 68 bytes and truncated payloads.<br><br>The last, quoted argument is a <strong>BPF filter</strong> (the same language as a Wireshark capture filter). Quote it so the shell does not interpret special characters.`, code: { lang: 'bash', text: `# List interfaces
+sudo tcpdump -D
+
+# Quick look: 20 packets, no name lookups
+sudo tcpdump -i eth0 -nn -c 20
+
+# Only one host and port, saved in full to a file for Wireshark
+sudo tcpdump -i eth0 -nn -s 0 -w web.pcap 'host 10.0.0.5 and port 80'
+
+# Print FTP control traffic as ASCII (shows USER / PASS in the clear)
+sudo tcpdump -i eth0 -nn -A 'tcp port 21'
+
+# Hex + ASCII dump of the first 5 web packets
+sudo tcpdump -i eth0 -nn -X -c 5 'tcp port 80'
+
+# Read a saved capture, only traffic to port 4444
+tcpdump -nn -r web.pcap 'dst port 4444'
+
+# DNS queries only
+sudo tcpdump -i eth0 -nn 'udp port 53'` } },
+    { title: 'Reading a Packet Row and a tcpdump Line', desc: `Wireshark's default packet list columns are: <strong>No.</strong> (packet number in this capture), <strong>Time</strong> (seconds since the capture started), <strong>Source</strong> and <strong>Destination</strong> (addresses), <strong>Protocol</strong> (the highest layer Wireshark could decode), <strong>Length</strong> (frame size in bytes), and <strong>Info</strong> (a one-line summary: the HTTP request line, the DNS query, the TCP flags). Rows are coloured by protocol/problem; the colouring rules are under View → Coloring Rules.<br><br>A tcpdump line packs the same information: <strong>timestamp</strong>, <strong>IP</strong> (the protocol), <strong>source.port &gt; destination.port</strong>, then TCP <strong>Flags</strong> (<code>[S]</code> SYN, <code>[S.]</code> SYN+ACK, <code>[.]</code> ACK, <code>[P.]</code> PSH+ACK carrying data, <code>[F.]</code> FIN, <code>[R]</code> RST), <strong>seq</strong>/<strong>ack</strong> sequence numbers, <strong>win</strong> (receive window), and <strong>length</strong> (payload bytes, not counting headers). With <code>-A</code> the payload follows on the next line (dots stand for unprintable bytes, here the start of the IP and TCP headers and the trailing carriage return and newline).`, code: { lang: 'text', text: `# Wireshark packet list
+No.  Time      Source          Destination     Protocol Length Info
+ 41  3.201104  192.168.1.20    203.0.113.5     FTP        80   Request: PASS hunter2
+ 42  3.201893  203.0.113.5     192.168.1.20    FTP        89   Response: 230 Login successful.
+
+# tcpdump -nn -A 'tcp port 21'
+10:15:31.482910 IP 192.168.1.20.51234 > 203.0.113.5.21: Flags [P.], seq 1:15, ack 78, win 502, length 14
+E..B..@.@.....................P.....PASS hunter2..` } },
+    { title: 'Spot Cleartext FTP Credentials', desc: `FTP sends the username and password as plain text on its control connection (port 21). Filter for the command, or follow the stream to see the whole login. A <code>230</code> response means the login succeeded; <code>530</code> means it failed.<br><br>The same applies to Telnet, HTTP Basic authentication and any HTTP login form sent without TLS. The remedy is to stop using them (SFTP/SSH/HTTPS).`, code: { lang: 'filter', text: `ftp.request.command == "USER" || ftp.request.command == "PASS"
+ftp.response.code == 230     # login successful
+http.authorization           # HTTP Basic / other Authorization headers
+http.request.method == "POST" && frame contains "password"` } },
+    { title: 'Spot SQL Injection in HTTP', desc: `On unencrypted HTTP the full request is visible, including a UNION SELECT or a quote-based payload in the URL. Use the URI filter, then Follow → TCP Stream to see the server's reply: database error text or dumped data confirms it worked. Note that <code>http.request.uri</code> holds the raw, still-URL-encoded text, so <code>%27</code> stands for a quote and <code>%20</code> or <code>+</code> for a space. <code>contains</code> is case-sensitive; use <code>matches "(?i)union"</code> for a case-insensitive search.`, code: { lang: 'filter', text: `http.request.uri contains "UNION"
+http.request.uri matches "(?i)union.+select"
+http.request.uri contains "%27"
+http.response.code == 500` } },
+    { title: 'Spot DNS Tunnelling and Exfiltration', desc: `Because DNS is almost always allowed out, attackers hide data in the queries themselves: they encode stolen bytes into a very long subdomain and ask their own authoritative server for it (<code>6d616c776172652d646174612e.evil-c2.net</code> is the hex for "malware-data." in front of the attacker's domain). Signs: unusually long or random-looking query names (a DNS label is at most 63 characters and a full name at most 253), many unique subdomains of one domain, and heavy use of TXT (type 16) queries.`, code: { lang: 'filter', text: `dns.flags.response == 0         # queries only (not responses)
+dns.qry.name.len > 50           # long query names
+dns.qry.type == 16              # TXT record queries
+dns.qry.name contains "evil-c2.net"` } },
+    { title: 'Spot Malware Beaconing', desc: `Malware that has been installed calls home to its command-and-control (C2) server at regular intervals ("beaconing"). Do not rely on the port: port 4444 is the default for Metasploit payload handlers, but modern malware uses 80 or 443. Look at behaviour instead:<br><br><strong>Regular timing</strong>: connections every 30 or 60 seconds, with only small jitter. Filter to one host pair, then use View → Time Display Format → "Seconds Since Previous Displayed Packet" and watch the gaps.<br><br><strong>Small, uniform packets</strong>: the same few dozen bytes each time (a "still alive" check-in).<br><br><strong>One internal host, one rare external IP</strong>: open Statistics → Conversations (or Endpoints) and sort by bytes or packets; Statistics → I/O Graph shows the periodic spikes.`, code: { lang: 'filter', text: `ip.dst == 203.0.113.99 && tcp.flags.syn == 1 && tcp.flags.ack == 0
+tcp.dstport == 4444
+tcp.len > 0 && tcp.len < 100` } },
+    { title: 'Common Mistakes', desc: `<strong>1) Mixing up the two filter languages.</strong> Typing <code>http.request.method == "POST"</code> into a capture filter, or <code>host 10.0.0.5</code> into the display bar, gives an error. Capture filter = BPF; display filter = Wireshark syntax.<br><br><strong>2) Capturing with a too-narrow capture filter.</strong> Filtering at capture time throws away evidence you might need. Capture broadly, then filter the display.<br><br><strong>3) Capturing on the wrong interface or without permission.</strong> If the list shows no interfaces or no packets, check the group membership from the install step, and pick the interface with the activity graph. On switched networks you only see your own traffic (plus broadcast) unless you use a mirror/SPAN port.<br><br><strong>4) Expecting to read encrypted traffic.</strong> HTTPS content is not visible without the session keys; look at metadata (who, when, how much) instead.<br><br><strong>5) Forgetting name resolution.</strong> In tcpdump always add <code>-nn</code> so addresses and ports stay numeric and your capture does not generate its own DNS lookups.<br><br><strong>6) Truncated packets.</strong> A small snapshot length (<code>-s</code>) cuts off the payload; use <code>-s 0</code> when you need full content.`, code: null },
+    { title: 'Try It — Live Packet Capture Simulator', desc: `Scroll down to the <strong>Live Packet Capture Simulator</strong> below this tutorial. Press <strong>Start Capture</strong>: one packet arrives every half second, 40 in total. Four of them are malicious (DNS exfiltration, a C2 beacon on port 4444, a SQL injection and a cleartext FTP password) mixed in with ordinary traffic. Type a filter in the box and press <strong>Apply</strong> or Enter (it applies on Apply/Enter, not as you type); <strong>Clear</strong> resets it. Click a row to see the packet detail; the packet's one-line Info summary is shown in the detail pane and as a tooltip on the row. Clicking a malicious packet triggers an analysis box.<br><br><strong>The simulator is not real Wireshark.</strong> It supports only these filters, all lower-case and with <strong>no spaces around ==</strong>:<br><code>http</code>, <code>dns</code>, <code>tcp</code>, <code>tls</code>, <code>ftp</code>, <code>icmp</code>; <code>ip.addr==X</code>, <code>ip.src==X</code>, <code>ip.dst==X</code> (X is matched as a substring of the address); <code>tcp.dstport==N</code> (matches the port shown in the packet summary); <code>dns contains "text"</code> (text in double quotes); and combinations joined with <code>and</code> / <code>or</code>. Anything else is treated as a plain text search of the packet summary, protocol and addresses, so <code>union</code> will find the SQLi packet there even though real Wireshark would flag that as an invalid filter. It does <strong>not</strong> understand <code>&amp;&amp;</code>, <code>||</code>, <code>!=</code>, <code>!</code>, field filters such as <code>ftp.request.command == "PASS"</code>, <code>http.request.method</code>, <code>tcp.port</code> or <code>dns.qry.name.len</code>, spaced <code>ip.addr == x</code>, or BPF (capture) filters. Real Wireshark accepts the spaced form and all the filters from this tutorial.<br><br>Try these filters one at a time. <code>ftp</code> leaves only the cleartext password packet; <code>http</code> leaves the web requests, one of which is the SQL injection; <code>dns</code> shows the queries, one with the long exfiltration subdomain; <code>tcp.dstport==4444</code> isolates the C2 beacon; <code>ip.addr==192.168.1.105</code> shows what the compromised host sent (three malicious packets and some normal ones):`, code: { lang: 'filter', text: `ftp
+http
+dns
+tcp.dstport==4444
+ip.addr==192.168.1.105
+http or dns` } },
+    { title: 'Legal and Ethical Use', desc: `Capture only on networks you own or have written permission to monitor. Sniffing other people's traffic (a café Wi-Fi, a neighbour's network, your employer's network without authorisation) can break wiretapping and computer-misuse laws, and captures often contain passwords, messages and personal data. Keep capture files secured, share them only when necessary, and delete them when the investigation ends. Practise on your own lab network or the built-in simulator.`, code: null }
   ],
 
   defense: [
@@ -530,14 +640,19 @@ awk '$9 == 401 {print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn
   ],
 
   payloads: { headers: ['Filter / Command', 'Purpose', 'Risk Detected'], rows: [
-    ['http.request.method == "POST"',   'Find all form submissions',          'Credential Theft'],
-    ['ftp.request.command == "PASS"',   'Find FTP plaintext passwords',      'Credential Exposure'],
-    ['dns.qry.name.len > 50',           'Detect DNS tunneling/exfiltration',  'Data Exfiltration'],
-    ['tcp.dstport == 4444',             'C2 beacon on common RAT port',       'Malware'],
-    ['http.authorization',              'Find Basic Auth credentials',         'Credential Theft'],
-    ['icmp',                            'Ping sweeps / ICMP tunneling',       'Reconnaissance'],
-    ['tcp.flags.syn == 1',              'SYN flood detection',                'DDoS'],
-    ['ip.src == 10.0.0.X && dns',       'Internal host doing unusual DNS',    'Lateral Movement']
+    ['http.request.method == "POST"',                     'Display filter: find form submissions',                   'Credential Theft'],
+    ['ftp.request.command == "PASS"',                     'Display filter: FTP plaintext passwords',                 'Credential Exposure'],
+    ['http.authorization',                                'Display filter: HTTP Authorization headers (Basic auth)', 'Credential Theft'],
+    ['dns.qry.name.len > 50',                             'Display filter: unusually long DNS query names',          'Data Exfiltration'],
+    ['tcp.dstport == 4444',                               'Display filter: traffic to a common RAT/handler port',    'Malware / C2'],
+    ['http.request.uri contains "UNION"',                 'Display filter: SQL injection in a URL',                  'SQL Injection'],
+    ['icmp',                                              'Display filter: ping sweeps and ICMP tunnelling',         'Reconnaissance'],
+    ['tcp.flags.syn == 1 && tcp.flags.ack == 0',          'Display filter: new connection attempts (SYN only)',      'Port Scan / SYN Flood'],
+    ['ip.src == 10.0.0.5 && dns',                         'Display filter: DNS activity from one internal host',     'Lateral Movement / Exfiltration'],
+    ['host 10.0.0.5 and port 80',                         'Capture filter (BPF): one host, one port',                'Targeted capture'],
+    ['tcpdump -i eth0 -nn -s 0 -w out.pcap',              'Capture everything on eth0 to a file, full packets',      'Evidence collection'],
+    ['tcpdump -nn -A \'tcp port 21\'',                    'Show FTP control traffic as ASCII',                       'Credential Exposure'],
+    ['tcpdump -nn -r out.pcap \'dst port 4444\'',         'Read a saved capture, filter by BPF',                     'Malware / C2']
   ]}
 },
 
@@ -2522,7 +2637,7 @@ function initPacketLab() {
   ];
 
   const maliciousPackets = [
-    { proto:'DNS',  src:'192.168.1.105', dst:'8.8.8.8',    len:98,  info:'Query A 6d616c776172652d646174612e evil-c2.net (long subdomain!)', malicious:true, detail:'DNS Exfiltration beacon!\nSubdomain encodes base64 data: "malware-data"\nDestination: evil-c2.net (known C2 domain)\nAction: Block outbound DNS to evil-c2.net' },
+    { proto:'DNS',  src:'192.168.1.105', dst:'8.8.8.8',    len:98,  info:'Query A 6d616c776172652d646174612e evil-c2.net (long subdomain!)', malicious:true, detail:'DNS Exfiltration beacon!\nSubdomain encodes hex data: "malware-data."\nDestination: evil-c2.net (known C2 domain)\nAction: Block outbound DNS to evil-c2.net' },
     { proto:'TCP',  src:'192.168.1.105', dst:'13.37.13.37', len:52, info:'[SYN] → 13.37.13.37:4444 (known RAT port)', malicious:true, detail:'C2 Beacon detected!\nDst Port: 4444 (Metasploit default listener)\nRemote IP: 13.37.13.37 (threat intel: known C2)\nPattern: Repeating every 60s (beacon interval)\nAction: Block outbound TCP/4444, isolate host' },
     { proto:'HTTP', src:'192.168.1.105', dst:'203.0.113.99', len:310, info:'GET /products?id=1 UNION SELECT username,password,NULL FROM users--', malicious:true, detail:'SQL Injection in URL!\nPayload: UNION SELECT ...\nTarget endpoint: /products\nDatabase data at risk: all user credentials\nAction: WAF block, patch parameterized queries' },
     { proto:'FTP',  src:'192.168.1.20',  dst:'203.0.113.5', len:44,  info:'Request: PASS s3cr3t_p@ssw0rd (PLAINTEXT!)', malicious:true, detail:'Plaintext Credentials Exposed!\nProtocol: FTP (no encryption)\nPassword transmitted in clear text\nAnyone on the network can see this!\nAction: Disable FTP, enforce SFTP/SCP' },
