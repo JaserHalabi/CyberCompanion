@@ -25,7 +25,7 @@ Created by **Jaser Halabi**
   - **Network Traffic Analyst**: a Wireshark/tcpdump tutorial with a packet-capture lab and display-filter practice.
   - **Defenses**: one page collecting the fixes and mitigations for every attack covered in the red-team path.
 - **Five built-in offline practice labs**, each opened in its own window from the relevant module: a Burp Suite interception lab, a SQL injection lab, a price tampering lab, a cookie manipulation lab, and an HTTP header manipulation lab. They are fully self-contained pages bundled with the app.
-- **Terminal-style interface**: monospace UI with a collapsible sidebar, a home screen with a "continue" row that remembers your last module, and four themes (default, hacker, pink, light).
+- **Terminal-style interface**: monospace UI with a collapsible sidebar, a home screen with a "continue" row that remembers your last module.
 - **Legal-use framing**: every tutorial states that the commands are for systems you own or the built-in labs. Wordlists and credentials are referenced, not shipped.
 
 ## 🛠️ Technology Stack

