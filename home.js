@@ -27,6 +27,20 @@
     return groups;
   }
 
+  // Defences grouped by source module: red path first, then blue, each by num. Modules with no defence items and the defenses page itself are skipped.
+  function buildDefenseSections(modules) {
+    if (!Array.isArray(modules)) return [];
+    const out = [];
+    ['red', 'blue'].forEach((track) => {
+      modules.slice().sort((a, b) => String(a && a.num).localeCompare(String(b && b.num), 'en', { numeric: true })).forEach((m) => {
+        if (!m || m.track !== track || m.id === 'defenses') return;
+        if (!Array.isArray(m.defense) || m.defense.length === 0) return;
+        out.push({ id: m.id, title: m.title, items: m.defense });
+      });
+    });
+    return out;
+  }
+
   // The module to offer under "continue", or null when the stored id is unknown.
   function pickContinue(modules, storedId) {
     if (!Array.isArray(modules) || typeof storedId !== 'string' || !storedId) return null;
@@ -48,7 +62,7 @@
     return Array.from({ length: Math.max(0, count) }, (_, i) => Math.min(i * STEP_MS, max));
   }
 
-  const CCHome = { LAST_KEY, homeRows, trackGroups, pickContinue, readLast, writeLast, rowDelays };
+  const CCHome = { LAST_KEY, homeRows, trackGroups, buildDefenseSections, pickContinue, readLast, writeLast, rowDelays };
 
   if (typeof window !== 'undefined') window.CCHome = CCHome;
   if (typeof module !== 'undefined' && module.exports) module.exports = CCHome;

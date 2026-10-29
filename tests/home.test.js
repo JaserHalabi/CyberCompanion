@@ -84,3 +84,20 @@ test('rowDelays stay inside the 380ms reveal budget', () => {
   assert.ok(d[7] + 200 <= 380, 'last row finishes within 380ms');
   assert.ok(CCHome.rowDelays(40, 200).every((ms) => ms + 200 <= 380), 'capped for long lists');
 });
+
+test('buildDefenseSections groups defences by module, red path then blue, skipping empties and defenses', () => {
+  const mods = [
+    { id: 'hydra', track: 'red', num: '06', title: 'Hydra', defense: [{ title: 'a', desc: 'x' }] },
+    { id: 'soc', track: 'blue', num: 'B1', title: 'SOC', defense: [{ title: 'b', desc: 'y' }, { title: 'c', desc: 'z' }] },
+    { id: 'nmap', track: 'red', num: '01', title: 'Nmap', defense: [{ title: 'd', desc: 'w' }] },
+    { id: 'xss', track: 'red', num: '03', title: 'XSS', defense: [] },
+    { id: 'sqli', track: 'red', num: '02', title: 'SQLi' },
+    { id: 'defenses', track: 'blue', num: 'B3', title: 'Defenses', defense: [{ title: 'self', desc: '' }] }
+  ];
+  const s = CCHome.buildDefenseSections(mods);
+  assert.deepStrictEqual(s.map((x) => x.id), ['nmap', 'hydra', 'soc']);
+  assert.deepStrictEqual(s.map((x) => x.title), ['Nmap', 'Hydra', 'SOC']);
+  assert.strictEqual(s[2].items.length, 2);
+  assert.strictEqual(s[2].items[0].title, 'b');
+  assert.deepStrictEqual(CCHome.buildDefenseSections(null), []);
+});
