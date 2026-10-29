@@ -160,12 +160,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
   <div class="target-panel">
     <div class="target-header">
       <div class="dot dot-red"></div><div class="dot dot-amber"></div><div class="dot dot-green"></div>
-      <div class="target-url" id="targetUrl">cybermart.local</div>
+      <div class="target-url" id="targetUrl">shop.local</div>
     </div>
     <div class="target-body">
       <div class="proxy-badge" id="proxyBadge">Pause Request Intercepted...</div>
       <nav class="cm-navbar">
-        <div class="cm-brand">CyberMart</div>
+        <div class="cm-brand">Practice Shop</div>
         <div class="cm-nav-links">
           <a href="#" onclick="showPage('home');return false">Home</a>
           <a href="#" onclick="showPage('products');return false">Products</a>
@@ -178,7 +178,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
       </nav>
       <div class="cm-page active" id="page-home">
         <div class="cm-hero">
-          <h1>Welcome to CyberMart</h1>
+          <h1>Welcome to Practice Shop</h1>
           <p>Your trusted online store. Log in to browse exclusive products.</p>
           <button class="cm-btn cm-btn-primary" onclick="showPage('login')" id="heroLoginBtn">Login to Shop</button>
         </div>
@@ -200,7 +200,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
         <div class="cm-login-wrapper">
           <div class="cm-login-card">
             <h2>Sign In</h2>
-            <p>Enter your credentials to access CyberMart</p>
+            <p>Enter your credentials to access Practice Shop</p>
             <div class="cm-form-group"><label for="emailInput">Email Address</label><input type="email" id="emailInput" placeholder="you@example.com" autocomplete="off"></div>
             <div class="cm-form-group"><label for="passwordInput">Password</label><input type="password" id="passwordInput" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="off"></div>
             <button class="cm-submit-btn" id="loginBtn" onclick="handleLogin()">Sign In</button>
@@ -218,7 +218,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
           <table class="cm-admin-table">
             <thead><tr><th>ID</th><th>Email</th><th>Role</th><th>Last Login</th></tr></thead>
             <tbody>
-              <tr><td>001</td><td>admin@cybermart.local</td><td style="color:#f87171">Admin</td><td>Now</td></tr>
+              <tr><td>001</td><td>admin@shop.local</td><td style="color:#f87171">Admin</td><td>Now</td></tr>
               <tr><td>002</td><td>alice@example.com</td><td>User</td><td>2h ago</td></tr>
               <tr><td>003</td><td>bob@example.com</td><td>User</td><td>1d ago</td></tr>
               <tr><td>004</td><td>charlie@example.com</td><td>User</td><td>3d ago</td></tr>
@@ -255,7 +255,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
     <div class="burp-status">
       <div class="status-dot green" id="statusDot"></div>
       <span id="statusText">Proxy running · Intercept ON</span>
-      <span style="margin-left:auto;opacity:.4">cybermart.local:80</span>
+      <span style="margin-left:auto;opacity:.4">shop.local:80</span>
     </div>
   </div>
   <div class="tutorial-panel">
@@ -282,11 +282,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
 var interceptOn=true,pendingReq=null,currentStep=0,isAdmin=false;
 var STEPS=[
   {title:'Enable Intercept',desc:'Make sure Intercept is ON (green button). This tells Burp to pause all outgoing HTTP requests before they reach the server.',action:'The toggle should read "Intercept is ON"',hint:'Look at the green "Intercept is ON" button in the Burp panel. If it says OFF, click it to enable.',check:function(){return interceptOn;}},
-  {title:'Open the Login Page',desc:'Navigate to the CyberMart login page by clicking the "Login" button in the top navbar or the "Login to Shop" button on the homepage.',action:'Click "Login" in the top navigation bar',hint:'The Login button is in the top-right corner of the CyberMart site above.',check:function(){return document.getElementById('page-login').classList.contains('active');}},
+  {title:'Open the Login Page',desc:'Navigate to the Practice Shop login page by clicking the "Login" button in the top navbar or the "Login to Shop" button on the homepage.',action:'Click "Login" in the top navigation bar',hint:'The Login button is in the top-right corner of the Practice Shop site above.',check:function(){return document.getElementById('page-login').classList.contains('active');}},
   {title:'Fill In Credentials',desc:'Enter any email address and password. Since Burp will intercept the request before it hits the server, it does not matter what you type!',action:'Type any email and password into the form',hint:'Try: test@example.com / password123 — or any text you like.',check:function(){var e=document.getElementById('emailInput').value.trim();var p=document.getElementById('passwordInput').value.trim();return e.length>3&&p.length>2;}},
   {title:'Submit the Form',desc:'Click the "Sign In" button. Because Intercept is ON, the request will FREEZE and appear in the Burp editor in raw HTTP format — watch the middle panel!',action:'Click "Sign In" to send the request',hint:'After clicking Sign In, check the Burp editor (middle panel) for the raw HTTP request.',check:function(){return pendingReq!==null;}},
   {title:'Modify the Request',desc:'In the Burp editor, find the JSON body. Change "isAdmin": false to "isAdmin": true. This simulates a Broken Access Control attack — escalating your privileges by tampering with the raw request!',action:'Find "isAdmin": false in the Burp editor and change it to true',hint:'Scroll to the bottom of the Burp editor. The JSON body contains the isAdmin field. Simply change false to true.',check:function(){var v=document.getElementById('burpEditor').value;return v.indexOf('"isAdmin": true')!==-1||v.indexOf('"isAdmin":true')!==-1;}},
-  {title:'Forward the Request',desc:'Click "Forward" to send your modified request to the server. The server will see isAdmin: true and grant you admin access! Check the CyberMart site — you should now see the Admin panel.',action:'Click the Forward button in the Burp toolbar',hint:'The Forward button is cyan/teal colored in the Burp toolbar. Click it to release the request.',check:function(){return isAdmin;}}
+  {title:'Forward the Request',desc:'Click "Forward" to send your modified request to the server. The server will see isAdmin: true and grant you admin access! Check the Practice Shop site — you should now see the Admin panel.',action:'Click the Forward button in the Burp toolbar',hint:'The Forward button is cyan/teal colored in the Burp toolbar. Click it to release the request.',check:function(){return isAdmin;}}
 ];
 var stepsContainer=document.getElementById('stepsContainer');
 var progressFill=document.getElementById('progressFill');
@@ -361,8 +361,8 @@ function toggleIntercept(){
 function showPage(page){
   document.querySelectorAll('.cm-page').forEach(function(p){p.classList.remove('active');});
   document.getElementById('page-'+page).classList.add('active');
-  var urls={home:'cybermart.local/',login:'cybermart.local/login',products:'cybermart.local/products',admin:'cybermart.local/admin'};
-  document.getElementById('targetUrl').textContent=urls[page]||'cybermart.local';
+  var urls={home:'shop.local/',login:'shop.local/login',products:'shop.local/products',admin:'shop.local/admin'};
+  document.getElementById('targetUrl').textContent=urls[page]||'shop.local';
   setTimeout(checkStep,50);
 }
 function handleLogin(){
@@ -373,11 +373,11 @@ function handleLogin(){
   if(interceptOn){
     var rawBody=JSON.stringify({email:email,password:password,isAdmin:false});
     var raw='POST /api/login HTTP/1.1\n'
-      +'Host: cybermart.local\n'
+      +'Host: shop.local\n'
       +'Content-Type: application/json\n'
       +'Accept: application/json\n'
       +'Content-Length: '+rawBody.length+'\n'
-      +'Origin: http://cybermart.local\n'
+      +'Origin: http://shop.local\n'
       +'User-Agent: Mozilla/5.0 (CyberCompanion Lab)\n'
       +'\n'
       +rawBody;
