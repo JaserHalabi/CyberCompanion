@@ -80,7 +80,7 @@ test('tutorials.json: every step selector id/class exists in index.html or rende
 
 test('tutorials.json: no legacy lab, target or dead-field wording', () => {
   const raw = read('tutorials.json');
-  assert.ok(!/docker|dvwa|juice|cybermart|localhost:3000|:8080|challengeKey|requiresWebview/i.test(raw));
+  assert.ok(!/docker|dvwa|juice|cybermart|localhost:3000|:8080|challengeKey|requiresWebview|mini proxy|lab mode|\bxp\b|achievement/i.test(raw));
 });
 
 test('every lab flag maps to a labAPI launcher exposed by preload.js', () => {

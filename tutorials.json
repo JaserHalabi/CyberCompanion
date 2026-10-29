@@ -2,7 +2,7 @@
   "proxy-intercept": {
     "name": "Proxy Intercept: SQLi Bypass",
     "module": "burp-proxy",
-    "description": "Learn how to use the Mini Proxy Interceptor to pause a request and modify it in transit.",
+    "description": "Use the Proxy Intercept Practice Lab to pause a login request and modify it in transit.",
     "steps": [
       {
         "text": "Welcome to the Proxy Intercept tutorial! First, click the Email field.",
@@ -14,7 +14,7 @@
         "text": "The default email is fine for now.",
         "selector": "#burpLabEmail",
         "action": "input",
-        "waitForValue": "user@company.com",
+        "waitForValue": "user@shop.local",
         "position": "right"
       },
       {
@@ -24,10 +24,10 @@
         "position": "right"
       },
       {
-        "text": "The request has been paused! Look at the Intercept window. You'll see the raw HTTP POST request. Let's change the email parameter to a SQL injection payload to bypass the login. Change user@company.com to admin@company.com'--",
+        "text": "The request has been paused! Look at the Intercept window. You'll see the raw HTTP POST request. Let's change the email parameter to a SQL injection payload to bypass the login. Change user@shop.local to admin@shop.local'--",
         "selector": "#burpLabIntercepted",
         "action": "input",
-        "waitForValue": "admin@company.com'--",
+        "waitForValue": "admin@shop.local'--",
         "position": "center"
       },
       {
@@ -37,7 +37,7 @@
         "position": "bottom"
       },
       {
-        "text": "Success! The server processed the modified request and granted you admin access because of the SQL injection. Click anywhere to finish.",
+        "text": "Success! The server processed the modified request and granted you admin access because of the SQL injection. Press Next to finish.",
         "selector": "#burpLabResponse",
         "action": "click",
         "position": "bottom"
@@ -62,7 +62,7 @@
         "position": "bottom"
       },
       {
-        "text": "The request was successfully dropped. The server never saw it! Click anywhere to finish.",
+        "text": "The request was successfully dropped. The server never saw it! Press Next to finish.",
         "selector": "#burpLabResponse",
         "action": "click",
         "position": "bottom"
@@ -75,13 +75,13 @@
     "description": "Learn how to intercept and modify API parameters to manipulate server logic (e.g., getting items for free).",
     "steps": [
       {
-        "text": "Parameter tampering is a classic exploit where you change data sent to the server. Click Submit (Intercept ON) to capture a request.",
+        "text": "Parameter tampering is a classic exploit where you change data sent to the server. Click Submit (Intercept ON) to capture the login request.",
         "selector": "#burpLabSubmit",
         "action": "click",
         "position": "bottom"
       },
       {
-        "text": "The checkout request is intercepted. Look at the JSON payload in the body. Find the 'price' parameter and change it to 0 or a negative number.",
+        "text": "The request is paused. This lab's form only sends email and password, so simulate a client-supplied price: add a line \"price\": 0, inside the JSON body.",
         "selector": "#burpLabIntercepted",
         "action": "input",
         "waitForValue": "\"price\": 0",
@@ -94,7 +94,7 @@
         "position": "bottom"
       },
       {
-        "text": "Success! The server didn't validate the price parameter on the backend and processed the purchase for $0. Click anywhere to finish.",
+        "text": "Success! The server trusted the client-supplied price and confirmed the order for 0. Press Next to finish.",
         "selector": "#burpLabResponse",
         "action": "click",
         "position": "bottom"
@@ -126,7 +126,7 @@
         "position": "bottom"
       },
       {
-        "text": "Access granted! The server trusted the X-Forwarded-For header and allowed you into the portal. Click anywhere to finish.",
+        "text": "Access granted! The server trusted the X-Forwarded-For header and allowed you into the portal. Press Next to finish.",
         "selector": "#burpLabResponse",
         "action": "click",
         "position": "bottom"
@@ -158,7 +158,7 @@
         "position": "bottom"
       },
       {
-        "text": "Look at the result below! The application reflected your input without sanitization, allowing your script tag to execute in the iframe. You have successfully triggered XSS. Click anywhere to finish.",
+        "text": "Look at the result below! The application reflected your input without sanitization, allowing your script tag to execute in the iframe. You have successfully triggered XSS. Press Next to finish.",
         "selector": "#xssResult",
         "action": "click",
         "position": "center"
@@ -190,7 +190,7 @@
         "position": "bottom"
       },
       {
-        "text": "The payload executed! This demonstrates why filtering just script tags is never enough — all user input must be HTML encoded. Click anywhere to finish.",
+        "text": "The payload executed! This demonstrates why filtering just script tags is never enough — all user input must be HTML encoded. Press Next to finish.",
         "selector": "#xssResult",
         "action": "click",
         "position": "center"
@@ -375,10 +375,10 @@
         "position": "bottom"
       },
       {
-        "text": "Now let's point SQLmap at a vulnerable URL. The -u flag sets the target URL. Type: sqlmap -u \"http://target.com/item?id=1\"",
+        "text": "Now let's point SQLmap at a vulnerable URL. The -u flag sets the target URL. Type: sqlmap -u \"http://shop.local/item?id=1\"",
         "selector": "#sqlmapSimInput",
         "action": "input",
-        "waitForValue": "sqlmap -u \"http://target.com/item?id=1\"",
+        "waitForValue": "sqlmap -u \"http://shop.local/item?id=1\"",
         "position": "bottom"
       },
       {
@@ -388,10 +388,10 @@
         "position": "bottom"
       },
       {
-        "text": "SQLmap confirmed the vulnerability! Now let's list all databases with --dbs. Type: sqlmap -u \"http://target.com/item?id=1\" --dbs",
+        "text": "SQLmap confirmed the vulnerability! Now let's list all databases with --dbs. Type: sqlmap -u \"http://shop.local/item?id=1\" --dbs",
         "selector": "#sqlmapSimInput",
         "action": "input",
-        "waitForValue": "sqlmap -u \"http://target.com/item?id=1\" --dbs",
+        "waitForValue": "sqlmap -u \"http://shop.local/item?id=1\" --dbs",
         "position": "bottom"
       },
       {
@@ -408,10 +408,10 @@
     "description": "Once you know the database name, use SQLmap to enumerate all tables inside it.",
     "steps": [
       {
-        "text": "We found the database is called 'shopdb'. Now we enumerate its tables with -D and --tables. Type: sqlmap -u \"http://target.com/item?id=1\" -D shopdb --tables",
+        "text": "We found the database is called 'shopdb'. Now we enumerate its tables with -D and --tables. Type: sqlmap -u \"http://shop.local/item?id=1\" -D shopdb --tables",
         "selector": "#sqlmapSimInput",
         "action": "input",
-        "waitForValue": "sqlmap -u \"http://target.com/item?id=1\" -D shopdb --tables",
+        "waitForValue": "sqlmap -u \"http://shop.local/item?id=1\" -D shopdb --tables",
         "position": "bottom"
       },
       {
@@ -421,10 +421,10 @@
         "position": "bottom"
       },
       {
-        "text": "We found a 'users' table! Now let's dump it with -T and --dump. Type: sqlmap -u \"http://target.com/item?id=1\" -D shopdb -T users --dump",
+        "text": "We found a 'users' table! Now let's dump it with -T and --dump. Type: sqlmap -u \"http://shop.local/item?id=1\" -D shopdb -T users --dump",
         "selector": "#sqlmapSimInput",
         "action": "input",
-        "waitForValue": "sqlmap -u \"http://target.com/item?id=1\" -D shopdb -T users --dump",
+        "waitForValue": "sqlmap -u \"http://shop.local/item?id=1\" -D shopdb -T users --dump",
         "position": "bottom"
       },
       {
@@ -441,10 +441,10 @@
     "description": "Gather intelligence about the target DBMS — version, current user, and current database.",
     "steps": [
       {
-        "text": "Before dumping data, it's good practice to fingerprint the DBMS. Let's get the banner (DB version). Type: sqlmap -u \"http://target.com/item?id=1\" --banner",
+        "text": "Before dumping data, it's good practice to fingerprint the DBMS. Let's get the banner (DB version). Type: sqlmap -u \"http://shop.local/item?id=1\" --banner",
         "selector": "#sqlmapSimInput",
         "action": "input",
-        "waitForValue": "sqlmap -u \"http://target.com/item?id=1\" --banner",
+        "waitForValue": "sqlmap -u \"http://shop.local/item?id=1\" --banner",
         "position": "bottom"
       },
       {
@@ -454,10 +454,10 @@
         "position": "bottom"
       },
       {
-        "text": "Now get the current database user (to check privileges). Type: sqlmap -u \"http://target.com/item?id=1\" --current-user --current-db",
+        "text": "Now get the current database user (to check privileges). Type: sqlmap -u \"http://shop.local/item?id=1\" --current-user --current-db",
         "selector": "#sqlmapSimInput",
         "action": "input",
-        "waitForValue": "sqlmap -u \"http://target.com/item?id=1\" --current-user --current-db",
+        "waitForValue": "sqlmap -u \"http://shop.local/item?id=1\" --current-user --current-db",
         "position": "bottom"
       },
       {
@@ -609,7 +609,7 @@
     "requiresCookieManipulation": true
   },
   "header-manipulation": {
-    "name": "Proxy Intercept: Header Manipulation",
+    "name": "Header Manipulation Lab",
     "module": "burp-proxy",
     "description": "Bypass IP-based access controls by injecting a spoofed X-Forwarded-For header.",
     "requiresHeaderManipulation": true
