@@ -662,14 +662,14 @@ http or dns` } },
 {
   id: 'defenses', track: 'blue', num: 'B3', short: 'defend',
   title: 'Defenses & Remediation',
-  subtitle: 'The defensive fixes for each attack in the red-team path, collected in one place.',
+  subtitle: 'Defences for every attack topic: the fixes for each red-team module and the blue-team playbooks, in one place.',
   tag: 'Blue B3 — Hardening',
 
   concept: [
-    `Every attack in the red-team path has a matching defence. This page will collect them so you can move from "how it breaks" to "how it is fixed".`
+    `This is how to defend what the red-team modules attack. Every attack in the learning path has a matching set of fixes, and this page is the single home for all of them, grouped by the module they belong to. Use the index to jump to a topic, then follow the link back to the attack if you want to see how it works first.`
   ],
 
-  analogy: { emoji: '🛡️', text: `A lock is only useful once you know how it gets picked. Learn the attack, then learn the fix.` },
+  analogy: { emoji: '🛡️', text: `A lock is only worth fitting once you know how it gets picked. Learn the attack, then learn the fix.` },
 
   steps: [],
 
@@ -768,6 +768,7 @@ function renderHome() {
 }
 
 function showHome() {
+  defenseNavToken++;
   stopSocSimulator();
   document.getElementById('socMode').style.display = 'none';
   contentArea.style.display = '';
@@ -796,6 +797,7 @@ function exitSoc() {
 }
 
 function selectModule(index) {
+  defenseNavToken++;
   stopSocSimulator();
   document.getElementById('socMode').style.display = 'none';
   document.getElementById('contentArea').style.display = '';
@@ -812,6 +814,7 @@ function selectModule(index) {
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function renderModule(mod) {
+  if (mod.id === 'defenses') { renderDefenses(mod); return; }
   contentArea.innerHTML = `
     <div class="module-header fade-in">
       <span class="module-tag">${mod.tag}</span>
@@ -866,30 +869,15 @@ function renderModule(mod) {
       </div>
     </div>
 
-    <!-- Defense & Remediation -->
-    ${mod.defense ? `
-    <div class="section-card fade-in fade-in-delay-4">
-      <div class="section-header">
-        <div class="section-icon defense">${ICONS.shield}</div>
-        <h3 class="section-title">${t('section_defense')}</h3>
-      </div>
-      <div class="section-body">
-        <ul class="defense-list">
-          ${mod.defense.map(d => `
-            <li class="defense-item">
-              <div class="defense-icon-sm">${ICONS.shield}</div>
-              <div class="defense-content">
-                <h4>${d.title}</h4>
-                <p>${d.desc}</p>
-              </div>
-            </li>
-          `).join('')}
-        </ul>
-      </div>
-    </div>
+    <!-- Defense & Remediation: one line, the content lives on the Defenses page -->
+    ${mod.defense && mod.defense.length ? `
+    <p class="defense-link fade-in fade-in-delay-4">
+      <span class="defense-icon-sm">${ICONS.shield}</span>
+      <span>Defences for ${escapeHtml(mod.title)}: see the <button type="button" class="defense-link-btn" onclick="window.__app.openDefenseTopic('${mod.id}')">Defenses page</button></span>
+    </p>
     ` : ''}
 
-    <!-- Interactive Reference Table -->
+0    <!-- Interactive Reference Table -->
     <div class="section-card fade-in fade-in-delay-5">
       <div class="section-header">
         <div class="section-icon reference">${ICONS.reference}</div>
@@ -1467,6 +1455,91 @@ Ready. Type 'hydra' for usage help.</div>
   attachCopyHandlers();
   contentArea.scrollTop = 0;
   window.CCMotion && window.CCMotion.openModule(contentArea, 'open ' + mod.id);
+}
+
+// The Defenses page: every module's defense[] grouped by source module, with an index.
+function renderDefenses(mod) {
+  const sections = window.CCHome ? window.CCHome.buildDefenseSections(MODULES) : [];
+  const byId = {};
+  MODULES.forEach((m) => { byId[m.id] = m; });
+  const index = sections.map((sec) => `
+        <li><button type="button" class="defense-index-btn" onclick="window.__app.scrollToDefenseTopic('${sec.id}')">
+          <span class="defense-index-title">${escapeHtml(sec.title)}</span>
+          <span class="defense-index-count">${sec.items.length}</span>
+        </button></li>`).join('');
+  const topics = sections.map((sec) => {
+    const src = byId[sec.id];
+    const lead = src.track === 'blue' ? 'Open the module' : 'See the attack';
+    return `
+    <div class="section-card defense-topic fade-in fade-in-delay-4" id="defense-${sec.id}">
+      <div class="section-header">
+        <div class="section-icon defense">${ICONS.shield}</div>
+        <h3 class="section-title">${escapeHtml(sec.title)}</h3>
+      </div>
+      <div class="section-body">
+        <ul class="defense-list">
+          ${sec.items.map((d) => `
+            <li class="defense-item">
+              <div class="defense-icon-sm">${ICONS.shield}</div>
+              <div class="defense-content">
+                <h4>${d.title}</h4>
+                <p>${d.desc}</p>
+              </div>
+            </li>`).join('')}
+        </ul>
+        <p class="defense-back">${lead}: <button type="button" class="defense-link-btn" onclick="window.__app.selectModuleById('${sec.id}')">${escapeHtml(sec.title)}</button></p>
+      </div>
+    </div>`;
+  }).join('');
+
+  contentArea.innerHTML = `
+    <div class="module-header fade-in">
+      <span class="module-tag">${mod.tag}</span>
+      <h2 class="module-title">${mod.title}</h2>
+      <p class="module-subtitle">${mod.subtitle}</p>
+    </div>
+
+    <div class="section-card fade-in fade-in-delay-1">
+      <div class="section-header">
+        <div class="section-icon concept">${ICONS.concept}</div>
+        <h3 class="section-title">${t('section_concept')}</h3>
+      </div>
+      <div class="section-body">
+        ${mod.concept.map((p) => `<p>${p}</p>`).join('')}
+      </div>
+    </div>
+
+    <div class="section-card fade-in fade-in-delay-2" id="defenseIndex">
+      <div class="section-header">
+        <div class="section-icon reference">${ICONS.reference}</div>
+        <h3 class="section-title">Topics</h3>
+      </div>
+      <div class="section-body">
+        <ul class="defense-index">${index}
+        </ul>
+      </div>
+    </div>
+    ${topics}
+  `;
+
+  contentArea.scrollTop = 0;
+  window.CCMotion && window.CCMotion.openModule(contentArea, 'open ' + mod.id);
+}
+
+function scrollToDefenseTopic(moduleId) {
+  const el = document.getElementById('defense-' + moduleId);
+  if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
+}
+
+// Attack page -> the matching topic on the Defenses page. A later navigation
+// bumps the token, so a stale timer never scrolls the wrong page.
+let defenseNavToken = 0;
+function openDefenseTopic(moduleId) {
+  selectModuleById('defenses');
+  const token = defenseNavToken; // selectModule just bumped it
+  setTimeout(() => {
+    if (token === defenseNavToken) scrollToDefenseTopic(moduleId);
+  }, 100);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -2856,6 +2929,8 @@ window.__app = {
   stopSocSimulator,
   exitSoc,
   selectModuleById,
+  openDefenseTopic,
+  scrollToDefenseTopic,
   showHome,
   submitRemediation,
   toggleSettings,
