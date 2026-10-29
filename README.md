@@ -2,7 +2,7 @@
 
 **Note: This project is currently a Work In Progress (WIP).**
 
-CyberCompanion is an interactive, offline educational desktop application built with Electron. It is designed to guide users through Web Application Penetration Testing by providing integrated tools, tutorials, and localized vulnerable environments.
+CyberCompanion is an interactive, fully offline desktop application built with Electron. It teaches web application security through hands-on tool tutorials, built-in practice labs, and in-app simulators, with a red-team learning path and a separate blue-team section. Nothing is downloaded and nothing touches a real network target.
 
 Created by **Jaser Halabi**
 [LinkedIn Profile](https://www.linkedin.com/in/jaser-halabi/)
@@ -11,29 +11,34 @@ Created by **Jaser Halabi**
 
 ## 🎯 Features
 
-- **Integrated Vulnerable Environments**: Automatically downloads and spins up Docker containers for intentionally vulnerable web applications, including:
-  - OWASP Juice Shop
-  - DVWA (Damn Vulnerable Web App)
-- **Interactive Lab Mode**: A built-in webview that lets you browse the vulnerable applications directly within the app without needing an external browser.
-- **Mini Burp Proxy Interceptor**: A session-level HTTP proxy built directly into the application.
-  - Automatically intercepts API, REST, and login requests.
-  - Pauses intercepted requests in a queue so you can inspect their headers and body.
-  - Modify payloads on the fly and forward them to the target, or drop them entirely.
-- **Hydra Brute-Force Simulator**: An integrated terminal simulator designed to mimic the popular `hydra` brute-forcing tool, allowing users to safely practice simulated attacks against `ssh`, `ftp`, and `http-post-form` services.
-- **Interactive Step-by-Step Tutorials**: An overlay tutorial engine that guides users step-by-step through specific vulnerabilities (like XSS or Brute Forcing) by pointing directly to elements within the embedded webview.
+- **Red-team learning path** (modules 01-06): offline tutorials for the tools used in a web assessment, in a sensible learning order:
+  - Nmap network scanning
+  - SQL injection (SQLi)
+  - Cross-Site Scripting (XSS)
+  - sqlmap automation
+  - Burp Suite proxy interception
+  - Hydra brute-forcing
+
+  Each module has a concept explanation, an analogy, a hands-on tutorial, and a reference table, plus an interactive tutorial overlay and an in-app simulator (terminal-style Nmap, Hydra and sqlmap simulators, an XSS sandbox, and a Burp-style intercept panel).
+- **Blue-team section** (B1-B3):
+  - **SOC Analyst Simulator**: triage streaming log alerts, flag real threats, and pick the right remediation.
+  - **Network Traffic Analyst**: a Wireshark/tcpdump tutorial with a packet-capture lab and display-filter practice.
+  - **Defenses**: one page collecting the fixes and mitigations for every attack covered in the red-team path.
+- **Five built-in offline practice labs**, each opened in its own window from the relevant module: a Burp Suite interception lab, a SQL injection lab, a price tampering lab, a cookie manipulation lab, and an HTTP header manipulation lab. They are fully self-contained pages bundled with the app.
+- **Terminal-style interface**: monospace UI with a collapsible sidebar, a home screen with a "continue" row that remembers your last module, and four themes (default, hacker, pink, light).
+- **Legal-use framing**: every tutorial states that the commands are for systems you own or the built-in labs. Wordlists and credentials are referenced, not shipped.
 
 ## 🛠️ Technology Stack
 
 - **Framework**: [Electron](https://www.electronjs.org/)
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Backend / Integration**: Node.js, Docker CLI
+- **Backend**: Node.js (Electron main process)
 - **Packaging**: electron-builder
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v16 or higher)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (must be installed and running)
+- [Node.js](https://nodejs.org/) and npm (used to install dependencies and run the app in development)
 
 ### Installation
 
@@ -51,6 +56,11 @@ Created by **Jaser Halabi**
 3. **Run the application**
    ```bash
    npm start
+   ```
+
+4. **Run the tests** (optional)
+   ```bash
+   npm test
    ```
 
 ### Building for Production
